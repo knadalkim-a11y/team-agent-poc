@@ -1,0 +1,136 @@
+## GF1 panel {'w': 690, 'h': 611, 'x': 256} {'w': 830, 'h': 720, 'x': 56} active BODY|시안 1 · 저장·실행 안 됨 · G | mode|업무
+  DIFF ('.ew-fg-card', 0) w:611->759  
+  DIFF ('.ew-fg-card .ew-primary', 0) x:526->674  
+  DIFF ('.ew-fg-card h3', 0) w:449->597  
+  DIFF ('.ew-fg-card p', 0) w:449->597  
+  DIFF ('.ew-fg-card small', 0) w:449->597  
+## GF2 panel {'w': 690, 'h': 611, 'x': 256} {'w': 830, 'h': 720, 'x': 56} active gf-addr| | ew-stage-page-page-id|
+  DIFF ('.ew-center-breadcrumb', 0) w:611->759  
+  DIFF ('.ew-center-heading-actions .ew-icon-button', 0) x:611->759  
+  DIFF ('.ew-fg-ask', 0) w:569->717  
+  DIFF ('.ew-vd-entry', 0) w:609->757  
+  DIFF ('.ew-vd-entry', 1) w:609->757  
+  DIFF ('[data-decision-status]', 0) x:590->738  
+  DIFF ('[data-decision-status]', 1) x:583->731  
+## GF3-empty panel {'w': 690, 'h': 611, 'x': 256} {'w': 830, 'h': 720, 'x': 56} active gf-addr| | ew-stage-page-page-id|
+  DIFF ('.ew-center-breadcrumb', 0) w:611->759  
+  DIFF ('.ew-center-heading-actions .ew-icon-button', 0) x:611->759  
+  DIFF ('.ew-fg-ask', 0) w:569->717  
+  DIFF ('.ew-fg-error', 0) w:487->635  
+  DIFF ('.ew-vd-entry', 0) w:609->757  
+  DIFF ('.ew-vd-entry', 1) w:609->757  
+  DIFF ('[data-decision-status]', 0) x:590->738  
+  DIFF ('[data-decision-status]', 1) x:583->731  
+## GF3 panel {'w': 690, 'h': 611, 'x': 256} {'w': 830, 'h': 720, 'x': 56} active gf-addr| | ew-stage-page-page-id|
+  DIFF ('.ew-center-breadcrumb', 0) w:611->759  
+  DIFF ('.ew-center-heading-actions .ew-icon-button', 0) x:611->759  
+  DIFF ('.ew-fg-ask', 0) w:569->717  
+  DIFF ('.ew-fg-ask button', 0)  bg:rgb(52, 58, 70)->rgb(29, 33, 40) 
+  DIFF ('.ew-fg-error', 0) w:487->635  
+  DIFF ('.ew-vd-entry', 0) w:609->757  
+  DIFF ('.ew-vd-entry', 1) w:609->757  
+  DIFF ('[data-decision-status]', 0) x:590->738  
+  DIFF ('[data-decision-status]', 1) x:583->731  
+## GF4 panel {'w': 690, 'h': 611, 'x': 256} {'w': 830, 'h': 720, 'x': 56} active page:yes|맞아요 | stage_decide|맞아요
+  DIFF ('.ew-center-breadcrumb', 0) w:611->759  
+  DIFF ('.ew-center-heading-actions .ew-icon-button', 0) x:611->759  
+  DIFF ('.ew-center-task-description', 1) y:557->515  
+  DIFF ('.ew-fg-ask', 0) w:569->717 h:76->34  
+  DIFF ('.ew-fg-ask button', 0) x:53->545 y:332->290  
+  DIFF ('.ew-fg-ask input', 0)   text:'https://wiki.example.com/pages/viewpage.'->'https://wiki.example.com/pages/viewpage.'
+  DIFF ('.ew-fg-found', 0) y:380->338 w:569->717  text:'설비 점검 안내 (예시) 페이지 123456789'->'점검 기준서 페이지 ID 27182'
+  DIFF ('.ew-fg-found .ew-fg-title, .ew-fg-found > a', 0) y:380->338 w:487->635  text:'설비 점검 안내 (예시)'->'점검 기준서'
+  DIFF ('.ew-fg-found > small', 0) y:406->364 w:487->635  text:'페이지 123456789'->'페이지 ID 27182'
+  DIFF ('.ew-fg-more button', 0) y:486->444  
+  DIFF ('.ew-fg-question button', 0) y:438->396  
+  DIFF ('.ew-fg-question button', 1) y:438->396  
+  DIFF ('.ew-fg-question strong', 0) y:444->402  text:'이 문서가 맞나요?'->'이 결과가 맞나요?'
+  DIFF ('.ew-vd-entry', 0) w:609->757 h:310->268  text:'1 기준 문서 찾기 찾을 문서의 Confluence 주소를 넣으세요. 확'->'1 기준 문서 찾기 찾을 문서의 Confluence 주소를 넣으세요. 확'
+  DIFF ('.ew-vd-entry', 1) y:529->487 w:609->757  
+  DIFF ('.ew-vd-entry .ew-vd-name', 1) y:533->491  
+  DIFF ('[data-decision-status]', 0) x:568->716  
+  DIFF ('[data-decision-status]', 1) x:583->731 y:539->497  
+## GF5 panel {'w': 690, 'h': 611, 'x': 256} {'w': 830, 'h': 720, 'x': 56} active child|찾기 | stage_execute|찾기
+  DIFF ('.ew-center-breadcrumb', 0) w:611->759  
+  DIFF ('.ew-center-heading-actions .ew-icon-button', 0) x:611->759  
+  DIFF ('.ew-center-task-description', 0) w:106->85  text:'설비 점검 안내 (예시)'->'점검 기준서'
+  DIFF ('.ew-fg-ask', 0) w:569->717  text:'기준 문서 설비 점검 안내 (예시) 찾기'->'1번 결과 점검 기준서 찾기'
+  DIFF ('.ew-fg-ask button', 0) x:260->208  
+  DIFF ('.ew-fg-given', 0) w:115->63  text:'설비 점검 안내 (예시)'->'점검 기준서'
+  DIFF ('.ew-fg-key', 0)   text:'기준 문서'->'1번 결과'
+  DIFF ('.ew-vd-entry', 0) w:609->757  text:'1 기준 문서 찾기 설비 점검 안내 (예시) 맞음'->'1 기준 문서 찾기 점검 기준서 맞음'
+  DIFF ('.ew-vd-entry', 1) w:609->757  text:'2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 할 '->'2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 할 '
+  DIFF ('.ew-vd-entry .ew-vd-name', 0) w:106->85  
+  DIFF ('[data-decision-status]', 0) x:577->725  
+  DIFF ('[data-decision-status]', 1) x:590->738  
+## GF6 panel {'w': 690, 'h': 611, 'x': 256} {'w': 830, 'h': 720, 'x': 56} active child:yes|네 | stage_confirm_list|네
+  DIFF ('.ew-center-breadcrumb', 0) w:611->759  
+  DIFF ('.ew-center-heading-actions .ew-icon-button', 0) x:611->759  
+  DIFF ('.ew-center-task-description', 0) w:106->85  text:'설비 점검 안내 (예시)'->'점검 기준서'
+  DIFF ('.ew-fg-ask', 0) w:569->717  text:'기준 문서 설비 점검 안내 (예시) 다시 찾기'->'1번 결과 점검 기준서 다시 찾기'
+  DIFF ('.ew-fg-ask button', 0) x:260->208 bg:rgb(248, 249, 250)->rgb(255, 255, 255) 
+  DIFF ('.ew-fg-found', 0) w:569->717  text:'찾은 문서 2개 주간 점검표 (예시) 페이지 123456801 월간 점검'->'찾은 결과 2개 교대 점검표 페이지 ID 31415 주간 점검표 페이지 '
+  ONLY product ('.ew-fg-found .ew-fg-title, .ew-fg-found > a', 0) 교대 점검표
+  ONLY product ('.ew-fg-found .ew-fg-title, .ew-fg-found > a', 1) 주간 점검표
+  DIFF ('.ew-fg-found > small', 0) w:487->635  text:'찾은 문서 2개'->'찾은 결과 2개'
+  DIFF ('.ew-fg-given', 0) w:115->63  text:'설비 점검 안내 (예시)'->'점검 기준서'
+  DIFF ('.ew-fg-key', 0)   text:'기준 문서'->'1번 결과'
+  DIFF ('.ew-fg-list li', 0) w:487->635  text:'주간 점검표 (예시) 페이지 123456801'->'교대 점검표 페이지 ID 31415'
+  DIFF ('.ew-fg-list li', 1) w:487->635  text:'월간 점검표 (예시) 페이지 123456802'->'주간 점검표 페이지 ID 31416'
+  DIFF ('.ew-vd-entry', 0) w:609->757  text:'1 기준 문서 찾기 설비 점검 안내 (예시) 맞음'->'1 기준 문서 찾기 점검 기준서 맞음'
+  DIFF ('.ew-vd-entry', 1) w:609->757  text:'2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 확인'->'2 하위 문서 찾기 1번 문서 바로 아래 문서를 5개까지 찾습니다. 확인'
+  DIFF ('.ew-vd-entry .ew-vd-name', 0) w:106->85  
+  DIFF ('[data-decision-status]', 0) x:577->725  
+  DIFF ('[data-decision-status]', 1) x:568->716  
+## GF7 panel {'w': 690, 'h': 611, 'x': 256} {'w': 830, 'h': 720, 'x': 56} active finish|끝내기 | finish_run|끝내기
+  DIFF ('.ew-center-breadcrumb', 0) w:611->759  
+  DIFF ('.ew-center-heading-actions .ew-icon-button', 0) x:611->759  
+  DIFF ('.ew-center-task-description', 0) w:106->85  text:'설비 점검 안내 (예시)'->'점검 기준서'
+  DIFF ('.ew-center-task-description', 1) w:220->154  text:'2건 · 주간 점검표 (예시), 월간 점검표 (예시)'->'2건 · 교대 점검표, 주간 점검표'
+  DIFF ('.ew-fg-done', 0) w:611->759  text:'다 했어요 기준 문서 설비 점검 안내 (예시) · 하위 문서 2건 끝내기'->'다 했어요 점검 기준서 외 2건 끝내기'
+  DIFF ('.ew-fg-done .ew-primary', 0) x:526->674  
+  DIFF ('.ew-fg-done h3', 0) w:449->597  
+  DIFF ('.ew-fg-done p', 0) w:449->597  text:'기준 문서 설비 점검 안내 (예시) · 하위 문서 2건'->'점검 기준서 외 2건'
+  DIFF ('.ew-vd-entry', 0) w:609->757  text:'1 기준 문서 찾기 설비 점검 안내 (예시) 맞음'->'1 기준 문서 찾기 점검 기준서 맞음'
+  DIFF ('.ew-vd-entry', 1) w:609->757  text:'2 하위 문서 찾기 2건 · 주간 점검표 (예시), 월간 점검표 (예시)'->'2 하위 문서 찾기 2건 · 교대 점검표, 주간 점검표 확인함'
+  DIFF ('.ew-vd-entry .ew-vd-name', 0) w:106->85  
+  DIFF ('.ew-vd-entry .ew-vd-name', 1) w:220->154  
+  DIFF ('[data-decision-status]', 0) x:577->725  
+  DIFF ('[data-decision-status]', 1) x:565->713  
+## GF1-after panel {'w': 690, 'h': 611, 'x': 256} {'w': 830, 'h': 720, 'x': 56} active start|시작 | workflow|시작
+  DIFF ('.ew-fg-card', 0) w:611->759  
+  DIFF ('.ew-fg-card .ew-primary', 0) x:526->674  
+  DIFF ('.ew-fg-card h3', 0) w:449->597  
+  DIFF ('.ew-fg-card p', 0) w:449->597  
+  DIFF ('.ew-fg-card small', 0) w:449->597  text:'지난번 11. 20. 02:05 끝냄 · 설비 점검 안내 (예시) 외 2'->'지난번 11. 20. 03:02 끝냄 · 점검 기준서 외 2건'
+## GF8 panel {'w': 690, 'h': 611, 'x': 256} {'w': 830, 'h': 720, 'x': 56} active BUTTON|연결 안 됨 GF8 | ew-stage-page-page-id|
+  DIFF ('.ew-center-breadcrumb', 0) w:611->759  
+  DIFF ('.ew-center-heading-actions .ew-icon-button', 0) x:611->759  
+  DIFF ('.ew-center-task-description', 1) y:525->483  
+  DIFF ('.ew-fg-ask', 0) w:569->717 h:76->34  
+  DIFF ('.ew-fg-ask button', 0) x:53->545 y:332->290  
+  DIFF ('.ew-fg-ask input', 0)   text:'https://wiki.example.com/pages/viewpage.'->'https://wiki.example.com/pages/viewpage.'
+  DIFF ('.ew-fg-more button', 0) y:454->412  
+  DIFF ('.ew-fg-problem', 0) y:380->338 w:487->635 border:0px none rgb(94, 101, 115) / 3px rgb(191, 58, 43)->0px solid oklch(0.92 0 0) / 3px rgb(191, 58, 43) text:'Confluence에 연결되어 있지 않아요 운영 담당자에게 Conflue'->'사내 Confluence에 연결되어 있지 않아요 운영 담당자에게 사내 C'
+  DIFF ('.ew-fg-problem span', 0) y:412->370 w:458->606  text:'운영 담당자에게 Confluence 연결을 요청한 뒤 다시 찾으세요.'->'운영 담당자에게 사내 Confluence 연결을 요청한 뒤 다시 찾으세요'
+  DIFF ('.ew-fg-problem strong', 0) y:390->348 w:458->606  text:'Confluence에 연결되어 있지 않아요'->'사내 Confluence에 연결되어 있지 않아요'
+  DIFF ('.ew-vd-entry', 0) w:609->757 h:278->236  text:'1 기준 문서 찾기 찾을 문서의 Confluence 주소를 넣으세요. 연'->'1 기준 문서 찾기 찾을 문서의 Confluence 주소를 넣으세요. 연'
+  DIFF ('.ew-vd-entry', 1) y:497->455 w:609->757  
+  DIFF ('.ew-vd-entry .ew-vd-name', 1) y:501->459  
+  DIFF ('[data-decision-status]', 0) x:579->727  
+  DIFF ('[data-decision-status]', 1) x:583->731 y:507->465  
+## GF9 panel {'w': 690, 'h': 611, 'x': 256} {'w': 830, 'h': 720, 'x': 56} active gf-addr| | ew-stage-page-page-id|
+  DIFF ('.ew-center-breadcrumb', 0) w:611->759  
+  DIFF ('.ew-center-heading-actions .ew-icon-button', 0) x:611->759  
+  DIFF ('.ew-center-task-description', 1) y:525->483  
+  DIFF ('.ew-fg-ask', 0) w:569->717 h:76->34  
+  DIFF ('.ew-fg-ask button', 0) x:53->545 y:332->290  
+  DIFF ('.ew-fg-more button', 0) y:454->412  
+  DIFF ('.ew-fg-problem', 0) y:380->338 w:487->635 border:0px none rgb(94, 101, 115) / 3px rgb(191, 58, 43)->0px solid oklch(0.92 0 0) / 3px rgb(191, 58, 43) 
+  DIFF ('.ew-fg-problem span', 0) y:412->370 w:458->606  
+  DIFF ('.ew-fg-problem strong', 0) y:390->348 w:458->606  
+  DIFF ('.ew-vd-entry', 0) w:609->757 h:278->236  
+  DIFF ('.ew-vd-entry', 1) y:497->455 w:609->757  
+  DIFF ('.ew-vd-entry .ew-vd-name', 1) y:501->459  
+  DIFF ('[data-decision-status]', 0) x:575->723  
+  DIFF ('[data-decision-status]', 1) x:583->731 y:507->465  

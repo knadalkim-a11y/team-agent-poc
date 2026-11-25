@@ -52,7 +52,7 @@
   let apiContextGeneration=0, apiContextSignature="", purposeRequest=null;
   const context=()=>JSON.stringify([epoch,token()===identity,location.pathname,location.search,selection.system_id,selection.factory_id,selection.workflow_id,selection.run_id,selection.job_id]);
   const view=createWorkView({callbacks:{panelWidth:width=>{if(!restored)initialSelectionPatch={...initialSelectionPatch,panel_width:width};selection.panel_width=width;remember(width);}}});
-  const designer=createWorkDesigner({callbacks:{command,read,openNative,models:models,askHelp,apiContextChanged:syncApiContext,helpState:()=>source()?.helpState?.(),startContextChanged:value=>{procedureStart=value;if(state&&available()&&chatPrepared())view.sync(snapshot());},openTools:async()=>select({mode:'author',tab:'tools',workflow_id:'',run_id:'',job_id:''}),openWorkflow:async(id,systemId)=>select({...(systemId&&systemId!==selection.system_id?{system_id:systemId,factory_id:''}:{}),workflow_id:id,run_id:'',job_id:'',mode:'author',tab:'overview'}),changed:refresh,navigate:mode=>select({mode}),operationsRead,operationsCommand,options:async body=>{const at=context();const result=await api('workspace/options',body);if(at!==context())throw new Error('작업 위치가 바뀌어 선택 목록을 적용하지 않았습니다.');return result;},resources:async()=>{const at=context();const result=await api('resources');return at===context()?result:null;}}});
+  const designer=createWorkDesigner({callbacks:{command,read,openNative,models:models,askHelp,apiContextChanged:syncApiContext,helpState:()=>source()?.helpState?.(),startContextChanged:value=>{procedureStart=value;if(state&&available()&&chatPrepared())view.sync(snapshot());},openTools:async()=>select({mode:'author',tab:'tools',workflow_id:'',run_id:'',job_id:''}),openWorkflow:async(id,systemId)=>select({...(systemId&&systemId!==selection.system_id?{system_id:systemId,factory_id:''}:{}),workflow_id:id,run_id:'',job_id:'',mode:'author',tab:'overview'}),changed:refresh,navigate:(mode,patch={})=>select({mode,...patch}),operationsRead,operationsCommand,tryRead:async body=>{const at=context();const result=await api('workspace/try',body);return at===context()?result:null;},tryCommand:(path,body)=>sendCommand(path,body,{quiet:true}),options:async body=>{const at=context();const result=await api('workspace/options',body);if(at!==context())throw new Error('작업 위치가 바뀌어 선택 목록을 적용하지 않았습니다.');return result;},resources:async()=>{const at=context();const result=await api('resources');return at===context()?result:null;}}});
   function currentApiContext(){
     if(selection.mode!=='author'||selection.tab!=='tools'||nativePage()||nativeReturnPreview()||targetLoading||evidenceUnavailable)return null;
     return designer.readApiContext?.() || null;
@@ -287,12 +287,7 @@
       const factoryId=next.run?.factory_id ?? selection.factory_id,common=settings.find(item=>!item.factory_id),specific=settings.find(item=>item.factory_id===factoryId);
       next.settings={values:{...(common?.values || {}),...(specific?.values || {})},base_values:common?.values || {},overrides:specific?.values || {},revision:specific?.revision || 0,factory_id:factoryId};
     }
-    if(next.run){const attempts=next.run.attempts || [];for(const [id,job] of Object.entries(next.run.jobs || {})){
-      const attempt=attempts.find(item=>item.id===job.current_attempt) || attempts.filter(item=>item.job_id===id).at(-1);
-      if(attempt){job.result=attempt.result;job.attempt_id=attempt.id;job.evidence_access=attempt.evidence_access;}
-      if(Array.isArray(job.decisions)){job.decision_history=clone(job.decisions);job.decisions=Object.fromEntries(job.decisions.filter(item=>item.result_revision===job.result_revision).map(item=>[item.item_id,item]));}
-      const external=(next.operations?.requests || []).filter(item=>item.job_id===id).at(-1);if(external)job.request=external;
-    }}
+    if(next.run)workNormalizeRun(next.run,next.operations);
     return next;
   }
   const workspaceKey=()=>JSON.stringify([selection.system_id || '',selection.factory_id || '',selection.workflow_id || '',selection.run_id || '']);
@@ -395,7 +390,8 @@
       const operations=await workspaceOperations(result);
       if(at!==context()||n!==serial)return null;
       let legacy;if(selection.tab==='records'){try{legacy=await api('legacy');}catch(failure){legacy={error:failure.message};}if(at!==context()||n!==serial)return null;}acceptWorkspace(normalized({...result,operations,legacy}));if(selection.mode==='author'&&!workCanWorkspace(state.capabilities)){selection={...selection,mode:'work',tab:'overview'};}error='';readyRoute=route;syncNativeReturn();render();loadOptions();
-      const active=Object.values(state.run?.jobs || {}).some(job=>job.status==='running')||(state.operations?.scope_runs || []).some(scope=>['queued','running'].includes(scope.status))||(state.operations?.requests || []).some(request=>['requested','accepted','running','reported_complete'].includes(request.state));refreshTimer=setTimeout(refresh,active||busy?2500:30000);
+      if(selection.mode==='author')designer.refreshTry?.();
+      const active=Object.values(state.run?.jobs || {}).some(job=>job.status==='running')||(state.operations?.scope_runs || []).some(scope=>['queued','running'].includes(scope.status))||(state.operations?.requests || []).some(request=>['requested','accepted','running','reported_complete'].includes(request.state))||selection.mode==='author'&&Boolean(designer.tryActive?.());refreshTimer=setTimeout(refresh,active||busy?2500:30000);
       return state;
     }catch(failure){if(at!==context()||n!==serial)return null;error=failure.message;if(!nativePage()&&pendingNativeAction?.applied){pendingNativeAction=null;invalidateWorkspace();}if(nativePage()){nativeCapabilities={};nativeScope=null;}if(accessFailure(failure)){invalidateWorkspace();nativeCapabilities={};nativeScope=null;}
       else if(!nativePage()&&(selection.mode!=='author'||['history','records','historical_reference'].includes(selection.tab))){
@@ -408,7 +404,7 @@
   }
   function revisionFor(action){if(['save_draft','validate_workflow','publish_workflow','unpublish_workflow','start_run','run_start'].includes(action))return state?.workflow?.revision || 0;if(action==='save_settings')return state?.settings?.revision || 0;if(action==='save_ui')return uiRevision;return state?.run?.revision || 0;}
   async function command(body){return sendCommand('workspace/command',body);}
-  async function sendCommand(path,body){
+  async function sendCommand(path,body,{quiet=false}={}){
     if(!available())throw new Error('로그인을 확인해 주세요.');
     const at=context(),auth=token(),payload={...body,expected_revision:body.expected_revision ?? revisionFor(body.action)};
     // The connection password must never become a receipt key (or a hash of it).
@@ -417,9 +413,9 @@
     const key=privateConnection?path+':'+payload.action+':'+payload.request_id:path+JSON.stringify(payload);if(!payload.request_id)payload.request_id=receipts.get(key) || workUI.newId();receipts.set(key,payload.request_id);
     let result;
     try{result=await api(path,payload);receipts.delete(key);}
-    catch(failure){if(failure.status&&failure.status<500)receipts.delete(key);if(auth===token()&&at===context()){commandError=failure.message;render();}throw failure;}
+    catch(failure){if(failure.status&&failure.status<500)receipts.delete(key);if(!quiet&&auth===token()&&at===context()){commandError=failure.message;render();}throw failure;}
     if(auth!==token()||at!==context())return null;
-    commandError='';return result;
+    if(!quiet)commandError='';return result;
   }
   function observeSavedUI(value){
     if(value && Number.isInteger(value.revision) && value.revision>=uiRevision){
@@ -720,10 +716,7 @@
     const menu=source()?.hosts?.()?.panel?.querySelector?.('#ees-stage-verdict-menu');if(!menu?.getBoundingClientRect)return;
     const panel=menu.parentElement,trigger=[...(panel?.querySelectorAll('[data-action="stage_verdict"]') || [])].find(item=>item.dataset.jobId===selection.stage_verdict_job);
     if(!trigger?.getBoundingClientRect)return;
-    const bounds=panel.getBoundingClientRect(),anchor=trigger.getBoundingClientRect(),rect=menu.getBoundingClientRect();
-    const top=anchor.bottom+6+rect.height<=bounds.bottom-8?anchor.bottom+6:anchor.top-6-rect.height;
-    menu.style.left=Math.max(8,Math.min(anchor.left-bounds.left,bounds.width-rect.width-8))+'px';
-    menu.style.top=Math.max(8,top-bounds.top)+'px';
+    workPlaceStageMenu(panel,menu,trigger);
   }
   function closeStageMenu(restoreFocus=false){
     const id=selection.stage_verdict_job;if(!id)return;selection.stage_verdict_job='';render();

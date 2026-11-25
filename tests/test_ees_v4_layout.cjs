@@ -338,3 +338,13 @@ test('read-only and temporary conversations can visit Native work and return wit
     assert.equal(h.api.reference().kind,'none');
   }
 });
+
+// 2026-11-20, design mock 21 revision 2: the editor's try draws work rows, so the panel keeps their scope.
+test('mock 21: the work panel keeps the work rows scope only while the editor shows its try',()=>{
+ const h=dom(),view=run(h.context,'createWorkView({callbacks:{}})'),query=h.panel.querySelector.bind(h.panel);let trying=true;
+ h.panel.querySelector=selector=>selector==='#ees-work-designer[data-author-tab="try"]'?(trying?h.element('designer'):null):query(selector);
+ const author=snapshot({mode:'author',workflow_id:'w'});author.state.capabilities={actor_id:'a',can_author:true};
+ view.render(author);assert.equal(h.panel.classList.contains('ew-vd'),true);
+ trying=false;view.render(author);assert.equal(h.panel.classList.contains('ew-vd'),false);
+ trying=true;view.render(snapshot({mode:'work',tab:'overview'}));assert.equal(h.panel.classList.contains('ew-vd'),false,'the work home has no rows');
+});

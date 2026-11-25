@@ -1,0 +1,730 @@
+{
+  "what": "design mock 21 rev 2 (try before publish) followed in the real app, T1..T11 and extra checks",
+  "source_commit": "15934c7",
+  "runs": {
+    "1920": {
+      "viewport": "1920x1080",
+      "status": "passed",
+      "build": "t21b",
+      "wheel": "open_webui-0.11.3+ees.14-py3-none-any.whl",
+      "wheel_sha256": "8391335e0379d604d799570bc147a1e5326c0805c21d5219d0755cd95fcb341e",
+      "scenes": [
+        {
+          "scene": "t1",
+          "result": "done"
+        },
+        {
+          "scene": "t2",
+          "result": "done"
+        },
+        {
+          "scene": "t3",
+          "result": "done"
+        },
+        {
+          "scene": "t8",
+          "result": "done"
+        },
+        {
+          "scene": "t4",
+          "result": "done"
+        },
+        {
+          "scene": "t5",
+          "result": "done"
+        },
+        {
+          "scene": "t10",
+          "result": "done"
+        },
+        {
+          "scene": "t11",
+          "result": "done"
+        },
+        {
+          "scene": "t6",
+          "result": "done"
+        },
+        {
+          "scene": "t7",
+          "result": "done"
+        },
+        {
+          "scene": "b_work_open",
+          "result": "done"
+        },
+        {
+          "scene": "t9",
+          "result": "done"
+        },
+        {
+          "scene": "b_real_start",
+          "result": "done"
+        },
+        {
+          "scene": "unpublish",
+          "result": "done"
+        }
+      ],
+      "checks": {
+        "total": 59,
+        "passed": 59,
+        "failed": [],
+        "items": [
+          {
+            "step": "T1 head shows 미게시",
+            "ok": true
+          },
+          {
+            "step": "T1 four tabs",
+            "ok": true
+          },
+          {
+            "step": "T1 no publication select",
+            "ok": true
+          },
+          {
+            "step": "T1 저장 disabled when saved",
+            "ok": true
+          },
+          {
+            "step": "T1 게시 enabled (unpublished)",
+            "ok": true
+          },
+          {
+            "step": "T1 no main button",
+            "ok": true
+          },
+          {
+            "step": "T1 status 저장됨",
+            "ok": true
+          },
+          {
+            "step": "T1 line EMS",
+            "ok": true
+          },
+          {
+            "step": "T2 bar",
+            "ok": true
+          },
+          {
+            "step": "T2 no reset before start",
+            "ok": true
+          },
+          {
+            "step": "T2 no start button",
+            "ok": true
+          },
+          {
+            "step": "T2 focus on first item",
+            "ok": true
+          },
+          {
+            "step": "T2 page ID field open under its row",
+            "ok": true
+          },
+          {
+            "step": "T2 panel keeps row scope class",
+            "ok": true
+          },
+          {
+            "step": "T2 try is no run for GET",
+            "ok": true
+          },
+          {
+            "step": "T3 after ticks focus goes to the empty page ID",
+            "ok": true
+          },
+          {
+            "step": "T3 reset 처음부터 after start",
+            "ok": true
+          },
+          {
+            "step": "T3 result shows the page title",
+            "ok": true
+          },
+          {
+            "step": "T3 verdict control shown",
+            "ok": true
+          },
+          {
+            "step": "T3 focus on verdict control after result",
+            "ok": true
+          },
+          {
+            "step": "T3 고치기 on each row",
+            "ok": true
+          },
+          {
+            "step": "T3 no top error line",
+            "ok": true
+          },
+          {
+            "step": "T8 B work list lacks the unpublished procedure",
+            "ok": true
+          },
+          {
+            "step": "T8 B try has nothing ticked",
+            "ok": true
+          },
+          {
+            "step": "T8 B try has no result of A",
+            "ok": true
+          },
+          {
+            "step": "T8 two windows, two tries",
+            "ok": true
+          },
+          {
+            "step": "T8 A bar offers 새 저장본으로 처음부터",
+            "ok": true
+          },
+          {
+            "step": "T8 A ticks kept (B did not touch them)",
+            "ok": true
+          },
+          {
+            "step": "T4 cursor in the new item field",
+            "ok": true
+          },
+          {
+            "step": "T5 unsaved after typing",
+            "ok": true
+          },
+          {
+            "step": "T5 저장 is main while unsaved",
+            "ok": true
+          },
+          {
+            "step": "T5 바뀜 on the fixed job",
+            "ok": true
+          },
+          {
+            "step": "T5 바뀜 only there",
+            "ok": true
+          },
+          {
+            "step": "T5 page ID refilled",
+            "ok": true
+          },
+          {
+            "step": "T5 new try not started yet",
+            "ok": true
+          },
+          {
+            "step": "T10 not connected under the row",
+            "ok": true
+          },
+          {
+            "step": "T10 no top error line",
+            "ok": true
+          },
+          {
+            "step": "T10 legend counts 연결 안 됨",
+            "ok": true
+          },
+          {
+            "step": "T11 cannot open under the row",
+            "ok": true
+          },
+          {
+            "step": "T11 no top error line",
+            "ok": true
+          },
+          {
+            "step": "T11 legend counts 열 수 없음",
+            "ok": true
+          },
+          {
+            "step": "T11 페이지 ID 고치기 selects the value",
+            "ok": true
+          },
+          {
+            "step": "T6 found after fixing the page ID",
+            "ok": true
+          },
+          {
+            "step": "T6 게시 is the only main button",
+            "ok": true
+          },
+          {
+            "step": "T6 cursor on 게시",
+            "ok": true
+          },
+          {
+            "step": "T7 status 게시함 · 방금",
+            "ok": true
+          },
+          {
+            "step": "T7 cursor on 업무에서 보기",
+            "ok": true
+          },
+          {
+            "step": "T7 back on 업무 내용",
+            "ok": true
+          },
+          {
+            "step": "T7 mark 게시",
+            "ok": true
+          },
+          {
+            "step": "T7 게시 내림 in ⋯",
+            "ok": true
+          },
+          {
+            "step": "T7 B work list has it after 게시",
+            "ok": true
+          },
+          {
+            "step": "T9 line says unpublished changes",
+            "ok": true
+          },
+          {
+            "step": "T9 save did not publish",
+            "ok": true
+          },
+          {
+            "step": "T9 바뀜 on the job with the new item",
+            "ok": true
+          },
+          {
+            "step": "real start after a draft save elsewhere: no error",
+            "ok": true
+          },
+          {
+            "step": "one real run open beside the tries",
+            "ok": true
+          },
+          {
+            "step": "GET lists no try",
+            "ok": true
+          },
+          {
+            "step": "unpublish: cursor on the ⋯ summary",
+            "ok": true
+          },
+          {
+            "step": "unpublish: line EMS",
+            "ok": true
+          }
+        ]
+      },
+      "page_exceptions": [
+        [],
+        []
+      ],
+      "confluence_calls": [
+        "/rest/api/content/123456789",
+        "/rest/api/content/99999",
+        "/rest/api/content/123456789",
+        "/rest/api/content/123456789"
+      ],
+      "captures": [
+        {
+          "file": "A-T1-1920.png",
+          "sha256": "5371337cf5db716c342d79a45a8897661247f04f7f0a736a803d90d0d6565f83"
+        },
+        {
+          "file": "A-T2-1920.png",
+          "sha256": "88cb4c05c83196febb90ecf072b9a9fb4727ef3688961292a659796ac2abbc5b"
+        },
+        {
+          "file": "A-T3-1920.png",
+          "sha256": "dd683650fe47957a646ad64b3051476b581796170baa8393bc88498a67402d43"
+        },
+        {
+          "file": "A-T4-1920.png",
+          "sha256": "bd39d183a1605fc549e5bff8c6f6498345160e18919e72ce12a4cb85f0a92149"
+        },
+        {
+          "file": "A-T5-1920.png",
+          "sha256": "7bf202a0bdc4f98b1d69d9331ac9d4ef9a0f7e6378b86ddbd7ea1b3cfd611e1e"
+        },
+        {
+          "file": "A-T6-1920.png",
+          "sha256": "c8cb07fe407cb77624e2b1082faa62959e12f1606c1a8d3e2137653e5784f792"
+        },
+        {
+          "file": "A-T7-1920.png",
+          "sha256": "4a5b9fa767e22f789aaba185e8b90c7ec54b9e31c22955ea35221e7110f45702"
+        },
+        {
+          "file": "A-T8-saved-1920.png",
+          "sha256": "f878d8f56677b25106cf62a63dcdfbba8b3bfedc79ffc7ed584291f705ec4dd4"
+        },
+        {
+          "file": "A-T9-1920.png",
+          "sha256": "7aec145ef05b152ed934a748e0d8ddea7fb5b1b95da6022e3a32446bceda314a"
+        },
+        {
+          "file": "A-T9-try-1920.png",
+          "sha256": "02c28f324232a8c7991bd91803bd4829dfb5ce0ad776efc8abd5ef5fff2c3382"
+        },
+        {
+          "file": "A-T10-1920.png",
+          "sha256": "789eb36d87718166050d886f7cdfe3faae9d077237dff0634a1074602d99ee18"
+        },
+        {
+          "file": "A-T11-1920.png",
+          "sha256": "66a898952a26336065ffc7f74c4debacb16f3144e6e1eff0456caf2cd6a71723"
+        },
+        {
+          "file": "B-T8-1920.png",
+          "sha256": "2a4a19fc8a938a82848b45c82962e403b9522c4058f97eae5f1992dbbd2dbecc"
+        },
+        {
+          "file": "B-T8-trial-1920.png",
+          "sha256": "69243db7e5c366993d7671b85425ae0a37d7854c581efdb16876de7608117683"
+        },
+        {
+          "file": "B-B-real-run-1920.png",
+          "sha256": "bfd01d07e95ebb0a8a8e5598502df0105f1eabb31b028a30bad47b4ae8ff3b1e"
+        },
+        {
+          "file": "A-unpublished-1920.png",
+          "sha256": "8c6e7bc8d395c091e05db4a41825d40dd3eb30db9fb18cd2950428d8fb41a9eb"
+        }
+      ]
+    },
+    "1366": {
+      "viewport": "1366x768",
+      "status": "passed",
+      "build": "t21b",
+      "wheel": "open_webui-0.11.3+ees.14-py3-none-any.whl",
+      "wheel_sha256": "8391335e0379d604d799570bc147a1e5326c0805c21d5219d0755cd95fcb341e",
+      "scenes": [
+        {
+          "scene": "t1",
+          "result": "done"
+        },
+        {
+          "scene": "t2",
+          "result": "done"
+        },
+        {
+          "scene": "t3",
+          "result": "done"
+        },
+        {
+          "scene": "t8",
+          "result": "done"
+        },
+        {
+          "scene": "t4",
+          "result": "done"
+        },
+        {
+          "scene": "t5",
+          "result": "done"
+        },
+        {
+          "scene": "t10",
+          "result": "done"
+        },
+        {
+          "scene": "t11",
+          "result": "done"
+        },
+        {
+          "scene": "t6",
+          "result": "done"
+        },
+        {
+          "scene": "t7",
+          "result": "done"
+        },
+        {
+          "scene": "b_work_open",
+          "result": "done"
+        },
+        {
+          "scene": "t9",
+          "result": "done"
+        },
+        {
+          "scene": "b_real_start",
+          "result": "done"
+        },
+        {
+          "scene": "unpublish",
+          "result": "done"
+        }
+      ],
+      "checks": {
+        "total": 59,
+        "passed": 59,
+        "failed": [],
+        "items": [
+          {
+            "step": "T1 head shows 미게시",
+            "ok": true
+          },
+          {
+            "step": "T1 four tabs",
+            "ok": true
+          },
+          {
+            "step": "T1 no publication select",
+            "ok": true
+          },
+          {
+            "step": "T1 저장 disabled when saved",
+            "ok": true
+          },
+          {
+            "step": "T1 게시 enabled (unpublished)",
+            "ok": true
+          },
+          {
+            "step": "T1 no main button",
+            "ok": true
+          },
+          {
+            "step": "T1 status 저장됨",
+            "ok": true
+          },
+          {
+            "step": "T1 line EMS",
+            "ok": true
+          },
+          {
+            "step": "T2 bar",
+            "ok": true
+          },
+          {
+            "step": "T2 no reset before start",
+            "ok": true
+          },
+          {
+            "step": "T2 no start button",
+            "ok": true
+          },
+          {
+            "step": "T2 focus on first item",
+            "ok": true
+          },
+          {
+            "step": "T2 page ID field open under its row",
+            "ok": true
+          },
+          {
+            "step": "T2 panel keeps row scope class",
+            "ok": true
+          },
+          {
+            "step": "T2 try is no run for GET",
+            "ok": true
+          },
+          {
+            "step": "T3 after ticks focus goes to the empty page ID",
+            "ok": true
+          },
+          {
+            "step": "T3 reset 처음부터 after start",
+            "ok": true
+          },
+          {
+            "step": "T3 result shows the page title",
+            "ok": true
+          },
+          {
+            "step": "T3 verdict control shown",
+            "ok": true
+          },
+          {
+            "step": "T3 focus on verdict control after result",
+            "ok": true
+          },
+          {
+            "step": "T3 고치기 on each row",
+            "ok": true
+          },
+          {
+            "step": "T3 no top error line",
+            "ok": true
+          },
+          {
+            "step": "T8 B work list lacks the unpublished procedure",
+            "ok": true
+          },
+          {
+            "step": "T8 B try has nothing ticked",
+            "ok": true
+          },
+          {
+            "step": "T8 B try has no result of A",
+            "ok": true
+          },
+          {
+            "step": "T8 two windows, two tries",
+            "ok": true
+          },
+          {
+            "step": "T8 A bar offers 새 저장본으로 처음부터",
+            "ok": true
+          },
+          {
+            "step": "T8 A ticks kept (B did not touch them)",
+            "ok": true
+          },
+          {
+            "step": "T4 cursor in the new item field",
+            "ok": true
+          },
+          {
+            "step": "T5 unsaved after typing",
+            "ok": true
+          },
+          {
+            "step": "T5 저장 is main while unsaved",
+            "ok": true
+          },
+          {
+            "step": "T5 바뀜 on the fixed job",
+            "ok": true
+          },
+          {
+            "step": "T5 바뀜 only there",
+            "ok": true
+          },
+          {
+            "step": "T5 page ID refilled",
+            "ok": true
+          },
+          {
+            "step": "T5 new try not started yet",
+            "ok": true
+          },
+          {
+            "step": "T10 not connected under the row",
+            "ok": true
+          },
+          {
+            "step": "T10 no top error line",
+            "ok": true
+          },
+          {
+            "step": "T10 legend counts 연결 안 됨",
+            "ok": true
+          },
+          {
+            "step": "T11 cannot open under the row",
+            "ok": true
+          },
+          {
+            "step": "T11 no top error line",
+            "ok": true
+          },
+          {
+            "step": "T11 legend counts 열 수 없음",
+            "ok": true
+          },
+          {
+            "step": "T11 페이지 ID 고치기 selects the value",
+            "ok": true
+          },
+          {
+            "step": "T6 found after fixing the page ID",
+            "ok": true
+          },
+          {
+            "step": "T6 게시 is the only main button",
+            "ok": true
+          },
+          {
+            "step": "T6 cursor on 게시",
+            "ok": true
+          },
+          {
+            "step": "T7 status 게시함 · 방금",
+            "ok": true
+          },
+          {
+            "step": "T7 cursor on 업무에서 보기",
+            "ok": true
+          },
+          {
+            "step": "T7 back on 업무 내용",
+            "ok": true
+          },
+          {
+            "step": "T7 mark 게시",
+            "ok": true
+          },
+          {
+            "step": "T7 게시 내림 in ⋯",
+            "ok": true
+          },
+          {
+            "step": "T7 B work list has it after 게시",
+            "ok": true
+          },
+          {
+            "step": "T9 line says unpublished changes",
+            "ok": true
+          },
+          {
+            "step": "T9 save did not publish",
+            "ok": true
+          },
+          {
+            "step": "T9 바뀜 on the job with the new item",
+            "ok": true
+          },
+          {
+            "step": "real start after a draft save elsewhere: no error",
+            "ok": true
+          },
+          {
+            "step": "one real run open beside the tries",
+            "ok": true
+          },
+          {
+            "step": "GET lists no try",
+            "ok": true
+          },
+          {
+            "step": "unpublish: cursor on the ⋯ summary",
+            "ok": true
+          },
+          {
+            "step": "unpublish: line EMS",
+            "ok": true
+          }
+        ]
+      },
+      "page_exceptions": [
+        [],
+        []
+      ],
+      "confluence_calls": [
+        "/rest/api/content/123456789",
+        "/rest/api/content/99999",
+        "/rest/api/content/123456789",
+        "/rest/api/content/123456789"
+      ],
+      "captures": [
+        {
+          "file": "A-T3-1366.png",
+          "sha256": "c8414d3f388801d64800f1c8ce5f235d60e5bf806ecd0211b6a7bc40898ea30e"
+        },
+        {
+          "file": "A-T5-1366.png",
+          "sha256": "54ff912180b8dd05e2e25818c74678f8973d813d3f58d8de225a23c276db4ab0"
+        },
+        {
+          "file": "A-T10-1366.png",
+          "sha256": "65512650567ebb976dc888525c2c871980500e8a9e58ab92107a1096a6192cce"
+        },
+        {
+          "file": "A-T11-1366.png",
+          "sha256": "dff03b336f03effe1771031b6ab5db0199042ef40fb8540905f72f68c6f14725"
+        },
+        {
+          "file": "B-T8-menu-1366.png",
+          "sha256": "0f1ded4e17f538bfc924844b34f4911b5204ea1a18f4473647df20d58e88d737"
+        }
+      ]
+    }
+  }
+}

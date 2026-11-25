@@ -1086,7 +1086,8 @@ async def select_chat_work_tools(request, user, metadata, tool_ids, form_data, *
             return ["ees_workflow"]
         with service._db() as db:
             if reference.get("run_id"):
-                row = service._work_run(db, actor, groups, reference["run_id"])
+                # A chat has no window key and a try is not work: never a chat context.
+                row = service._work_real_run(db, actor, groups, reference["run_id"])
                 if row["workflow_id"] != reference.get("workflow_id"):
                     _fail("work_chat_context_changed")
                 definition = json.loads(row["snapshot"])["definition"]

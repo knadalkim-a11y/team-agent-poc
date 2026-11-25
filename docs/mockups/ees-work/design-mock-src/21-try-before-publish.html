@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src data:; font-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>게시 전에 시험해 보기 시안 2 · EES Workflow</title>
+<!--@mock:provenance-->
+<!--@mock:fonts-->
+<!--@mock:product-css-->
+<!-- Mock only: the guide strip above the frame. Not product UI; excluded from comparison. -->
+<style data-mock-frame>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#fff}
+body{display:flex;flex-direction:column}
+.mk-guide{flex:none;position:relative;z-index:90;font:400 13px/20px var(--ees-font-sans);color:var(--ees-text-primary);background:#fff;border-bottom:1px dashed var(--ees-text-tertiary);padding:8px 16px 10px}
+.mk-guide *{box-sizing:border-box}
+.mk-row{display:flex;align-items:center;gap:8px 16px;flex-wrap:wrap;min-width:0}
+.mk-tag{font-size:12px;line-height:18px;font-weight:500;padding:4px 8px;border:1px dashed var(--ees-text-secondary);border-radius:2px;white-space:nowrap}
+.mk-group{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0}
+.mk-guide button{font:inherit;font-size:13px;line-height:20px;font-weight:500;color:var(--ees-text-primary);background:#fff;border:1px solid var(--ees-line-control);border-radius:2px;min-height:28px;padding:0 10px;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.mk-guide button small{font-size:12px;font-weight:400;color:var(--ees-text-secondary)}
+.mk-guide button:hover{background:var(--ees-surface-hover)}
+.mk-guide button[aria-pressed="true"]{background:var(--ees-surface-selected);border-color:var(--ees-text-primary)}
+.mk-guide button:focus-visible{outline:2px solid var(--ees-text-primary);outline-offset:2px}
+.mk-guide [hidden]{display:none!important}
+.mk-guide .mk-fold{margin-left:auto;border-color:transparent}
+.mk-text{margin:6px 0 0;display:flex;flex-wrap:wrap;gap:2px 20px;min-width:0}
+.mk-text b{font-weight:400;font-size:12px;color:var(--ees-text-secondary);margin-right:6px}
+.mk-words{margin:8px 0 0;border-collapse:collapse;font-size:12px;line-height:18px}
+.mk-words th,.mk-words td{text-align:left;font-weight:400;padding:2px 20px 2px 0;vertical-align:top}
+.mk-words th{color:var(--ees-text-secondary)}
+.mk-guide[data-collapsed="true"] :is(.mk-hide,.mk-text,.mk-words){display:none}
+.mk-stage{flex:1;min-height:0;display:flex;position:relative}
+</style>
+<!-- Context only: the frame around the work panel (left menu shell, top bar, chat). The product draws these in its
+     Svelte shell; the mock copies their measured sizes and colours. The left menu content and the work panel use the
+     product's own markup and style sheet. -->
+<style data-mock-context="frame">
+.fu-shell{flex:1;min-width:0;display:grid;grid-template-columns:256px minmax(0,1fr) 560px;color:var(--ees-text-primary);font:400 14px/20px var(--ees-font-sans);letter-spacing:0}
+.fu-shell *{box-sizing:border-box}
+.fu-side{background:var(--ees-surface-sidebar);border-right:1px solid var(--ees-line-divider);display:flex;flex-direction:column;min-height:0}
+.fu-brand{height:48px;flex:none;display:flex;align-items:center;gap:8px;padding:0 10px;font-weight:700;font-size:15px}
+.fu-logo{width:22px;height:22px;border-radius:6px;background:var(--ees-brand-solid);color:#fff;font-size:12px;display:grid;place-items:center}
+.fu-side #ees-work-entry{flex:1;min-height:0;overflow:auto;padding:0 8px}
+.fu-user{flex:none;height:52px;display:flex;align-items:center;gap:10px;padding:0 14px;border-top:1px solid var(--ees-line-divider);font-size:14px}
+.fu-user i{width:22px;height:22px;border-radius:50%;background:var(--ees-line-control)}
+.fu-main{display:flex;flex-direction:column;min-width:0;min-height:0;background:#fff}
+.fu-top{height:48px;flex:none;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid var(--ees-line-divider)}
+.fu-top strong{font-size:15px;font-weight:700}
+.fu-top span{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 10px;border:1px solid var(--ees-line-control);border-radius:6px;font-size:13px}
+.fu-main #ees-work-panel{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;background:#fff}
+.fu-main #ees-work-panel>div{flex:1;min-height:0}
+.fu-chat{border-left:1px solid var(--ees-line-divider);display:flex;flex-direction:column;min-height:0;background:#fff}
+.fu-chat header{height:48px;flex:none;display:flex;align-items:center;padding:0 12px;font-size:14px}
+.fu-chat-empty{flex:1;display:flex;flex-direction:column;justify-content:center;padding:0 80px;font-size:30px;line-height:36px;color:var(--ees-text-disabled,#8c93a0)}
+.fu-chat-empty b{color:var(--ees-text-primary);font-weight:400}
+.fu-chat-input{margin:0 24px 16px;height:86px;border:1px solid var(--ees-text-primary);border-radius:8px;padding:16px;font-size:14px;color:var(--ees-text-secondary)}
+.fu-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);max-width:min(560px,calc(100% - 32px));padding:10px 16px;border-radius:4px;background:#fff;color:var(--ees-text-primary);border:1px solid var(--ees-line-control);font:400 13px/20px var(--ees-font-sans);box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:100}
+/* the product folds the left menu to its 56px rail below 1440 (eesCompact) and docks a 480px chat there; below 1200 the
+   chat closes. The rail itself is drawn by the product style sheet from data-compact. */
+@media (max-width:1439px){.fu-shell{grid-template-columns:56px minmax(0,1fr) 480px}.fu-brand{justify-content:center;padding:0}.fu-brand strong,.fu-user span{display:none}.fu-user{justify-content:center;padding:0}}
+.fu-side[data-compact=true] :is(.ew-recent,.ew-empty){display:none}
+@media (max-width:1199px){.fu-shell{grid-template-columns:56px minmax(0,1fr)}.fu-chat{display:none}}
+</style>
+<!-- New screen CSS for this proposal. Written with product tokens; to be reused when a version of this mock is
+     chosen for the product. -->
+<!-- Mock only: the switch between the two people of T8 and the comparison box of T9. Not product UI; excluded from
+     comparison. -->
+<style data-mock-context="people">
+.mk-sub{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:6px 0 0}
+.mk-sub b{font-weight:400;font-size:12px;color:var(--ees-text-secondary);margin-right:4px}
+.mk-peer{display:inline-flex;align-items:center;gap:6px;margin:0 0 12px;padding:2px 8px;border:1px dashed var(--ees-text-secondary);border-radius:2px;font:400 12px/18px var(--ees-font-sans);color:var(--ees-text-secondary)}
+.mk-compare{margin:28px 0 0;padding:12px 16px;border:1px dashed var(--ees-text-tertiary);border-radius:2px;font:400 13px/20px var(--ees-font-sans);color:var(--ees-text-primary);max-width:560px}
+.mk-compare h4{margin:0 0 6px;font-size:12px;line-height:18px;font-weight:500;color:var(--ees-text-secondary)}
+.mk-compare ol{margin:0;padding-left:20px}
+</style>
+<!-- New screen CSS for this proposal. Written with product tokens; to be reused when a version of this mock is
+     chosen for the product. -->
+<style data-new-screen="try-before-publish">
+/* 2판 · trying a procedure from where it is written, before it is published. The job rows are the product's rows
+   (main e494605); what is new is the try bar above them, '고치기' at the end of each row, the mark of a changed job,
+   the line that says the try went through, a failure said under the row, and the publish control in the footer. */
+/* the head keeps its place when the tab changes: the product's procedure-overview spacing (B2) also on the try tab */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=try]>.ew-author-scroll{padding-top:14px}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=try] .ew-author-breadcrumb{gap:6px;margin:0 0 10px;font-size:14px;line-height:22px}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=try] .ew-author-breadcrumb>button{min-height:22px;margin:0}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=try] .ew-author-definition-head>.ew-author-muted{margin-top:8px}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=try] .ew-author-tabs{margin:10px 0 12px}
+/* the try bar: what this is, that the team does not see it, which saved content it uses. It stays in view while the
+   rows scroll; the scroller keeps the 14px top padding above (B2), so the bar sticks 14px higher to meet its edge. */
+[data-ees-work-surface] #ees-work-panel .ew-try-bar{position:sticky;top:-14px;z-index:5;display:flex;align-items:center;flex-wrap:wrap;gap:6px 10px;min-height:40px;margin:0 0 20px;padding:6px 12px;border-radius:6px;background:var(--ees-status-attention-bg);font-size:13px;line-height:20px;color:var(--ees-text-primary)}
+[data-ees-work-surface] #ees-work-panel .ew-try-tag{display:inline-flex;align-items:center;min-height:20px;padding:0 6px;border-radius:4px;background:var(--ees-status-attention);color:var(--ees-text-inverse);font-size:12px;line-height:18px;font-weight:600}
+[data-ees-work-surface] #ees-work-panel .ew-try-bar small{font-size:12px;color:var(--ees-text-secondary)}
+[data-ees-work-surface] #ees-work-panel .ew-try-bar .ew-try-note{font-size:12px;font-weight:500;color:var(--ees-status-attention)}
+[data-ees-work-surface] #ees-work-panel .ew-try-bar .ew-text{min-height:24px;padding:0 6px;border-radius:4px;font-size:13px;font-weight:500;color:var(--ees-text-primary);text-decoration:underline;text-underline-offset:3px}
+[data-ees-work-surface] #ees-work-panel .ew-try-bar .ew-text:hover:not(:disabled){background:var(--ees-surface-panel-hover)}
+/* '고치기' at the end of a row: plain words, the size of the words */
+[data-ees-work-surface] #ees-work-panel .ew-try-fix{flex:none;min-height:28px;padding:0 6px;border:0;border-radius:4px;background:transparent;font:inherit;font-size:13px;color:var(--ees-text-secondary);cursor:pointer}
+[data-ees-work-surface] #ees-work-panel .ew-try-fix:hover{background:var(--ees-surface-panel-hover);color:var(--ees-text-primary)}
+[data-ees-work-surface] #ees-work-panel .ew-try-changed{display:inline-flex;flex:none;align-items:center;min-height:18px;margin-left:8px;padding:0 6px;border-radius:4px;background:var(--ees-status-attention-bg);color:var(--ees-status-attention);font-size:12px;line-height:18px;font-weight:500;vertical-align:1px}
+/* the try went through: one line under the last row */
+[data-ees-work-surface] #ees-work-panel .ew-try-done{display:flex;align-items:center;gap:8px;margin:12px 0 0;padding:0 16px;font-size:14px;line-height:20px;font-weight:600}
+/* a failure is said under its row with the one thing to do */
+[data-ees-work-surface] #ees-work-panel .ew-try-problem{display:grid;gap:2px;justify-items:start;margin:0 0 12px;padding:10px 12px;border-left:3px solid var(--ees-status-danger);border-radius:4px;background:var(--ees-status-danger-bg)}
+[data-ees-work-surface] #ees-work-panel .ew-try-problem strong{font-size:13px;line-height:20px;font-weight:600}
+[data-ees-work-surface] #ees-work-panel .ew-try-problem small{font-size:12px;line-height:18px;color:var(--ees-text-secondary)}
+[data-ees-work-surface] #ees-work-panel .ew-try-problem button{margin-top:6px;min-height:28px;padding:0 10px;border:1px solid var(--ees-line-control);border-radius:6px;background:var(--ees-surface-default);font:inherit;font-size:13px;font-weight:500;cursor:pointer}
+[data-ees-work-surface] #ees-work-panel .ew-try-problem button:hover{background:var(--ees-surface-hover)}
+/* 1920: what is asked and what came back sit side by side under a row; narrower, they stack */
+@container ew-try (min-width:760px){
+ [data-ees-work-surface] #ees-work-panel .ew-try-rows .ew-vd-tool-detail{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:32px;align-items:start}
+ [data-ees-work-surface] #ees-work-panel .ew-try-rows .ew-vd-tool-detail>.ew-try-problem{grid-column:1/-1}
+}
+[data-ees-work-surface] #ees-work-panel .ew-try-rows{position:relative;container:ew-try / inline-size}
+/* the title row: a state mark instead of the select; the footer holds 저장 and 게시 */
+[data-ees-work-surface] #ees-work-panel .ew-author-heading>.ew-author-tag{flex:none;align-self:center}
+[data-ees-work-surface] #ees-work-panel .ew-author footer small .ew-text{margin-left:8px;font-size:12px;font-weight:500;color:var(--ees-text-primary);text-decoration:underline;text-underline-offset:3px}
+/* the verdict menu of a row opens under its control */
+[data-ees-work-surface] #ees-work-panel .ew-try-menu{position:absolute;z-index:30;min-width:140px;padding:4px;border:1px solid var(--ees-line-control);border-radius:6px;background:var(--ees-surface-default);box-shadow:0 4px 12px #1118270f;display:grid}
+[data-ees-work-surface] #ees-work-panel .ew-try-menu button{display:flex;align-items:center;gap:8px;min-height:32px;padding:0 10px;border:0;border-radius:4px;background:transparent;font:inherit;font-size:13px;text-align:left;cursor:pointer}
+[data-ees-work-surface] #ees-work-panel .ew-try-menu button:hover{background:var(--ees-surface-hover)}
+</style>
+</head>
+<body>
+<div class="mk-guide" id="mock-guide" data-collapsed="false" role="region" aria-label="시안 안내 · 제품 화면 아님">
+ <div class="mk-row">
+  <strong class="mk-tag" id="mock-badge">시안 2 · 저장·실행 안 됨 · T1</strong>
+  <div class="mk-group mk-hide" role="group" aria-label="화면 바로 보기">
+   <button data-step="T1" aria-pressed="true">작성 화면 <small>T1</small></button>
+   <button data-step="T2" aria-pressed="false">시험 시작 <small>T2</small></button>
+   <button data-step="T3" aria-pressed="false">고칠 곳 찾음 <small>T3</small></button>
+   <button data-step="T4" aria-pressed="false">고치기 <small>T4</small></button>
+   <button data-step="T5" aria-pressed="false">다시 시험 <small>T5</small></button>
+   <button data-step="T6" aria-pressed="false">모두 적합 <small>T6</small></button>
+   <button data-step="T7" aria-pressed="false">게시한 뒤 <small>T7</small></button>
+   <button data-step="T8" aria-pressed="false">동료 화면 <small>T8</small></button>
+   <button data-step="T9" aria-pressed="false">게시된 절차 고치기 <small>T9</small></button>
+   <button data-step="T10" aria-pressed="false">연결 안 됨 <small>T10</small></button>
+   <button data-step="T11" aria-pressed="false">문서를 못 열 때 <small>T11</small></button>
+  </div>
+  <button class="mk-hide" id="mock-words-toggle" aria-expanded="false">바뀐 말</button>
+  <button class="mk-fold" id="mock-fold" aria-expanded="true">안내 접기</button>
+ </div>
+ <p class="mk-text" id="mock-step-text"></p>
+ <div class="mk-sub mk-hide" id="mock-peer" role="group" aria-label="동료 화면 고르기" hidden>
+  <b>같은 공용 계정, 다른 PC</b>
+  <button data-peer="home" aria-pressed="true">B의 업무 화면</button>
+  <button data-peer="trial" aria-pressed="false">B가 시험해 보면</button>
+  <button data-peer="saved" aria-pressed="false">B가 저장한 뒤 A의 시험</button>
+ </div>
+ <table class="mk-words" id="mock-words" hidden>
+  <thead><tr><th>구분</th><th>지금 제품</th><th>이 시안</th></tr></thead>
+  <tbody>
+   <tr><td>결정 필요</td><td>시험하려면 게시한 뒤 업무에서 ‘시작’(실제 진행 건이라 팀 화면과 실행 기록에 섞임)</td><td>작성 화면의 탭 ‘시험해 보기’ · 위 줄 ‘시험 · 팀에 안 보임 · 11:42 저장본’ · 시험은 그 창에만 있음</td></tr>
+   <tr><td>결정 필요</td><td>제목 옆 ‘게시 상태’ 선택칸 [미게시 ▾] · 바닥 ‘저장 · 게시’ / ‘저장 · 게시 내림’</td><td>제목 옆 표시 ‘미게시’ · ‘게시’, 바닥 ‘저장’ · ‘게시’, ‘게시 내림’은 ⋯ 안</td></tr>
+   <tr><td>결정 필요</td><td>게시된 절차는 ‘저장’할 때마다 새 판이 바로 게시됨</td><td>‘저장’은 팀에 안 감 · ‘EMS · 게시 v1 · 게시 안 한 변경 있음’ · ‘게시’를 눌러야 v2</td></tr>
+   <tr><td>결정 필요</td><td>(없음) 게시는 언제나 같은 무게</td><td>시험이 모두 적합이면 바닥 ‘게시’가 주 단추 · 시험 없이도 게시는 막지 않음</td></tr>
+   <tr><td>결정 필요</td><td>고친 뒤에도 열려 있는 옛 회차 → 진행 상세 → ‘진행 건 취소’(이유 입력)</td><td>시험 위 줄 ‘처음부터’(이유 없음) · 고쳐 저장하면 새 저장본으로 새 시험 · 바뀐 작업에 ‘바뀜’</td></tr>
+   <tr><td>제안</td><td>(없음) 다른 사람이 저장해도 알 수 없음</td><td>시험 위 줄 ‘새 저장본 있음 · 11:50’ · ‘새 저장본으로 처음부터’</td></tr>
+   <tr><td>결정 필요</td><td>업무 화면의 줄: ‘실행’ · ‘실행 필요’ · ‘판정 필요’ · ‘판정 근거’</td><td>시험에서도 같은 말과 같은 줄 그대로</td></tr>
+   <tr><td>결정 필요</td><td>도구 실패 때 화면 위 오류 줄(예: ‘상대 경로에는 해당 서비스의 허용 주소가 필요합니다.’)</td><td>시험에서는 그 줄 아래 ‘Confluence에 연결되어 있지 않아요’ · ‘연결 설정 열기’ / ‘이 페이지 ID의 문서를 열 수 없어요’ · ‘페이지 ID 고치기’</td></tr>
+   <tr><td>결정 필요</td><td>왼쪽 아래 ‘게시 전 1’ → 작성 화면</td><td>이 시안은 그대로 둠 · 시험이 작성 화면으로 오면 남길지 정해야 함</td></tr>
+   <tr><td>제안</td><td>(없음)</td><td>줄 끝 ‘고치기’ · 마지막 줄 아래 ‘모두 적합’ · 게시한 뒤 바닥 ‘게시함 · 방금’ · ‘업무에서 보기’</td></tr>
+  </tbody>
+ </table>
+</div>
+<div class="mk-stage" id="mock-stage">
+<div class="fu-shell" id="fu-shell">
+ <aside class="fu-side" aria-label="탐색" data-ees-source-sidebar data-compact="false">
+  <div class="fu-brand"><span class="fu-logo">E</span><strong>EES Workflow</strong></div>
+  <section id="ees-work-entry" data-ees-work data-work-mode="author" aria-label="업무 탐색"></section>
+  <div class="fu-user"><i></i><span id="fu-user">EMS 공용 계정</span></div>
+ </aside>
+ <main class="fu-main" data-ees-work-surface>
+  <header class="fu-top"><strong id="fu-area">업무 절차</strong><span><img class="ew-icon" src="v4/093d6.svg" alt="">대화</span></header>
+  <section id="ees-work-panel" tabindex="-1" data-ees-work data-ees-source-slot aria-label="업무 패널" data-ees-mode="author"></section>
+ </main>
+ <aside class="fu-chat" aria-label="업무 도우미 대화(맥락)">
+  <header>업무 도우미</header>
+  <div class="fu-chat-empty"><b>업무 도우미</b>무엇을 도와드릴까요?</div>
+  <div class="fu-chat-input">업무를 물어보거나, 필요한 작업을 요청하세요</div>
+ </aside>
+</div>
+</div>
+<div class="fu-toast" id="mock-toast" role="status" hidden></div>
+<script>
+(()=>{'use strict';
+const $=s=>document.querySelector(s),panel=$('#ees-work-panel'),entry=$('#ees-work-entry'),guide=$('#mock-guide');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+// Icon files are written out in full so the mock builder can embed each one.
+const ICON={
+ '4df0d':'v4/4df0d.svg','cece5':'v4/cece5.svg','40095':'v4/40095.svg','f34f3':'v4/f34f3.svg','ead50':'v4/ead50.svg',
+ 'e8a37':'v4/e8a37.svg','d1220':'v4/d1220.svg','126c7':'v4/126c7.svg','c325d':'v4/c325d.svg','093d6':'v4/093d6.svg',
+ 'f6bbc':'v4/f6bbc.svg','4fb09':'v4/4fb09.svg','9acc8':'v4/9acc8.svg','cb8e2':'v4/cb8e2.svg','a953c':'v4/a953c.svg',
+ '9ce50':'v4/9ce50.svg','e1049':'v4/e1049.svg','f0554':'v4/f0554.svg','69549':'v4/69549.svg','f17e6':'v4/f17e6.svg',
+ '9d8d5':'v4/9d8d5.svg','41b38':'v4/41b38.svg'
+};
+const I=n=>`<img class="ew-icon" src="${ICON[n]}" alt="" aria-hidden="true">`;
+// The product folds the left menu to its rail below 1440 (eesCompact).
+const compact=()=>window.innerWidth<1440;
+const PLAY='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4.5 2.75L11 7L4.5 11.25V2.75Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"/></svg>';
+const RETRY='<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M11.5 7A4.5 4.5 0 1 1 9.9 3.6M11.5 2.5V5H9" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+// What each mock screen shows and what differs from the product today (main e494605). Guide text only.
+const SCREENS={
+ T1:{when:'새 절차를 적고 11:42에 저장한 뒤 · 아직 게시 전',change:'탭에 ‘시험해 보기’가 생김. ‘게시 상태’ 선택칸 대신 제목 옆 ‘미게시’, 바닥에 ‘저장’과 ‘게시’'},
+ T2:{when:'‘시험해 보기’를 처음 눌렀을 때',change:'게시하지 않고 그 자리에서 작업 줄로 해 봄. 위 줄 ‘시험 · 팀에 안 보임 · 11:42 저장본’. 시작 단추 없이 체크하거나 실행하면 시작'},
+ T3:{when:'해 보다가 빠진 점검 항목을 알아챘을 때(압력계도 봐야 함)',change:'줄마다 ‘고치기’. ‘처음부터’는 시험에만 있고 이유를 묻지 않음'},
+ T4:{when:'줄의 ‘고치기’를 눌렀을 때',change:'그 작업의 편집 화면이 바로 열림(점검 작업이면 새 항목 칸에 커서). 고친 뒤 ‘시험해 보기’를 누르면 먼저 저장'},
+ T5:{when:'고쳐 저장하고(11:47) 시험으로 돌아왔을 때',change:'새 저장본으로 처음부터, 바뀐 작업에 ‘바뀜’. 이 창에서 넣었던 페이지 ID는 칸에 다시 채워 둠'},
+ T6:{when:'시험이 모두 적합으로 끝났을 때',change:'마지막 줄 아래 ‘모두 적합’. 바닥 ‘게시’가 주 단추가 됨(시험 없이도 게시는 막지 않음)'},
+ T7:{when:'‘게시’를 누른 뒤',change:'이때 처음 팀의 업무 목록(운영)에 올라감. 바닥 ‘게시함 · 방금’ · ‘업무에서 보기’, ⋯ 안에 ‘게시 내림’'},
+ T8:{when:'그동안 같은 공용 계정으로 다른 PC에서 담당자 B가 볼 때',change:'B의 업무 목록(운영)에는 게시 전 절차가 없음. 왼쪽 아래 ‘게시 전’ 바로가기는 지금 그대로 작성 화면으로 감(결정 필요 · 메뉴가 접히는 좁은 화면에서는 지금처럼 안 보임). B가 시험해 보면 B 창의 새 시험. B가 저장하면 A의 시험 위 줄에 ‘새 저장본 있음’'},
+ T9:{when:'이미 게시된 절차(v1, 팀이 쓰는 중)에 항목을 더해 저장했을 때',change:'‘저장’은 팀에 안 감. ‘EMS · 게시 v1 · 게시 안 한 변경 있음’. 시험해 보고 ‘게시’를 눌러야 v2'},
+ T10:{when:'시험에서 실행했는데 이 계정에 Confluence 토큰이 없을 때',change:'화면 위 오류 줄 대신 그 줄 아래 ‘Confluence에 연결되어 있지 않아요’ · ‘연결 설정 열기’'},
+ T11:{when:'시험에서 없는 문서의 페이지 ID를 넣었을 때',change:'그 줄 아래 ‘이 페이지 ID의 문서를 열 수 없어요’ · ‘페이지 ID 고치기’(칸으로 돌아감)'}
+};
+const PURPOSE0='매주 월요일 설비 상태를 확인하고 이상을 기록합니다.',STAGE='점검';
+const BASE=['펌프 누수 없음','밸브 개폐 정상','배관 진동 없음'];
+const DOC={title:'주간 설비 점검 기준 (2026)',type:'page'};
+// Each save gets a number; the clock text is only what the person reads.
+const later=t=>{const [h,m]=t.split(':').map(Number),total=h*60+m+5;return String(Math.floor(total/60)).padStart(2,'0')+':'+String(total%60).padStart(2,'0');};
+const newTrial=(at,rev,items,gen,changed=[],page='')=>({at,rev,items:[...items],gen,changed,started:false,checks:[],page,ranPage:'',pageError:'',doc:'idle',ranAt:'',verdict:''});
+const fresh=()=>({view:'editor',tab:'content',jobOpen:'',jobFrom:'content',name:'주간 설비 점검',purpose:PURPOSE0,
+ job1:'설비 세 곳 점검',guide1:'펌프, 밸브, 배관을 차례로 봅니다.',rule1:'',job2:'점검 기준 문서 찾기',guide2:'점검 기준 문서의 페이지 ID를 넣고, 찾은 문서가 맞는지 봅니다.',
+ items:[...BASE],newItem:'',savedAt:'11:42',rev:1,savedBy:'me',dirty:false,version:0,published:false,publishedItems:null,ahead:false,justPublished:false,
+ connected:true,menu:false,verdictMenu:false,trial:null,gens:0,lastPage:'',peer:'home',peerTrial:null});
+let S=fresh();
+// A try belongs to one saved content. A save in this window opens a new try of it; a save elsewhere is only announced.
+function ensureTrial(st){
+ if(st.trial&&(st.trial.rev===st.rev||st.savedBy!=='me'))return st.trial;
+ const prev=st.trial;st.gens+=1;
+ const changed=prev&&JSON.stringify(prev.items)!==JSON.stringify(st.items)?['checks']:[];
+ st.trial=newTrial(st.savedAt,st.rev,st.items,st.gens,changed,st.lastPage);return st.trial;
+}
+// Jumping from the guide prepares the state a person would have reached by then.
+const PRESET={
+ T1:s=>s,
+ T2:s=>{s.tab='try';ensureTrial(s);return s;},
+ T3:s=>{PRESET.T2(s);Object.assign(s.trial,{started:true,checks:[0,1,2],page:'123456789',ranPage:'123456789',doc:'found',ranAt:'11:44'});s.lastPage='123456789';return s;},
+ T4:s=>{PRESET.T3(s);Object.assign(s,{view:'job',tab:'content',jobOpen:'checks',jobFrom:'fix'});return s;},
+ T5:s=>{PRESET.T3(s);Object.assign(s,{items:[...BASE,'압력계 수치 정상'],savedAt:'11:47',rev:2,tab:'try'});ensureTrial(s);return s;},
+ T6:s=>{PRESET.T5(s);Object.assign(s.trial,{started:true,checks:[0,1,2,3],page:'123456789',ranPage:'123456789',doc:'found',ranAt:'11:49',verdict:'적합'});return s;},
+ T7:s=>{PRESET.T6(s);Object.assign(s,{version:1,published:true,publishedItems:[...s.items],justPublished:true,ahead:false,tab:'content'});return s;},
+ T8:s=>{PRESET.T3(s);Object.assign(s,{view:'peer',peer:'home'});return s;},
+ T9:s=>{PRESET.T7(s);Object.assign(s,{justPublished:false,items:[...s.items,'계기판 경고등 없음'],savedAt:'12:05',rev:3,ahead:true,tab:'content'});return s;},
+ T10:s=>{PRESET.T5(s);Object.assign(s,{connected:false});Object.assign(s.trial,{started:true,checks:[0,1,2,3],page:'123456789',ranPage:'123456789',doc:'notconnected',ranAt:'11:49'});return s;},
+ T11:s=>{PRESET.T5(s);Object.assign(s.trial,{started:true,checks:[0,1,2,3],page:'99999',ranPage:'99999',doc:'cannotopen',ranAt:'11:49'});return s;}
+};
+function toast(text){const t=$('#mock-toast');t.textContent=text;t.hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>{t.hidden=true;},2600);}
+const NOT_HERE='시안입니다. 이 단추는 이번 시안에서 다루지 않습니다.';
+const peerTry=()=>S.view==='peer'&&S.peer==='trial';
+// The try on screen: B's own try in B's window, otherwise this window's.
+const T=()=>peerTry()?S.peerTrial:S.trial;
+const rowDone=t=>t.checks.length===t.items.length;
+const docDone=t=>t.verdict==='적합';
+const allDone=t=>Boolean(t)&&rowDone(t)&&docDone(t);
+const canPublish=()=>!S.published||S.ahead||S.dirty;
+const newerSaved=()=>S.trial&&S.trial.rev!==S.rev&&S.savedBy!=='me';
+const tryPassed=()=>S.trial&&S.trial.rev===S.rev&&!S.dirty&&allDone(S.trial);
+
+// ---- left menu: the product's markup for 워크스페이스 and 업무 ----
+function scopeHTML(){return `<div class="ew-scope-wrap" data-collapsed="false"><div class="ew-scope-inner"><p class="ew-nav-caption">작업 위치</p><div class="ew-scope"><div class="ew-scope-field"><button type="button" data-scope-trigger="factory" data-none>${I('40095')}<small>공장</small><span>전체 공장</span>${I('ead50')}</button></div><div class="ew-scope-field"><button type="button" data-scope-trigger="system" data-none>${I('f34f3')}<small>시스템</small><span>EMS</span>${I('ead50')}</button></div></div></div></div>`;}
+function modesHTML(mode){return `<nav class="ew-mode" aria-label="작업 모드"><button data-mode="work" data-go-mode="work" aria-pressed="${mode==='work'}">${I('4df0d')}<span>업무</span></button> <button data-mode="author" data-go-mode="author" aria-pressed="${mode==='author'}">${I('cece5')}<span>워크스페이스</span></button></nav>`;}
+function entryHTML(mode){
+ if(mode==='author')return modesHTML('author')+scopeHTML()+`<nav class="ew-nav-links ew-procedure-link"><button class="ew-nav-button" data-go="list" aria-current="page">${I('e8a37')}<span>업무 절차</span></button></nav><section class="ew-nav-group ew-assets-group"><button class="ew-assets-toggle" aria-expanded="${!compact()}" data-none><span>도구·자료</span>${I('ead50')}</button><div class="ew-category-body" aria-hidden="${compact()}"${compact()?' inert':''}><nav class="ew-nav-links ew-category-items"><button class="ew-nav-button" data-none>${I('d1220')}<span>도구</span></button></nav></div></section><p class="ew-nav-caption">최근 편집</p><nav class="ew-workflows ew-recent"><button data-go="editor">${I('126c7')}<span>${esc(S.name)}</span></button><button data-none>${I('126c7')}<span>Confluence 문서 확인 가이드</span></button></nav>`;
+ const category=(key,icon,label,body)=>`<div class="ew-category" data-category="${key}"><button class="ew-category-toggle" aria-expanded="${!compact()}" data-none>${I(icon)}<span>${label}</span>${I('ead50')}</button><div class="ew-category-body" aria-hidden="${compact()}"${compact()?' inert':''}><div class="ew-category-items">${body}</div></div></div>`;
+ const ops=(S.published?`<button data-go="overview"${S.view==='overview'?' aria-current="page"':''}><span>${esc(S.name)}</span></button>`:'')+`<button data-none><span>Confluence 문서 확인 가이드</span></button>`;
+ // Kept as main e494605 has it (decision 3): a saved procedure that is not published is reached from here; it opens the editor.
+ const pending=S.published||compact()?'':`<button class="ew-pending" data-go="pending"><span>게시 전</span><b>1</b></button>`;
+ return modesHTML('work')+scopeHTML()+`<nav class="ew-nav-links"><button data-none>${I('c325d')}<span>실행 기록</span></button><button data-none>${I('093d6')}<span>대화 기록</span></button></nav><p class="ew-nav-caption">업무</p><nav class="ew-workflows">${category('ops','126c7','운영',ops)}${category('setup','f6bbc','셋업','')}${category('incident','4fb09','장애대응','')}${pending}</nav>`;
+}
+
+// ---- the editor: the product's head with a state mark, the four tabs, the product's footer ----
+function headHTML(peer){
+ const mark=`<span class="ew-author-tag" data-state="${S.published?'published':'draft'}">${S.published?'게시':'미게시'}</span>`;
+ const menu=`<details class="ew-procedure-menu"${S.menu?' open':''}><summary aria-label="업무 절차 메뉴" data-menu>${I('cb8e2')}</summary><div><button type="button" class="ew-author-link" data-none>업무 절차 정보·분류 수정</button><button type="button" class="ew-author-link" data-none>다른 이름으로 저장</button><button type="button" class="ew-author-link" data-none>내용 확인</button>${S.published?'<button type="button" class="ew-author-link" data-unpublish>게시 내림</button>':''}</div></details>`;
+ const line='EMS'+(S.published?` · 게시 v${S.version}`+(S.ahead?' · 게시 안 한 변경 있음':''):'');
+ const tab=(key,label,extra='')=>`<button type="button" role="tab" data-tab="${key}" aria-selected="${S.tab===key}" tabindex="${S.tab===key?0:-1}"${extra}>${label}</button>`;
+ return `<div class="ew-author-definition-head"><div class="ew-author-heading"><h2>${esc(S.name)}</h2>${mark}${menu}</div><p class="ew-author-muted" id="ew-try-version">${line}</p></div><nav class="ew-author-tabs" role="tablist" aria-label="업무 절차 편집">${tab('content','업무 내용')}${tab('try','시험해 보기')}${tab('rules','판정 단어',' data-none')}${tab('history','게시 기록',' data-none')}</nav>`;
+}
+function footHTML(){
+ const status=S.dirty?'저장하지 않은 변경 있음':S.justPublished?`게시함 · 방금<button type="button" class="ew-text" data-go="overview">업무에서 보기</button>`:'저장됨';
+ // One main button at a time: 저장 while there is something to save, 게시 after a try of this saved content went through.
+ const publishMain=!S.dirty&&tryPassed()&&canPublish();
+ return `<footer><small data-author-status data-dirty="${S.dirty}" tabindex="-1">${status}</small><button type="button" id="ew-try-save"${S.dirty?' class="ew-primary"':' disabled'}>저장</button><button type="button" id="ew-try-publish"${publishMain?' class="ew-primary"':''}${canPublish()?'':' disabled'}>게시</button></footer>`;
+}
+function shellHTML(inner,detail=false){
+ return `<div id="ees-work-authoring-panel" class="ew-scroll"><section class="ew-author " id="ees-work-designer" data-ees-work aria-label="업무 절차 작성" data-author-tab="${detail?'content':S.tab}" data-author-detail="${detail}"><div class="ew-author-scroll">${detail?'':`<nav class="ew-author-breadcrumb" aria-label="현재 위치"><button type="button" data-go="list" class="ew-author-back">${I('9acc8')}업무 절차 목록</button></nav>`}${headHTML()}${inner}</div>${footHTML()}</section></div>`;
+}
+function contentHTML(){
+ const job=(key,name,meta)=>`<div class="ew-job-row"><button type="button" class="ew-author-job" data-open-job="${key}"><span class="ew-job-row-label"><span>${esc(name)}</span><small class="ew-job-meta">${meta}</small></span>${I('f0554')}</button><button type="button" class="ew-job-menu-button" aria-label="${esc(name)} 메뉴" data-none>${I('a953c')}</button></div>`;
+ return `<section class="ew-work-content"><section class="ew-content-overview"><form class="ew-procedure-info" id="ew-procedure-info"><label>업무 절차 이름<input name="overview_name" value="${esc(S.name)}" maxlength="160" data-field="name"></label><label class="ew-procedure-description">업무 목적<textarea name="overview_description" rows="2" data-field="purpose">${esc(S.purpose)}</textarea></label><button type="button" class="ew-author-link" data-none>분류·범위</button></form></section><div class="ew-content-heading"><h3>단계와 작업</h3><small>1개 단계</small><button type="button" class="ew-help-trigger" aria-label="단계와 작업 도움말" data-none>${I('41b38')}</button></div><div class="ew-stage-list"><section class="ew-content-stage"><div class="ew-stage-head"><button type="button" class="ew-stage-toggle" aria-expanded="true" data-none><span class="ew-author-stage-number">1</span><span class="ew-stage-name">${STAGE}</span><small class="ew-stage-count">2개 작업</small>${I('e1049')}</button><button type="button" class="ew-job-menu-button ew-stage-menu-button" aria-label="${STAGE} 메뉴" data-none>${I('a953c')}</button></div><div class="ew-stage-body"><div class="ew-stage-description"><p>설명 없음</p><button type="button" class="ew-author-link" data-none>단계 정보 수정</button></div><div class="ew-stage-jobs">${job('checks',S.job1,`사람이 확인 · 항목 ${S.items.length}개`)}${job('doc',S.job2,'도구로 처리 · 사내 Confluence')}<button type="button" class="ew-author-link" data-author-action="add_job" data-none>${I('9ce50')}작업 추가</button></div></div></section></div><button type="button" class="ew-author-link ew-stage-add" data-author-action="add_stage" data-none>${I('9ce50')}단계 추가</button><section class="ew-schedule-section ew-content-start-inputs"><div class="ew-author-heading ew-start-row"><h3>시작할 때 물어볼 것</h3><small>0개</small><button type="button" class="ew-author-link" aria-label="시작할 때 물어볼 것 추가" data-none>＋ 추가</button></div></section></section>`;
+}
+// The job's own screen: the product's checklist job (main e494605 markup).
+function jobHTML(){
+ const rows=S.items.map((text,i)=>`<li><span aria-hidden="true">${i+1}</span><input id="ew-check-item-${i}" value="${esc(text)}" maxlength="160" autocomplete="off" aria-label="확인 항목 ${i+1}" data-item="${i}"><button type="button" aria-label="확인 항목 ${i+1} 삭제" data-none>×</button></li>`).join('')
+  +`<li><span aria-hidden="true">${S.items.length+1}</span><input id="ew-check-item-new" value="${esc(S.newItem)}" maxlength="160" autocomplete="off" aria-label="새 확인 항목" placeholder="항목 추가" data-new-item><i aria-hidden="true"></i></li>`;
+ return `<section class="ew-job-detail"><header class="ew-job-detail-header"><button type="button" data-go="editor" data-back="checks" class="ew-author-back">${I('9acc8')}단계와 작업</button><span>/ 1 ${STAGE}</span><button type="button" class="ew-job-menu-button" aria-label="${esc(S.job1)} 메뉴" data-none>${I('cb8e2')}</button></header><form id="ew-author-node"><section class="ew-job-card ew-job-main" data-job-mode="human"><div class="ew-job-col"><label><span class="ew-job-field-label">작업 이름</span><input name="name" value="${esc(S.job1)}" maxlength="160" data-field="job1"></label><fieldset class="ew-job-method" role="radiogroup"><legend>수행 방법</legend><div><label><input type="radio" name="mode" value="human" checked><span>사람이 확인</span></label><label><input type="radio" name="mode" value="tool" data-none-change><span>도구로 처리</span></label></div></fieldset><label>무엇을 확인하나요<textarea name="job_guidance" placeholder="예: 설비 외관에 누수나 파손이 없는지 봅니다." data-field="guide1">${esc(S.guide1)}</textarea></label></div><div class="ew-job-col"><fieldset class="ew-job-method" role="radiogroup"><legend>확인 방식</legend><div><label><input type="radio" name="result_block" value="human_confirm" data-none-change><span>한 번에 확인</span></label><label><input type="radio" name="result_block" value="checklist" checked><span>항목마다 체크</span></label></div></fieldset><div class="ew-check-items"><span class="ew-job-field-label">확인 항목</span><ol>${rows}</ol></div><details class="ew-confirm-more"><summary>다른 방식</summary><div class="ew-job-method"><div><label><input type="radio" name="result_block" value="item_verdict" data-none-change><span>항목별 판정</span></label><label><input type="radio" name="result_block" value="values" data-none-change><span>사람이 정하는 값</span></label></div></div></details><label>완료 기준<textarea name="completion_rule" rows="1" class="ew-job-completion-rule" placeholder="예: 이상이 없으면 완료합니다." data-field="rule1">${esc(S.rule1)}</textarea></label><details class="ew-job-assignment"><summary>담당자 설정</summary><label>담당자 · 선택<select name="assignee"><option value="" selected>담당자 미지정</option><option value="account">EMS 공용 계정</option></select></label></details></div></section></form></section>`;
+}
+function docJobHTML(){
+ return `<section class="ew-job-detail"><header class="ew-job-detail-header"><button type="button" data-go="editor" data-back="doc" class="ew-author-back">${I('9acc8')}단계와 작업</button><span>/ 1 ${STAGE}</span><button type="button" class="ew-job-menu-button" aria-label="${esc(S.job2)} 메뉴" data-none>${I('cb8e2')}</button></header><form id="ew-author-node"><section class="ew-job-card ew-job-main" data-job-mode="tool"><label><span class="ew-job-field-label">작업 이름</span><input name="name" value="${esc(S.job2)}" maxlength="160" data-field="job2"></label><fieldset class="ew-job-method" role="radiogroup"><legend>수행 방법</legend><div><label><input type="radio" name="mode" value="human" data-none-change><span>사람이 확인</span></label><label><input type="radio" name="mode" value="tool" checked><span>도구로 처리</span></label></div></fieldset><section class="ew-job-tool-summary"><label>연결된 도구</label><div class="ew-api-job-binding"><div>페이지 ID · 실행 시 입력</div><small>받는 결과 · 문서 제목, 페이지 ID, 문서 유형</small><small>사내 Confluence　GET　/{id}</small></div><button type="button" class="ew-author-link" id="ew-try-tool-change" data-none>${I('cb8e2')}도구 변경</button></section><fieldset class="ew-job-method ew-job-result-confirmation" role="radiogroup" aria-describedby="ew-job-result-hint"><legend>결과 확인</legend><div><label><input type="radio" name="result_confirmation" value="manual" checked><span>담당자가 확인</span></label><label><input type="radio" name="result_confirmation" value="automatic" disabled><span>자동으로 완료</span></label></div><p class="ew-author-muted" id="ew-job-result-hint">담당자가 도구의 결과를 확인하면 완료됩니다.</p></fieldset><label>담당자 확인 기준<textarea name="completion_rule"></textarea></label><label>작업 안내 · 선택<textarea name="job_guidance" data-field="guide2">${esc(S.guide2)}</textarea></label><details class="ew-job-assignment"><summary>담당자 설정</summary><label>담당자 · 선택<select name="assignee"><option value="" selected>담당자 미지정</option><option value="account">EMS 공용 계정</option></select></label></details></section></form></section>`;
+}
+
+// ---- the try: the product's rows (main e494605) with what is new around them ----
+const stateText=text=>`<span class="ew-vd-state" data-decision-status><span>${text}</span></span>`;
+const finalText=word=>`<span class="ew-vd-final" data-decision-status><i class="ew-vd-dot" data-verdict="${word==='적합'?'ok':word==='미흡'?'bad':'none'}"></i><span>${esc(word)}</span></span>`;
+const fixButton=(key,name)=>`<button type="button" class="ew-try-fix" data-fix="${key}" aria-label="${esc(name)} 고치기">고치기</button>`;
+const changedMark=(t,key)=>t.changed.includes(key)&&!(key==='checks'?t.checks.length:t.doc!=='idle')?'<span class="ew-try-changed">바뀜</span>':'';
+function checksRow(t,peer){
+ const name=S.job1,done=rowDone(t);
+ const items=t.items.map((text,i)=>t.checks.includes(i)?`<li data-done="true"><span class="ew-vd-check-done" role="img" aria-label="확인함">${I('9d8d5')}</span><span>${esc(text)}</span><small>방금</small></li>`:`<li data-done="false"><label><input type="checkbox" data-check="${i}"><span>${esc(text)}</span></label></li>`).join('');
+ const meta=`<div class="ew-vd-decision">${done?finalText('적합'):`<span class="ew-vd-count" data-decision-status>${t.checks.length} / ${t.items.length}</span>`}</div>${peer?'':fixButton('checks',name)}`;
+ return `<section class="ew-vd-entry ew-center-task-row" data-job="checks" data-handler="human" data-expanded="false"><div class="ew-vd-item"><span class="ew-center-task-number" aria-hidden="true">1</span><div class="ew-vd-item-top"><button type="button" class="ew-vd-name" data-none>${esc(name)}${changedMark(t,'checks')}</button><small class="ew-center-task-description"><b data-decision-actor>직접 판정</b> · ${esc(S.guide1)}</small></div><div class="ew-vd-item-meta">${meta}</div></div><ol class="ew-vd-checks" aria-label="${esc(name)} 확인 항목">${items}</ol></section>`;
+}
+// The state word of the second row, also used for the counts above the rows.
+function docState(t){
+ if(t.verdict)return t.verdict;
+ return {running:'실행 중',found:'판정 필요',notconnected:'연결 안 됨',cannotopen:'열 수 없음'}[t.doc]||'실행 필요';
+}
+function docRow(t,peer){
+ const name=S.job2,running=t.doc==='running',ran=t.doc==='found',failed=['notconnected','cannotopen'].includes(t.doc),again=Boolean(t.ranAt),done=docDone(t);
+ const label=running?'실행 중':again?'다시 실행':'실행';
+ const run=done?'':`<button type="button" class="ew-vd-run" data-run="doc"${running?' aria-disabled="true"':''} aria-label="${esc(name)} ${label}">${again?RETRY:PLAY}<span>${label}</span></button>`;
+ const pick=word=>`<button type="button" class="ew-vd-pick" data-pick="doc" aria-haspopup="menu" aria-expanded="${S.verdictMenu}" aria-label="${esc(name)} ${word}"><span>${word}</span>${I('f17e6')}</button>`;
+ // 적합 closes the row as the product does; 미흡 and 판단 불가 stay on the control so they can be changed.
+ const decision=done?finalText('적합'):t.verdict?pick(t.verdict):running?stateText('실행 중'):ran?pick('판정 필요'):stateText(docState(t));
+ const asked=`<section><h4>입력</h4><dl class="ew-vd-tool-values ew-vd-ask-values"><dt><label for="ew-try-page">페이지 ID</label></dt><dd><input id="ew-try-page" type="text" inputmode="numeric" autocomplete="off" placeholder="예: 123456789" value="${esc(t.page)}"${t.pageError?' aria-invalid="true" aria-describedby="ew-try-page-error"':''}${running?' readonly':''}>${t.pageError?`<small class="ew-vd-ask-error" id="ew-try-page-error" role="alert">${esc(t.pageError)}</small>`:''}</dd></dl></section>`;
+ const came=ran?`<section><h4>결과<span>1차 · ${esc(t.ranAt)}</span></h4><dl class="ew-vd-tool-values"><dt>문서 제목</dt><dd>${esc(DOC.title)}</dd><dt>페이지 ID</dt><dd>${esc(t.ranPage)}</dd><dt>문서 유형</dt><dd>${DOC.type}</dd></dl></section>`:'';
+ const problem=t.doc==='notconnected'?`<div class="ew-try-problem" role="alert"><strong>Confluence에 연결되어 있지 않아요</strong><button type="button" data-connect>연결 설정 열기</button></div>`:t.doc==='cannotopen'?`<div class="ew-try-problem" role="alert"><strong>이 페이지 ID의 문서를 열 수 없어요</strong><small>없는 문서이거나 볼 권한이 없어요.</small><button type="button" data-refix>페이지 ID 고치기</button></div>`:'';
+ const under=done?'':`<div class="ew-vd-under"><div class="ew-vd-evidence ew-vd-job-values"><div class="ew-vd-tool-detail">${problem}${asked}${came}</div></div></div>`;
+ const meta=`${run}<div class="ew-vd-decision">${decision}${done?`<button type="button" class="ew-vd-evidence-toggle" aria-expanded="false" data-none>판정 근거${I('f17e6')}</button>`:''}</div>${peer?'':fixButton('doc',name)}`;
+ return `<section class="ew-vd-entry ew-center-task-row" data-job="doc" data-handler="human" data-expanded="${!done}"><div class="ew-vd-item"><span class="ew-center-task-number" aria-hidden="true">2</span><div class="ew-vd-item-top"><button type="button" class="ew-vd-name" data-none>${esc(name)}${changedMark(t,'doc')}</button><small class="ew-center-task-description"><b data-decision-actor>직접 판정</b> · ${esc(S.guide2)}</small></div><div class="ew-vd-item-meta">${meta}</div></div>${under}</section>`;
+}
+function menuHTML(t){
+ if(!S.verdictMenu)return '';
+ return `<div class="ew-try-menu" id="ew-try-menu" role="menu" aria-label="판정 고르기">${[['적합','ok'],['미흡','bad'],['판단 불가','none']].map(([word,tone])=>`<button type="button" role="menuitemradio" aria-checked="${t.verdict===word}" tabindex="-1" data-choose="${word}"><i class="ew-vd-dot" data-verdict="${tone}"></i><span>${word}</span></button>`).join('')}</div>`;
+}
+function tryHTML(t,{peer=false}={}){
+ const done=(rowDone(t)?1:0)+(docDone(t)?1:0);
+ const newer=!peer&&newerSaved();
+ const reset=t.started||newer?`<button type="button" class="ew-text" data-reset${t.doc==='running'?' aria-disabled="true"':''}>${newer?'새 저장본으로 처음부터':'처음부터'}</button>`:'';
+ const bar=`<div class="ew-try-bar" id="ew-try-bar" role="status"><span class="ew-try-tag">시험</span><span>팀에 안 보임</span><small>${esc(t.at)} 저장본</small>${newer?`<span class="ew-try-note">새 저장본 있음 · ${esc(S.savedAt)}</span>`:''}${reset}</div>`;
+ // Counts in the product's words, one per state; a row that is decided counts under its verdict.
+ const tally=new Map();const add=(word,tone)=>{const v=tally.get(word)||{n:0,tone};v.n+=1;tally.set(word,v);};
+ if(rowDone(t))add('적합','ok');else add('확인 필요','none');
+ const word=docState(t);add(word,word==='적합'?'ok':word==='미흡'?'bad':'none');
+ const counts=[...tally].map(([w,{n,tone}])=>`<span><i class="ew-vd-dot" data-verdict="${tone}"></i>${w} ${n}</span>`).join('');
+ const heading=`<div class="ew-center-task-heading ew-stage-summary"><h3>1 ${STAGE}</h3><span class="ew-stage-completed">${done} / 2 완료</span><div class="ew-center-counts">${counts}</div></div>`;
+ const tail=allDone(t)?`<p class="ew-try-done" role="status" tabindex="-1"><i class="ew-vd-dot" data-verdict="ok"></i>모두 적합</p>`:'';
+ return `<div class="ew-vd ew-try-rows" id="ew-try" data-trial="${esc(t.at)}">${bar}${heading}<div class="ew-vd-body ew-center-task-list">${checksRow(t,peer)}${docRow(t,peer)}</div>${tail}${menuHTML(t)}</div>`;
+}
+function compareHTML(){
+ // Mock only, T9: what B sees at the same moment in 업무 (the published version, without the new item).
+ return `<aside class="mk-compare" data-mock-context="compare" aria-label="비교 · 제품 화면 아님"><h4>비교 · 같은 시각 B의 업무 화면(게시 v${S.version}, 팀이 쓰는 판)</h4><ol>${(S.publishedItems||[]).map(text=>`<li>${esc(text)}</li>`).join('')}</ol></aside>`;
+}
+
+// ---- 업무 · the published procedure (product markup) and the first screen ----
+function overviewHTML(){
+ return `<div id="ees-work-content" class="ew-scroll ew-center-content ew-centered-overview"><section class="ew-operation-overview"><div class="ew-overview-head"><div><h2 tabindex="-1" id="ew-try-overview-title">${esc(S.name)}</h2><p class="ew-overview-purpose">${esc(S.purpose)}</p></div><button type="button" class="ew-secondary ew-stage-run-button" aria-label="${esc(S.name)} 시작" data-none>${PLAY}<span>시작</span></button></div><dl class="ew-operation-context"><dt>적용 대상</dt><dd>전체 공장 · EMS</dd></dl><section class="ew-operation-stages"><h3>업무 단계</h3><button type="button" class="ew-operation-stage" data-none><span><strong>${STAGE}</strong><small>작업 2개</small></span>${I('69549')}</button></section></section></div>`;
+}
+function workHomeHTML(note=''){
+ return `<div id="ees-work-content" class="ew-scroll ew-center-content">${note}<div class="ew-empty ew-work-home"><h3>업무 절차를 선택해 주세요</h3><p>공장·시스템을 선택한 뒤 왼쪽 업무 목록에서 절차를 여세요.</p></div></div>`;
+}
+const peerNote=who=>`<p class="mk-peer" data-mock-context="peer">${who}</p>`;
+
+function screenId(){
+ if(S.view==='peer')return 'T8';
+ if(S.view==='job')return S.jobFrom==='fix'?'T4':'T1';
+ if(S.view==='overview'||S.view==='workhome')return S.published?'T7':'T1';
+ if(S.justPublished)return 'T7';
+ const t=S.trial;
+ if(S.tab==='try'&&t&&t.doc==='notconnected')return 'T10';
+ if(S.tab==='try'&&t&&t.doc==='cannotopen')return 'T11';
+ if(S.published)return 'T9';
+ if(S.tab==='content')return 'T1';
+ if(!t)return 'T2';
+ if(allDone(t))return 'T6';
+ if(t.gen>1)return 'T5';
+ return rowDone(t)&&(t.doc==='found'||t.verdict)?'T3':'T2';
+}
+function render(){
+ if(S.view==='editor'&&S.tab==='try')ensureTrial(S);
+ const id=screenId();
+ const peerView=S.view==='peer';
+ const mode=['overview','workhome'].includes(S.view)||(peerView&&S.peer==='home')?'work':'author';
+ panel.dataset.eesMode=mode;entry.dataset.workMode=mode;entry.closest('[data-ees-source-sidebar]').dataset.compact=String(compact());
+ // The try tab draws the work rows inside the editor, so the panel carries the work rows' scope there too.
+ panel.className=mode==='work'||(S.view==='editor'&&S.tab==='try')||(peerView&&['trial','saved'].includes(S.peer))?'ew-vd':'';
+ entry.innerHTML=entryHTML(mode);
+ $('#fu-area').textContent=mode==='work'?'업무':'업무 절차';
+ if(peerView){
+  if(S.peer==='home')panel.innerHTML=workHomeHTML(peerNote('B의 창 · 같은 공용 계정'));
+  else if(S.peer==='editor'){const tab=S.tab;S.tab='content';panel.innerHTML=shellHTML(peerNote('B의 창 · 같은 공용 계정')+contentHTML());S.tab=tab;}
+  else if(S.peer==='trial'){const tab=S.tab;S.tab='try';S.peerTrial=S.peerTrial||newTrial(S.savedAt,S.rev,S.items,1);panel.innerHTML=shellHTML(peerNote('B의 창 · 같은 공용 계정')+tryHTML(S.peerTrial,{peer:true}));S.tab=tab;}
+  else {const tab=S.tab;S.tab='try';panel.innerHTML=shellHTML(peerNote('A의 창 · B가 11:50에 저장한 뒤')+tryHTML(S.trial));S.tab=tab;}
+ }else if(S.view==='overview')panel.innerHTML=overviewHTML();
+ else if(S.view==='workhome')panel.innerHTML=workHomeHTML();
+ else if(S.view==='job')panel.innerHTML=shellHTML(S.jobOpen==='doc'?docJobHTML():jobHTML(),true);
+ else panel.innerHTML=shellHTML(S.tab==='try'?tryHTML(S.trial)+(S.published&&S.ahead?compareHTML():''):contentHTML());
+ placeMenu();
+ $('#mock-badge').textContent='시안 2 · 저장·실행 안 됨 · '+id+(peerView?(S.peer==='saved'?' · A의 창':' · B의 창'):'');
+ for(const button of guide.querySelectorAll('[data-step]'))button.setAttribute('aria-pressed',String(button.dataset.step===id));
+ const sub=$('#mock-peer');sub.hidden=id!=='T8';for(const button of sub.querySelectorAll('[data-peer]'))button.setAttribute('aria-pressed',String(button.dataset.peer===S.peer));
+ const info=SCREENS[id];$('#mock-step-text').innerHTML=`<span><b>언제</b>${esc(info.when)}</span><span><b>바뀐 점</b>${esc(info.change)}</span>`;
+}
+// The verdict menu opens under its control, in the frame of the rows.
+function placeMenu(){
+ const menu=$('#ew-try-menu'),anchor=panel.querySelector('[data-pick]'),frame=panel.querySelector('#ew-try');
+ if(!menu||!anchor||!frame)return;
+ const box=anchor.getBoundingClientRect(),base=frame.getBoundingClientRect();
+ menu.style.left=Math.max(0,box.right-base.left-140)+'px';menu.style.top=(box.bottom-base.top+4)+'px';
+}
+function focus(selector,select=false){const e=panel.querySelector(selector)||entry.querySelector(selector);if(e){e.focus();if(select&&e.select)e.select();return true;}return false;}
+function focusTryNext(){
+ const t=T();
+ if(!rowDone(t))return focus('#ew-try [data-check]');
+ if(!docDone(t)){
+  if(t.doc==='found'||t.verdict)return focus('[data-pick=doc]');
+  if(!t.page)return focus('#ew-try-page');
+  return focus('[data-run=doc]');
+ }
+ if(!peerTry()&&!$('#ew-try-publish').disabled)return focus('#ew-try-publish');
+ return focus('.ew-try-done');
+}
+// Saving keeps what was typed; a published procedure is not published by saving.
+function save(){
+ if(!S.dirty)return;
+ if(S.newItem.trim()){S.items=[...S.items,S.newItem.trim()];S.newItem='';}
+ S.items=S.items.map(x=>x.trim()).filter(Boolean);
+ S.savedAt=later(S.savedAt);S.rev+=1;S.savedBy='me';S.dirty=false;S.justPublished=false;
+ if(S.published)S.ahead=true;
+}
+function openTry(){
+ save();S.view='editor';S.tab='try';S.menu=false;S.verdictMenu=false;ensureTrial(S);render();
+ if(!S.trial.started)focus('#ew-try [data-check]');else focusTryNext();
+}
+function markDirty(){
+ if(S.dirty)return;S.dirty=true;S.justPublished=false;
+ const small=panel.querySelector('[data-author-status]');if(small){small.textContent='저장하지 않은 변경 있음';small.dataset.dirty='true';}
+ const saveButton=$('#ew-try-save');if(saveButton){saveButton.disabled=false;saveButton.classList.add('ew-primary');}
+ const publish=$('#ew-try-publish');if(publish){publish.disabled=false;publish.classList.remove('ew-primary');}
+}
+function runDoc(){
+ const t=T(),field=$('#ew-try-page');
+ if(t.doc==='running')return;
+ t.page=(field?.value||'').trim();
+ if(!t.page){t.pageError='페이지 ID를 넣어 주세요';render();focus('#ew-try-page');return;}
+ if(!/^[0-9]+$/.test(t.page)){t.pageError='숫자만 넣어 주세요';render();focus('#ew-try-page',true);return;}
+ t.pageError='';t.started=true;t.verdict='';t.doc='running';if(!peerTry())S.lastPage=t.page;render();focus('[data-run=doc]');
+ setTimeout(()=>{
+  t.ranAt='11:49';t.ranPage=t.page;t.doc=!S.connected?'notconnected':t.page==='99999'?'cannotopen':'found';
+  // Only redraw when this try is still the one on screen; a person typing elsewhere keeps their place.
+  if(T()!==t||!(S.view==='editor'&&S.tab==='try'||peerTry()))return;
+  render();
+  if(t.doc==='notconnected')focus('[data-connect]');else if(t.doc==='cannotopen')focus('[data-refix]');else focus('[data-pick=doc]');
+ },500);
+}
+function openMenu(){
+ S.verdictMenu=true;render();
+ const items=[...panel.querySelectorAll('#ew-try-menu [data-choose]')],t=T();
+ (items.find(b=>b.dataset.choose===t.verdict)||items[0])?.focus();
+}
+function closeMenu(back=true){S.verdictMenu=false;render();if(back)focus('[data-pick=doc]');}
+
+guide.addEventListener('click',event=>{
+ const step=event.target.closest('[data-step]');
+ if(step){S=PRESET[step.dataset.step](fresh());render();
+  const id=step.dataset.step;
+  if(id==='T2'||id==='T5')focus('#ew-try [data-check]');
+  if(id==='T3')focus('[data-pick=doc]');
+  if(id==='T4')focus('#ew-check-item-new');
+  if(id==='T6')focus('#ew-try-publish');
+  if(id==='T7')focus('[data-go=overview].ew-text');
+  if(id==='T10')focus('[data-connect]');
+  if(id==='T11')focus('[data-refix]');
+  return;}
+ const peer=event.target.closest('[data-peer]');
+ if(peer){
+  S.view='peer';S.peer=peer.dataset.peer;S.verdictMenu=false;
+  // B saves at 11:50 (one more item). A's window keeps its try and is told a newer saved content exists.
+  if(S.peer==='saved'&&S.savedBy!=='other'){S.items=[...S.items,'오일 누유 없음'];S.savedAt='11:50';S.rev+=1;S.savedBy='other';}
+  render();return;}
+ const words=event.target.closest('#mock-words-toggle');
+ if(words){const table=$('#mock-words'),open=table.hidden;table.hidden=!open;words.setAttribute('aria-expanded',String(open));return;}
+ if(event.target.closest('#mock-fold')){const collapsed=guide.dataset.collapsed!=='true';guide.dataset.collapsed=String(collapsed);const button=event.target.closest('#mock-fold');button.textContent=collapsed?'안내 펴기':'안내 접기';button.setAttribute('aria-expanded',String(!collapsed));}
+});
+document.addEventListener('click',event=>{
+ const target=event.target;
+ if(target.closest('#mock-guide'))return;
+ if(S.menu&&!target.closest('.ew-procedure-menu')){S.menu=false;render();}
+ if(S.verdictMenu&&!target.closest('#ew-try-menu,[data-pick]')){S.verdictMenu=false;render();}
+ if(target.closest('[data-none],[data-none-change]')){event.preventDefault();toast(NOT_HERE);return;}
+ const inB=S.view==='peer'&&S.peer!=='saved';
+ if(inB&&target.closest('#ees-work-designer footer button,[data-menu],[data-open-job],[data-unpublish]')){event.preventDefault();toast('시안입니다. B 창에서 저장·게시·작업 열기는 이번 시안에서 다루지 않습니다.');return;}
+ const tab=target.closest('[role=tab][data-tab]');
+ if(tab){
+  if(S.view==='peer'){S.peer=tab.dataset.tab==='try'?'trial':'editor';render();focus(`[data-tab=${tab.dataset.tab}]`);return;}
+  if(tab.dataset.tab==='try'){openTry();return;}
+  S.view='editor';S.tab='content';S.verdictMenu=false;render();focus('[data-tab=content]');return;}
+ const go=target.closest('[data-go]');
+ if(go){const where=go.dataset.go;
+  if(where==='overview'){S.view='overview';S.justPublished=false;render();focus('#ew-try-overview-title');return;}
+  if(where==='pending'){if(S.view==='peer'){S.peer='editor';render();focus('[data-tab=content]');}else{S.view='editor';S.tab='content';render();focus('[data-tab=content]');}return;}
+  if(where==='list'){toast('시안입니다. 업무 절차 목록은 지금 제품 그대로입니다.');return;}
+  if(where==='editor'){const back=go.dataset.back;S.view='editor';S.tab='content';render();focus(back?`[data-open-job=${back}]`:'[data-tab=content]');return;}
+  return;}
+ const mode=target.closest('[data-go-mode]');
+ if(mode){
+  if(S.view==='peer'){S.peer=mode.dataset.goMode==='work'?'home':'editor';render();focus(`[data-go-mode=${mode.dataset.goMode}]`);return;}
+  S.view=mode.dataset.goMode==='work'?'workhome':'editor';if(S.view==='editor')S.tab='content';S.justPublished=false;render();focus(`[data-go-mode=${mode.dataset.goMode}]`);return;}
+ const open=target.closest('[data-open-job]');
+ if(open){S.view='job';S.jobOpen=open.dataset.openJob;S.jobFrom='content';S.tab='content';render();focus('#ew-author-node [name=name]');return;}
+ const fix=target.closest('[data-fix]');
+ if(fix){S.view='job';S.jobOpen=fix.dataset.fix;S.jobFrom='fix';S.tab='content';S.verdictMenu=false;render();if(S.jobOpen==='checks')focus('#ew-check-item-new');else focus('#ew-try-tool-change');return;}
+ const check=target.closest('[data-check]');
+ if(check){const t=T(),i=Number(check.dataset.check);if(!t.checks.includes(i))t.checks.push(i);t.started=true;render();focusTryNext();return;}
+ if(target.closest('[data-run]')){runDoc();return;}
+ if(target.closest('[data-pick]')){if(S.verdictMenu)closeMenu();else openMenu();return;}
+ const choose=target.closest('#ew-try-menu [data-choose]');
+ if(choose){const t=T();t.verdict=choose.dataset.choose;t.started=true;S.verdictMenu=false;render();
+  if(t.verdict==='적합')focusTryNext();else focus('[data-pick=doc]');return;}
+ const reset=target.closest('[data-reset]');
+ if(reset){if(reset.getAttribute('aria-disabled')==='true')return;
+  if(peerTry()){S.peerTrial=newTrial(S.peerTrial.at,S.peerTrial.rev,S.peerTrial.items,1);}
+  else if(newerSaved()){const prev=S.trial;S.gens+=1;S.trial=newTrial(S.savedAt,S.rev,S.items,S.gens,JSON.stringify(prev.items)!==JSON.stringify(S.items)?['checks']:[],S.lastPage);S.savedBy='me';}
+  else{S.trial=newTrial(S.trial.at,S.trial.rev,S.trial.items,S.trial.gen,[],S.lastPage);}
+  render();focus('#ew-try [data-check]');return;}
+ if(target.closest('[data-connect]')){toast('시안입니다. 이 계정의 개인 설정 › 도구 › EES Confluence Read(시스템 토큰을 넣는 곳)를 새 창으로 엽니다.');return;}
+ if(target.closest('[data-refix]')){focus('#ew-try-page',true);return;}
+ if(target.closest('#ew-try-save')){save();render();focus($('#ew-try-publish')&&!$('#ew-try-publish').disabled?'#ew-try-publish':'[data-author-status]');return;}
+ if(target.closest('#ew-try-publish')){save();S.version+=1;S.published=true;S.publishedItems=[...S.items];S.ahead=false;S.justPublished=true;S.view='editor';S.tab='content';S.verdictMenu=false;render();focus('[data-go=overview].ew-text');return;}
+ if(target.closest('[data-unpublish]')){S.published=false;S.ahead=false;S.justPublished=false;S.menu=false;render();focus('.ew-procedure-menu summary');toast('게시를 내렸습니다. 팀의 업무 목록에서 빠집니다.');return;}
+ if(target.closest('[data-menu]')){event.preventDefault();S.menu=!S.menu;render();if(S.menu)panel.querySelector('.ew-procedure-menu div button')?.focus();else focus('.ew-procedure-menu summary');return;}
+});
+document.addEventListener('input',event=>{
+ const target=event.target;
+ if(target.matches('#ew-try-page')){
+  const t=T();t.page=target.value;
+  if(t.pageError){t.pageError='';target.removeAttribute('aria-invalid');panel.querySelector('#ew-try-page-error')?.remove();}
+  // A result belongs to the value it ran with: changing the value asks for another run before a verdict.
+  if((t.doc==='found'||t.verdict)&&t.page.trim()!==t.ranPage){const at=target.selectionStart;t.doc='idle';t.verdict='';render();const field=$('#ew-try-page');field.focus();field.setSelectionRange(at,at);}
+  return;}
+ // Typing in B's window is B's own draft; the mock does not carry it into A's state.
+ if(S.view==='peer'&&S.peer!=='saved')return;
+ if(target.matches('[data-new-item]')){S.newItem=target.value;markDirty();return;}
+ if(target.matches('[data-item]')){S.items[Number(target.dataset.item)]=target.value;markDirty();return;}
+ if(target.matches('[data-field]')){S[target.dataset.field]=target.value;markDirty();}
+});
+document.addEventListener('keydown',event=>{
+ const target=event.target;
+ if(event.key==='Enter'&&target.matches('#ew-try-page')){event.preventDefault();runDoc();return;}
+ if(event.key==='Escape'&&S.verdictMenu){event.preventDefault();closeMenu();return;}
+ if(event.key==='Escape'&&S.menu){event.preventDefault();S.menu=false;render();focus('.ew-procedure-menu summary');return;}
+ if(S.verdictMenu&&target.closest('#ew-try-menu')&&['ArrowDown','ArrowUp','Home','End'].includes(event.key)){
+  const items=[...panel.querySelectorAll('#ew-try-menu [data-choose]')],i=items.indexOf(target);
+  const next=event.key==='Home'?0:event.key==='End'?items.length-1:(i+(event.key==='ArrowDown'?1:items.length-1))%items.length;
+  items[next].focus();event.preventDefault();return;}
+ if((event.key==='ArrowRight'||event.key==='ArrowLeft')&&target.matches('[role=tab]')){
+  const tabs=[...panel.querySelectorAll('[role=tab]')],i=tabs.indexOf(target),next=tabs[(i+(event.key==='ArrowRight'?1:tabs.length-1))%tabs.length];next.focus();event.preventDefault();}
+});
+document.addEventListener('focusout',event=>{
+ // Leaving the verdict menu with Tab closes it, as a menu should.
+ if(S.verdictMenu&&event.target.closest?.('#ew-try-menu')&&!event.relatedTarget?.closest?.('#ew-try-menu,[data-pick]')){S.verdictMenu=false;const next=event.relatedTarget;render();if(next&&next.id)focus('#'+next.id);}
+});
+// Crossing 1440 folds or opens the left menu as the product does.
+let wasCompact=compact();
+window.addEventListener('resize',()=>{if(compact()!==wasCompact){wasCompact=compact();render();}});
+render();
+})();
+</script>
+<!--@mock:font-licenses-->
+</body>
+</html>

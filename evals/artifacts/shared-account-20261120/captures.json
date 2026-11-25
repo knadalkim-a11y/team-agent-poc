@@ -1,0 +1,100 @@
+{
+ "date": "2026-11-20",
+ "what": "Diagnosis: several people use one system shared account at the same time to create, save, publish and try their own work procedures. Two browsers signed in to the same account drive the real product.",
+ "product": {
+  "program": "0.11.3+ees.14",
+  "builds": {
+   "e494605": {
+    "what": "main e494605, the version in use in-house (user report 2026-11-20), built from a worktree of that commit",
+    "wheel_sha256": "048945bd1b5df5743e99c5ac1bf438ba4421a0fcec062f8dfb6d7c893a903420"
+   },
+   "a8f9ee1 (branch)": {
+    "what": "working branch claude/brave-bell-p1tp73 a8f9ee1 (design mock 20 implementation, not merged)",
+    "wheel_sha256": "afb59a575f22fe4ff3155007a84e22139e5d288d7af5b55866108e42a714eff8"
+   }
+  },
+  "server": "the real Open WebUI app from the wheel (tests/ees_work_integrated_app.py ProductGate) with a temporary database, synthetic model provider, no Confluence service configured",
+  "account": "one non-admin account named EMS 공용 계정 given manager and participant on EMS / all factories through the admin-only save_access command; signed in twice through /api/v1/auths/signin, giving two sessions of the same user id (person A and person B)",
+  "taken_by": "a one-off script outside the repository (two ChromePipe browsers, physical CDP clicks and typing) built on tests/ees_work_integrated_app.py",
+  "viewport": "1920x1080, device scale factor 1"
+ },
+ "captures": [
+  {
+   "file": "s2-b-compare-json.png",
+   "build": "e494605",
+   "scenario": "S2",
+   "shows": "최신 저장본과 비교: both whole procedures as raw JSON, with the only choices 내 변경 유지 · 기존 버전으로 저장 차단 / 내 변경을 버리고 최신 저장본 열기",
+   "sha256": "4fb9b68dab75893a9e116d558140d8b212784817aab98dd304b35a5249705953"
+  },
+  {
+   "file": "s2-b-save-refused.png",
+   "build": "e494605",
+   "scenario": "S2",
+   "shows": "B saves the same procedure after A saved it: the save is refused at the top and in the left menu, the edit stays on screen (저장하지 않은 변경 있음)",
+   "sha256": "f889a0a6916024381ccc181379f17177837d070bfe3be41746804c39272a568f"
+  },
+  {
+   "file": "s5-a-verdict-refused.png",
+   "build": "e494605",
+   "scenario": "S5",
+   "shows": "A, whose screen had not refreshed, gives a verdict after B did: 다른 변경이 있습니다. 최신 내용을 다시 확인해 주세요., and the row now shows B's 미흡",
+   "sha256": "8a706eb49a46c5b8d15b4c6847b600016218e93dd2296bc5715c4449ce9144ac"
+  },
+  {
+   "file": "s5-b-lands-in-a-run.png",
+   "build": "e494605",
+   "scenario": "S5",
+   "shows": "B opens A's procedure in 업무 while A's trial run is open: B lands inside A's run, no 시작, nothing says whose run it is",
+   "sha256": "ed52836cc51ac4c09f8ff2719652586ad3c25c43382f96da26c5e48a3c62b6e7"
+  },
+  {
+   "file": "s6-b-start-refused.png",
+   "build": "e494605",
+   "scenario": "S6",
+   "shows": "A and B press 시작 on the same procedure at once: B gets 이 시스템에서 같은 업무가 진행 중입니다. 기존 진행 건을 확인해 주세요. and 시작 stays",
+   "sha256": "897f769dc6db17024df87ad356569f271e538b13010b334848b5a41aee3925a0"
+  },
+  {
+   "file": "s7-b-reload-lands-on-a-screen.png",
+   "build": "e494605",
+   "scenario": "S7",
+   "shows": "B, who was in 업무, reloads and opens on the 워크스페이스 editor A was last on",
+   "sha256": "8566cf781c70caaa9d36b197dd764865c075af2174f9372f5d53337ae0db6fce"
+  },
+  {
+   "file": "s9-b-autosave-error.png",
+   "build": "e494605",
+   "scenario": "S9",
+   "shows": "B types a start value while A moves around: 작성한 선택의 자동 저장 실패 ... at the top and in the left menu, the value stays",
+   "sha256": "4a6ae4deb1d2a0dde6ad5c4214281287f779880be43750c11206ca7081001a4a"
+  },
+  {
+   "file": "s11-a-old-run-after-republish.png",
+   "build": "e494605",
+   "scenario": "S11",
+   "shows": "A added a job and published again, then opened the procedure in 업무: the earlier run (version 1, one job, 미흡) is shown, no sign of the new version",
+   "sha256": "cfaeaae0e16cfbfac91a5ab56a46d44ff9b27df50a0e9393fe031b7e5b22427b"
+  },
+  {
+   "file": "s13-b-second-press.png",
+   "build": "e494605",
+   "scenario": "S13",
+   "shows": "B typed 222 under the first guide job before A's run existed, pressed 실행 (moved into A's run, value gone), then pressed 실행 again: the job ran with the run's stored value 111 and failed the same way as A's",
+   "sha256": "1eb67b9679f8d6a6ec4edcf404a14a415843cad680f7af276ea948701ba7400e"
+  },
+  {
+   "file": "s13-head-b-first-press.png",
+   "build": "a8f9ee1 (branch)",
+   "scenario": "S13",
+   "shows": "Branch build: B's first 찾기 after A's run opened shows 이 시스템에서 같은 업무가 진행 중입니다. with B's address still in the field; the next press moves B into A's run",
+   "sha256": "06ae5376f7fdddb1225387f8d74482a52e8ec4ee7304add49827dc6f5de0606e"
+  },
+  {
+   "file": "s14-b-purpose-save-refused.png",
+   "build": "e494605",
+   "scenario": "S14",
+   "shows": "B typed into 업무 목적, A saved the procedure; after B's refresh every 저장 is refused: 저장 버전이 바뀌었습니다. 입력은 유지했습니다. 최신 저장본과 비교한 뒤 다시 편집해 주세요.",
+   "sha256": "c895311b91eb6ad3e87dde0042c1b5684947836afa19c48cc3b14069c5eda7ec"
+  }
+ ]
+}
