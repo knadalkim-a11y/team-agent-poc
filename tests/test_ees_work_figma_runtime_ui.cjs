@@ -1100,6 +1100,23 @@ test('preview execution opens preparation over the same stage and cancel creates
  const action=h.api.handleClick({dataset:{action:'stage_start',nodeId:'t'}});assert.equal(dialog.options[0].title,'실행 준비');assert.equal(h.api.snapshot().selection.tab,'overview');assert.equal(h.api.snapshot().selection.stage_id,'t');dialog.pending.resolve(false);await action;
  assert.equal(h.calls.filter(call=>call.body&&call.body.action!=='save_ui').length,0);assert.equal(h.api.snapshot().selection.stage_id,'t');
 });
+// 2026-11-25 (PR #156 review): a required value that cannot be read yet when the window opens (an empty required
+// number) must not end the start before the person has typed it; what is wrong is said when 시작 is pressed.
+test('start window: an empty required value at opening keeps the window working, and is refused only at 시작',async()=>{
+ const required=()=>({name:'count',value:'',dataset:{inputType:'number',authoredSchema:JSON.stringify({type:'integer'}),authoredRequired:'true'},setCustomValidity(){}});
+ const started=h=>h.calls.filter(call=>call.body?.action==='start_run');
+ const flush=async()=>{for(let i=0;i<8;i++)await new Promise(resolve=>setImmediate(resolve));};
+ const filled=stagePreviewFixture(),dialog=stageStartDialog(filled);dialog.fields.splice(0,dialog.fields.length,required());
+ filled.setReply(call=>{if(call.body?.action==='start_run'){filled.state.run={id:'new-run',workflow_id:'w',definition:html('workPublishedDefinition(state)',{state:filled.state}),status:'open',jobs:{},attempts:[],revision:1};return {ok:true,run:filled.state.run};}return call.url.includes('workspace?')?filled.state:{ok:true};});
+ await filled.api.handleClick({dataset:{action:'stage_open',nodeId:'t'}});
+ const action=filled.api.handleClick({dataset:{action:'stage_start',nodeId:'t'}});await flush();
+ assert.equal(dialog.options.length,1);dialog.fields[0].value='3';dialog.confirm();await action;
+ assert.equal(started(filled).length,1);assert.deepEqual(started(filled)[0].body.inputs,{count:3});
+ const empty=stagePreviewFixture(),second=stageStartDialog(empty);second.fields.splice(0,second.fields.length,required());
+ await empty.api.handleClick({dataset:{action:'stage_open',nodeId:'t'}});
+ const refused=empty.api.handleClick({dataset:{action:'stage_start',nodeId:'t'}});await flush();second.confirm();await refused;
+ assert.equal(started(empty).length,0);
+});
 test('unpublished workflows never expose author drafts to operations preview',()=>{
  const h=stagePreviewFixture();delete h.state.workflow.published;delete h.state.workflow.published_version;
  assert.deepEqual(JSON.parse(JSON.stringify(html('workPublishedDefinition(state)',{state:h.state}))),{});

@@ -756,14 +756,20 @@
     if(workRunStartFields(definition).length){
       const html=workRunStartFieldsHTML(state,selection,definition);
       const pending=dialog({title:'실행 준비',note:'선택한 게시 버전과 이번 진행 건을 따로 보존합니다.',html,confirmLabel:'시작'}),element=$('#ees-work-dialog');
+      // A value that cannot be read yet (a required number still empty when the window opens) must not end the
+      // start: it is read again as the person types, and what is still wrong is said when 시작 is pressed.
+      let inputError='';
       const read=()=>{
         if(at!==context()||auth!==token()||owner!==actor())return;
-        const form=element.querySelector('#ees-work-start');if(!form)return;inputs=workReadInputs(form);
+        const form=element.querySelector('#ees-work-start');if(!form)return;
+        try{inputs=workReadInputs(form);inputError='';}
+        catch(failure){inputError=failure.message;}
       };
       read();element.addEventListener('input',read);element.addEventListener('change',read);
       // Capture before the dialog removes itself, including reduced-motion closes.
       element.addEventListener('click',event=>{if(event.target.closest?.('[data-dialog-confirm]'))read();},true);
       if(!await pending||at!==context()||auth!==token()||owner!==actor())return;
+      if(inputError){commandError=inputError;render();return null;}
     }
     // Values typed under a job before the run exists start with it.
     const typedScope=workStageValueScope(state,selection),typed=stageValues.get(typedScope) || {};
