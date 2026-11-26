@@ -1,0 +1,669 @@
+{
+ "wheel": {
+  "file": "open_webui-0.11.3+ees.14-py3-none-any.whl",
+  "sha256": "94b6749a7c7f69b84503b58d9d5177b9391c91d90ef7ef5b8dc4b784d311f009"
+ },
+ "against_mock": {
+  "P1 1920x1080": {
+   "elements_with_other_size_or_spacing": 3,
+   "elements_with_other_colour": 8,
+   "size_or_spacing": [
+    {
+     "element": "summary[0]",
+     "difference": [
+      "padding-top 8px->7px",
+      "padding-right 8px->7px",
+      "padding-bottom 8px->7px",
+      "padding-left 8px->7px"
+     ]
+    },
+    {
+     "element": "img[0].ew-icon",
+     "difference": [
+      "size 14x14->16x16"
+     ]
+    },
+    {
+     "element": "select#ew-overview-category[0]",
+     "difference": [
+      "padding-right 12px->36px"
+     ]
+    }
+   ],
+   "colour": [
+    {
+     "element": "button[0].ew-author-link \"업무 절차 정보·분류 수정\"",
+     "difference": [
+      "color rgb(29, 33, 40)->rgb(23, 27, 34)"
+     ]
+    },
+    {
+     "element": "button[1].ew-author-link \"다른 이름으로 저장\"",
+     "difference": [
+      "color rgb(29, 33, 40)->rgb(23, 27, 34)"
+     ]
+    },
+    {
+     "element": "button[2].ew-author-link \"내용 확인\"",
+     "difference": [
+      "color rgb(29, 33, 40)->rgb(23, 27, 34)"
+     ]
+    },
+    {
+     "element": "button[3].ew-author-link \"게시 내림\"",
+     "difference": [
+      "color rgb(29, 33, 40)->rgb(23, 27, 34)"
+     ]
+    },
+    {
+     "element": "button[2].ew-help-trigger",
+     "difference": [
+      "color rgb(29, 33, 40)->rgb(23, 27, 34)"
+     ]
+    },
+    {
+     "element": "img[0].ew-icon",
+     "difference": [
+      "color rgb(29, 33, 40)->rgb(23, 27, 34)"
+     ]
+    },
+    {
+     "element": "div[0].ew-stage-head",
+     "difference": [
+      "background-color rgba(0, 0, 0, 0)->rgb(243, 245, 248)",
+      "border-top-left-radius 0px->11px"
+     ]
+    },
+    {
+     "element": "div[3].ew-api-job-binding",
+     "difference": [
+      "color rgb(65, 73, 89)->rgb(94, 101, 115)"
+     ]
+    }
+   ]
+  },
+  "P2 1920x1080": {
+   "elements_with_other_size_or_spacing": 1,
+   "elements_with_other_colour": 6,
+   "size_or_spacing": [
+    {
+     "element": "button[0].ew-icon-button",
+     "difference": [
+      "padding-top 8px->7px",
+      "padding-right 8px->7px",
+      "padding-bottom 8px->7px",
+      "padding-left 8px->7px"
+     ]
+    }
+   ],
+   "colour": [
+    {
+     "element": "div[0].ew-vd-item",
+     "difference": [
+      "border-top-left-radius 0px->11px"
+     ]
+    },
+    {
+     "element": "div#stage-values-doc[0].ew-vd-evidence.ew-vd-job-values",
+     "difference": [
+      "color rgb(65, 73, 89)->rgb(94, 101, 115)"
+     ]
+    },
+    {
+     "element": "div[0].ew-vd-tool-detail",
+     "difference": [
+      "color rgb(65, 73, 89)->rgb(94, 101, 115)"
+     ]
+    },
+    {
+     "element": "section[0]",
+     "difference": [
+      "color rgb(65, 73, 89)->rgb(94, 101, 115)"
+     ]
+    },
+    {
+     "element": "dl[1].ew-vd-tool-values.ew-vd-ask-values",
+     "difference": [
+      "color rgb(65, 73, 89)->rgb(94, 101, 115)"
+     ]
+    },
+    {
+     "element": "input#ew-stage-doc-page-id[0]",
+     "difference": [
+      "border-top-color rgb(195, 200, 209)->rgb(43, 95, 168)",
+      "border-bottom-color rgb(195, 200, 209)->rgb(43, 95, 168)",
+      "border-left-color rgb(195, 200, 209)->rgb(43, 95, 168)"
+     ]
+    }
+   ]
+  },
+  "P3 1920x1080": {
+   "elements_with_other_size_or_spacing": 0,
+   "elements_with_other_colour": 1,
+   "size_or_spacing": [],
+   "colour": [
+    {
+     "element": "div[0].ew-empty.ew-work-home",
+     "difference": [
+      "color rgb(65, 73, 89)->rgb(94, 101, 115)"
+     ]
+    }
+   ]
+  },
+  "P1 1366x768": {
+   "elements_with_other_size_or_spacing": 3,
+   "elements_with_other_colour": 8,
+   "size_or_spacing": [
+    {
+     "element": "summary[0]",
+     "difference": [
+      "padding-top 8px->7px",
+      "padding-right 8px->7px",
+      "padding-bottom 8px->7px",
+      "padding-left 8px->7px"
+     ]
+    },
+    {
+     "element": "img[0].ew-icon",
+     "difference": [
+      "size 14x14->16x16"
+     ]
+    },
+    {
+     "element": "select#ew-overview-category[0]",
+     "difference": [
+      "padding-right 12px->36px"
+     ]
+    }
+   ],
+   "colour": [
+    {
+     "element": "button[0].ew-author-link \"업무 절차 정보·분류 수정\"",
+     "difference": [
+      "color rgb(29, 33, 40)->rgb(23, 27, 34)"
+     ]
+    },
+    {
+     "element": "button[1].ew-author-link \"다른 이름으로 저장\"",
+     "difference": [
+      "color rgb(29, 33, 40)->rgb(23, 27, 34)"
+     ]
+    },
+    {
+     "element": "button[2].ew-author-link \"내용 확인\"",
+     "difference": [
+      "color rgb(29, 33, 40)->rgb(23, 27, 34)"
+     ]
+    },
+    {
+     "element": "button[3].ew-author-link \"게시 내림\"",
+     "difference": [
+      "color rgb(29, 33, 40)->rgb(23, 27, 34)"
+     ]
+    },
+    {
+     "element": "button[2].ew-help-trigger",
+     "difference": [
+      "color rgb(29, 33, 40)->rgb(23, 27, 34)"
+     ]
+    },
+    {
+     "element": "img[0].ew-icon",
+     "difference": [
+      "color rgb(29, 33, 40)->rgb(23, 27, 34)"
+     ]
+    },
+    {
+     "element": "div[0].ew-stage-head",
+     "difference": [
+      "background-color rgba(0, 0, 0, 0)->rgb(243, 245, 248)",
+      "border-top-left-radius 0px->11px"
+     ]
+    },
+    {
+     "element": "div[3].ew-api-job-binding",
+     "difference": [
+      "color rgb(65, 73, 89)->rgb(94, 101, 115)"
+     ]
+    }
+   ]
+  },
+  "P2 1366x768": {
+   "elements_with_other_size_or_spacing": 1,
+   "elements_with_other_colour": 6,
+   "size_or_spacing": [
+    {
+     "element": "button[0].ew-icon-button",
+     "difference": [
+      "padding-top 8px->7px",
+      "padding-right 8px->7px",
+      "padding-bottom 8px->7px",
+      "padding-left 8px->7px"
+     ]
+    }
+   ],
+   "colour": [
+    {
+     "element": "div[0].ew-vd-item",
+     "difference": [
+      "border-top-left-radius 0px->11px"
+     ]
+    },
+    {
+     "element": "div#stage-values-doc[0].ew-vd-evidence.ew-vd-job-values",
+     "difference": [
+      "color rgb(65, 73, 89)->rgb(94, 101, 115)"
+     ]
+    },
+    {
+     "element": "div[0].ew-vd-tool-detail",
+     "difference": [
+      "color rgb(65, 73, 89)->rgb(94, 101, 115)"
+     ]
+    },
+    {
+     "element": "section[0]",
+     "difference": [
+      "color rgb(65, 73, 89)->rgb(94, 101, 115)"
+     ]
+    },
+    {
+     "element": "dl[1].ew-vd-tool-values.ew-vd-ask-values",
+     "difference": [
+      "color rgb(65, 73, 89)->rgb(94, 101, 115)"
+     ]
+    },
+    {
+     "element": "input#ew-stage-doc-page-id[0]",
+     "difference": [
+      "border-top-color rgb(195, 200, 209)->rgb(43, 95, 168)",
+      "border-bottom-color rgb(195, 200, 209)->rgb(43, 95, 168)",
+      "border-left-color rgb(195, 200, 209)->rgb(43, 95, 168)"
+     ]
+    }
+   ]
+  },
+  "P3 1366x768": {
+   "elements_with_other_size_or_spacing": 0,
+   "elements_with_other_colour": 1,
+   "size_or_spacing": [],
+   "colour": [
+    {
+     "element": "div[0].ew-empty.ew-work-home",
+     "difference": [
+      "color rgb(65, 73, 89)->rgb(94, 101, 115)"
+     ]
+    }
+   ]
+  }
+ },
+ "against_baseline": {
+  "A01-list": {
+   "panel_size_or_spacing": 0,
+   "panel_colour": 18,
+   "left_menu_size_or_spacing": 16,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 53,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "color"
+   ]
+  },
+  "A02-content": {
+   "panel_size_or_spacing": 84,
+   "panel_colour": 82,
+   "left_menu_size_or_spacing": 16,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 55,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "border-top-left-radius",
+    "color"
+   ]
+  },
+  "A03-job-menu": {
+   "panel_size_or_spacing": 85,
+   "panel_colour": 85,
+   "left_menu_size_or_spacing": 16,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 55,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "border-top-left-radius",
+    "color"
+   ]
+  },
+  "A04-stage-menu": {
+   "panel_size_or_spacing": 85,
+   "panel_colour": 85,
+   "left_menu_size_or_spacing": 16,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 55,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "border-top-left-radius",
+    "color"
+   ]
+  },
+  "A05-procedure-menu": {
+   "panel_size_or_spacing": 84,
+   "panel_colour": 82,
+   "left_menu_size_or_spacing": 16,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 55,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "border-top-left-radius",
+    "color"
+   ]
+  },
+  "A06-stage-edit": {
+   "panel_size_or_spacing": 89,
+   "panel_colour": 85,
+   "left_menu_size_or_spacing": 16,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 55,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "border-top-left-radius",
+    "color"
+   ]
+  },
+  "A07-add-job": {
+   "panel_size_or_spacing": 83,
+   "panel_colour": 81,
+   "left_menu_size_or_spacing": 16,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 55,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "border-top-left-radius",
+    "color"
+   ]
+  },
+  "A08-start-input-dialog": {
+   "panel_size_or_spacing": 84,
+   "panel_colour": 113,
+   "left_menu_size_or_spacing": 16,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 55,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "border-top-left-radius",
+    "color"
+   ]
+  },
+  "A09-tool-picker": {
+   "panel_size_or_spacing": 84,
+   "panel_colour": 116,
+   "left_menu_size_or_spacing": 16,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 55,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "border-top-left-radius",
+    "color"
+   ]
+  },
+  "A10-job-human": {
+   "panel_size_or_spacing": 17,
+   "panel_colour": 52,
+   "left_menu_size_or_spacing": 16,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 55,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "border-top-left-radius",
+    "color"
+   ]
+  },
+  "A11-job-tool": {
+   "panel_size_or_spacing": 17,
+   "panel_colour": 40,
+   "left_menu_size_or_spacing": 16,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 55,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "border-top-left-radius",
+    "color"
+   ]
+  },
+  "A12-try": {
+   "panel_size_or_spacing": 89,
+   "panel_colour": 96,
+   "left_menu_size_or_spacing": 16,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 55,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "border-top-left-radius",
+    "color"
+   ]
+  },
+  "A13-rules": {
+   "panel_size_or_spacing": 20,
+   "panel_colour": 72,
+   "left_menu_size_or_spacing": 16,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 55,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "border-top-left-radius",
+    "color"
+   ]
+  },
+  "A14-history": {
+   "panel_size_or_spacing": 21,
+   "panel_colour": 34,
+   "left_menu_size_or_spacing": 16,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 55,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "border-top-left-radius",
+    "color"
+   ]
+  },
+  "A15-content-dirty": {
+   "panel_size_or_spacing": 84,
+   "panel_colour": 82,
+   "left_menu_size_or_spacing": 16,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 55,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "border-top-left-radius",
+    "box-shadow",
+    "color"
+   ]
+  },
+  "A16-tools": {
+   "panel_size_or_spacing": 0,
+   "panel_colour": 22,
+   "left_menu_size_or_spacing": 13,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 53,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "color"
+   ]
+  },
+  "A17-new-procedure": {
+   "panel_size_or_spacing": 0,
+   "panel_colour": 25,
+   "left_menu_size_or_spacing": 16,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 53,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "color"
+   ]
+  },
+  "W01-home": {
+   "panel_size_or_spacing": 4,
+   "panel_colour": 3,
+   "left_menu_size_or_spacing": 16,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 50,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "color"
+   ]
+  },
+  "W02-overview": {
+   "panel_size_or_spacing": 0,
+   "panel_colour": 19,
+   "left_menu_size_or_spacing": 18,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 50,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "color"
+   ]
+  },
+  "W03-run-overview": {
+   "panel_size_or_spacing": 0,
+   "panel_colour": 18,
+   "left_menu_size_or_spacing": 18,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 50,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "color"
+   ]
+  },
+  "W04-stage": {
+   "panel_size_or_spacing": 74,
+   "panel_colour": 61,
+   "left_menu_size_or_spacing": 18,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 50,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "border-top-left-radius",
+    "box-shadow",
+    "color"
+   ]
+  },
+  "W05-stage-log": {
+   "panel_size_or_spacing": 17,
+   "panel_colour": 23,
+   "left_menu_size_or_spacing": 18,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 50,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "color"
+   ]
+  },
+  "W06-stage-rules": {
+   "panel_size_or_spacing": 17,
+   "panel_colour": 36,
+   "left_menu_size_or_spacing": 18,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 50,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "color"
+   ]
+  },
+  "W07-run-details": {
+   "panel_size_or_spacing": 0,
+   "panel_colour": 61,
+   "left_menu_size_or_spacing": 18,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 50,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "color"
+   ]
+  },
+  "W08-job-page": {
+   "panel_size_or_spacing": 0,
+   "panel_colour": 25,
+   "left_menu_size_or_spacing": 18,
+   "chat_and_frame_size_or_spacing": 0,
+   "chat_and_frame_colour": 50,
+   "colour_properties": [
+    "background-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-top-color",
+    "color"
+   ]
+  }
+ }
+}

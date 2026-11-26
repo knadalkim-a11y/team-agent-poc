@@ -407,7 +407,8 @@ class FigmaRuntimeNativeTests(IntegratedNativeCase):
         self.assertLessEqual(observed['overflow'], 1, observed)
         self.assertAlmostEqual(observed['header']['height'], 48, delta=1, msg=observed)
         self.assertEqual(observed['title']['fontSize'], '24px', observed)
-        self.assertEqual(observed['title']['lineHeight'], '37px', observed)
+        # The title step is 24px/32px since design mock 22 revision 1 (2026-11-26).
+        self.assertEqual(observed['title']['lineHeight'], '32px', observed)
         if observed['menu']:
             self.assertAlmostEqual(observed['menu']['width'], 180, delta=1, msg=observed)
             # 32px rows with a 2px gap inside 4px padding and a 1px border: 110px for three words.

@@ -355,7 +355,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.click('[data-author-action=open][data-id="' + key + '"]')
             self.wait("window.__eesNativeWorkV1.captureReference().workflow_id === " + json.dumps(key))
             self.assertEqual(self.text('.ew-author-definition-head h2'), '12판 작업 상세 ' + str(width))
-            # Figma's stage header is 52px with a 22px circular ordinal. This
+            # The stage header is 52px with a circular ordinal; the ordinal is 24px since
+            # design mock 22 revision 1 (2026-11-26, the same circle on every screen). This
             # check runs before opening the detail, against real rendered CSS.
             stage_geometry = self.browser.evaluate("""(() => {
                 const head=document.querySelector('.ew-stage-head'),number=head.querySelector('.ew-author-stage-number'),r=number.getBoundingClientRect(),s=getComputedStyle(number);
@@ -363,7 +364,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
                 return {height:head.getBoundingClientRect().height,number:{width:r.width,height:r.height,border:s.borderTopWidth,radius}};
             })()""")
             self.assertAlmostEqual(stage_geometry['height'], 52, delta=.5, msg=stage_geometry)
-            self.assertEqual(stage_geometry['number'], {'width': 22, 'height': 22, 'border': '1px', 'radius': 11})
+            self.assertEqual(stage_geometry['number'], {'width': 24, 'height': 24, 'border': '1px', 'radius': 12})
             self.open_author_job_ui('job-0')
             self.authoring_viewport(width, 768, overlay=width <= 480)
             self.assertIn('검증 단계', self.text('.ew-job-detail-header'))

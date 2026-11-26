@@ -345,8 +345,9 @@ class MotionNativeTests(IntegratedNativeCase):
                     for field in row['scopeFields']:
                         self.assertEqual(field['height'], 38, field)
                         self.assertEqual(field['lineHeight'], '20px', field)
-                        self.assertEqual(field['label']['fontSize'], '11px', field)
-                        self.assertEqual(field['label']['lineHeight'], '20px', field)
+                        # The smallest type step is 12px/18px since design mock 22 revision 1 (2026-11-26).
+                        self.assertEqual(field['label']['fontSize'], '12px', field)
+                        self.assertEqual(field['label']['lineHeight'], '18px', field)
                     self.assertTrue(row['icons'], row)
                     for icon in row['icons']:
                         self.assertGreaterEqual(icon['width'], 15.9, row)

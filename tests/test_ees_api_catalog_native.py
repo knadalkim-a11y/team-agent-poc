@@ -145,8 +145,9 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
           const style = getComputedStyle(row.querySelector('.ew-api-method'));
           return [row.dataset.method, [style.backgroundColor, style.color, getComputedStyle(row).backgroundColor]];}))""")
         # Reading is outlined and a request that changes something is filled; rows carry no tint.
-        self.assertEqual(methods['GET'], ['rgba(0, 0, 0, 0)', 'rgb(29, 33, 40)', 'rgba(0, 0, 0, 0)'])
-        self.assertEqual(methods['POST'], ['rgb(29, 33, 40)', 'rgb(255, 255, 255)', 'rgba(0, 0, 0, 0)'])
+        # The ink is #171b22 since design mock 22 revision 1 (2026-11-26).
+        self.assertEqual(methods['GET'], ['rgba(0, 0, 0, 0)', 'rgb(23, 27, 34)', 'rgba(0, 0, 0, 0)'])
+        self.assertEqual(methods['POST'], ['rgb(23, 27, 34)', 'rgb(255, 255, 255)', 'rgba(0, 0, 0, 0)'])
         self.fill('[name=api-search]', '재처리')
         self.wait("document.querySelector('[data-api-screen=list] h2')?.textContent === 'API 명세 3개 중 1개'")
         self.assertEqual(self.browser.evaluate("document.querySelectorAll('[data-api-action=open]').length"), 1)
