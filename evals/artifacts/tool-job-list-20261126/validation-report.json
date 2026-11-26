@@ -1,0 +1,1352 @@
+{
+ "mock": "design-mock-23-tool-job-list.html",
+ "checks": 224,
+ "passed": 224,
+ "failed": 0,
+ "results": [
+  {
+   "size": "1920x1080",
+   "name": "a short window starts with the guide folded, a tall one open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T1 badge says it is a mock and names the screen",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T1 now: the summary hides 단계 추가",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T1 now: the way in is ⋯ → 절차 편집",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T1 after: 단계 추가 shows as the procedure opens",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T1 after: no 절차 편집 / 도구 연결 보기 in the menu",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T1 after: the other menu items stay",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T1 after: the name, category and purpose fields show, as the product has them today",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T1 option: with the fields folded the stage list starts about where the summary has it",
+   "ok": true,
+   "detail": "{\"now\":191,\"on\":415,\"off\":255}"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T1 option: the name and category are still reachable from the ⋯ menu",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T1 option: the now side does not change",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "an option with nothing to change on this screen says where it shows",
+   "ok": true,
+   "detail": "이 화면에는 앞 작업의 결과를 받는 작업이 없습니다 · T2, T3, T4에서 보입니다"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T2 now: each job shows its name and three more lines",
+   "ok": true,
+   "detail": "[5,5]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T2 after: each job is its name and one line, nothing under it",
+   "ok": true,
+   "detail": "[{\"id\":\"page\",\"h\":64,\"name\":\"기준 문서 확인\",\"chip\":\"\",\"meta\":\"도구 사용 · 담당자 확인\",\"lines\":2,\"binding\":false,\"action\":\"\"},{\"id\":\"children\",\"h\":64,\"name\":\"하위 문서 목록 조회\",\"chip\":\"\",\"meta\":\"도구 사용 · 담당자 확인 · ‘기준 문서 확인’ 결과 사용\",\"lines\":2,\"binding\":false,\"action\":\"\"}]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T2 after: the line is the one the product writes today",
+   "ok": true,
+   "detail": "도구 사용 · 담당자 확인"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T2 after: the job that takes an earlier result names that job",
+   "ok": true,
+   "detail": "도구 사용 · 담당자 확인 · ‘기준 문서 확인’ 결과 사용"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T2 after: a job row is at most 64px tall",
+   "ok": true,
+   "detail": "[64,64]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T2 after: rows are shorter than now",
+   "ok": true,
+   "detail": "128 < 249"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T2 after: 작업 추가 and 단계 추가 show",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T2 now: 작업 추가 and 단계 추가 are hidden in the summary",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T2: the jobs are in view on both sides without scrolling by hand",
+   "ok": true,
+   "detail": "[[true,true],[true,true]]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T2 option: without the mark the second job reads like the first",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T2 now: after 절차 편집 the edit view shows, with the note under each job",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T2 now: the edit view writes the same line the after side keeps",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T2 now: the caption says which of the two views this is",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "flow: back to the list on both sides, numbered T0",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "flow: the other procedure (people and a tool) opens in the edit view on both sides",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "flow: the guide opens — summary now, edit view after",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "flow: opening the stage on one side opens it on the other, and the badge follows",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "flow: the keyboard stays on the stage row that was pressed",
+   "ok": true,
+   "detail": "after/stage_toggle/documents"
+  },
+  {
+   "size": "1920x1080",
+   "name": "flow: a job row opens the job page on both sides",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "flow: the keyboard lands on the way back",
+   "ok": true,
+   "detail": "after/node/"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 after: the card names the tool and the service",
+   "ok": true,
+   "detail": "기준 문서 확인사내 Confluence"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 after: one line of what the tool does",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 after: a job that takes nothing from an earlier job has no such line",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 after: 도구 변경 is in the card",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 after: inputs, results and address are closed at first",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 after: 상세 보기 opens them",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 after: the address is in the details",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 after: 예시 보기 sits on its label's line",
+   "ok": true,
+   "detail": "0"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 after: 예시 보기 says the product window would open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 after: 도구 변경 says the product window would open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "flow: back from the job to the stage, open, on both sides",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "flow: the now side comes back to the summary, as the product does",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "flow: the keyboard is back on the job one came from",
+   "ok": true,
+   "detail": "after/node/page"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 now: the tool section lists inputs, results and address in the open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 after: the tool section is not taller than now when closed",
+   "ok": true,
+   "detail": "152 <= 161"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 after: the card says which job its input comes from",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 after: the card is as wide as what it holds (at most 640px), its text on the fields' text edge",
+   "ok": true,
+   "detail": "{\"w\":640,\"button\":[77,32],\"text\":13,\"field\":13}"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 after: both inputs are in the details, each on its own line",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 option: without the mark the card drops that line; what was open stays open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 option: the fields switch says it does not apply to a job page",
+   "ok": true,
+   "detail": "이 화면에는 이름·분류·목적 칸이 없습니다 · T1, T2, T4, T5에서 보입니다"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 after: 상세 보기 shows a focus ring from the keyboard",
+   "ok": true,
+   "detail": "solid 2px"
+  },
+  {
+   "size": "1920x1080",
+   "name": "an arrow key pressed inside a side does not flip the view",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 after: Enter closes the details",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4 now: such a procedure opens in the summary too",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4 now: the summary has no mark on either job that needs a hand",
+   "ok": true,
+   "detail": "[[\"1. 기준 문서 확인\",\"\",\"도구 변경\"],[\"2. 하위 문서 목록 조회\",\"\",\"도구 변경\"],[\"3. 변경 이력 확인\",\"\",\"도구 연결\"],[\"4. 담당자 정보 조회\",\"\",\"도구 변경\"]]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4 after: four jobs, each its name and one line",
+   "ok": true,
+   "detail": "[[\"기준 문서 확인\",\"\",\"도구 사용 · 담당자 확인\",64],[\"하위 문서 목록 조회\",\"\",\"도구 사용 · 담당자 확인 · ‘기준 문서 확인’ 결과 사용\",64],[\"변경 이력 확인\",\"도구 연결 전\",\"도구 사용 · 담당자 확인\",64],[\"담당자 정보 조회\",\"도구 확인 필요\",\"도구 사용 · 담당자 확인\",64]]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4 after: the job without a tool carries the mark 도구 연결 전 and the button 도구 연결",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4 after: the job to check carries the mark 도구 확인 필요",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4 after: the mark is a filled chip, not a colour of the text alone",
+   "ok": true,
+   "detail": "[{\"color\":\"rgb(150, 89, 12)\",\"bg\":\"rgb(250, 241, 228)\",\"weight\":\"500\",\"radius\":\"4px\",\"gap\":8,\"h\":20,\"nameWeight\":\"600\"},{\"color\":\"rgb(150, 89, 12)\",\"bg\":\"rgb(250, 241, 228)\",\"weight\":\"500\",\"radius\":\"4px\",\"gap\":8,\"h\":20,\"nameWeight\":\"600\"}]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4 after: the chip text is readable on the chip",
+   "ok": true,
+   "detail": "5.03 5.03"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4 after: 도구 연결 sits on the job row, left of ⋯, clear of the text, 32px tall",
+   "ok": true,
+   "detail": "{\"inRow\":true,\"gap\":10,\"clear\":518,\"rowH\":64,\"h\":32,\"domBeforeMenu\":true}"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4 after: the keyboard reaches 도구 연결 before ⋯, as the eye does",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4: the jobs that need a hand are in view on the after side",
+   "ok": true,
+   "detail": "[true,true,true,true]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4 now: after 절차 편집 the job without a tool has a grey mark and 도구 연결 on a line of its own",
+   "ok": true,
+   "detail": "{\"below\":true,\"tag\":\"도구 연결 전\"}"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4-1 after: the job without a tool — its page shows the same mark and one button, 도구 연결",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4-1 after: the button is where 도구 변경 is on a connected job, the same size",
+   "ok": true,
+   "detail": "{\"h\":32,\"right\":13,\"mid\":0,\"cardH\":60}"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4: back to the board, open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4-2 after: the job to check — its page says so and offers 도구 변경",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4: the list counts the board's four jobs",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T5 now: the person's job is two lines, the tool job has the note under it",
+   "ok": true,
+   "detail": "[2,6]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T5 after: both jobs are a name and one line",
+   "ok": true,
+   "detail": "[{\"id\":\"checks\",\"h\":64,\"name\":\"설비 세 곳 점검\",\"chip\":\"\",\"meta\":\"사람이 확인 · 항목 3개\",\"lines\":2,\"binding\":false,\"action\":\"\"},{\"id\":\"doc\",\"h\":64,\"name\":\"점검 기준 문서 찾기\",\"chip\":\"\",\"meta\":\"도구 사용 · 담당자 확인\",\"lines\":2,\"binding\":false,\"action\":\"\"}]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T5 after: the person's job reads as it does now",
+   "ok": true,
+   "detail": "사람이 확인 · 항목 3개"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T5 after: the tool job keeps its name and the line it has now",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T5 after: the two rows are the same height",
+   "ok": true,
+   "detail": "64 64"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T5: a person's job says its page does not change and stays put",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T5-1 after: the tool job's page has the card — here the tool's name differs from the job's",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T5: back to the mixed procedure, open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "T5: the second stage says the mock opens only the first",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "a press the mock does not act on says it works as the product does",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "the note sits at the bottom, clear of the side headings",
+   "ok": true,
+   "detail": "{\"top\":972,\"labels\":120,\"bottom\":76}"
+  },
+  {
+   "size": "1920x1080",
+   "name": "a switch above redraws the side without losing where one had scrolled to",
+   "ok": true,
+   "detail": "60 → 60"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T1 (fields on): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T1 (fields on): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T1 (fields off): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T1 (fields off): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T2 (fields on): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T2 (fields on): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T2 (fields off): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T2 (fields off): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 (fields on): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 (fields on): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 (fields off): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 (fields off): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4 (fields on): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4 (fields on): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4 (fields off): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4 (fields off): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T5 (fields on): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T5 (fields on): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T5 (fields off): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T5 (fields off): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "single view: only the after side, with its left menu",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "single view: the chat shows from 1200",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "single view: ← shows now",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "single view: a switch that only touches the after side says so when now is shown",
+   "ok": true,
+   "detail": "‘지금만’에서는 달라지는 것이 없습니다 · 바꾼 쪽에만 해당합니다"
+  },
+  {
+   "size": "1920x1080",
+   "name": "keys 1–5 pick the screen",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "the reference line is closed until asked for",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "참고 opens the reference line, which also says the keys",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "the guide folds, the badge stays",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "no page errors",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1366x768",
+   "name": "a short window starts with the guide folded, a tall one open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T1 badge says it is a mock and names the screen",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T1 now: the summary hides 단계 추가",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T1 now: the way in is ⋯ → 절차 편집",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T1 after: 단계 추가 shows as the procedure opens",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T1 after: no 절차 편집 / 도구 연결 보기 in the menu",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T1 after: the other menu items stay",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T1 after: the name, category and purpose fields show, as the product has them today",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T1 option: with the fields folded the stage list starts about where the summary has it",
+   "ok": true,
+   "detail": "{\"now\":191,\"on\":415,\"off\":255}"
+  },
+  {
+   "size": "1366x768",
+   "name": "T1 option: the name and category are still reachable from the ⋯ menu",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T1 option: the now side does not change",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "an option with nothing to change on this screen says where it shows",
+   "ok": true,
+   "detail": "이 화면에는 앞 작업의 결과를 받는 작업이 없습니다 · T2, T3, T4에서 보입니다"
+  },
+  {
+   "size": "1366x768",
+   "name": "T2 now: each job shows its name and three more lines",
+   "ok": true,
+   "detail": "[5,5]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T2 after: each job is its name and one line, nothing under it",
+   "ok": true,
+   "detail": "[{\"id\":\"page\",\"h\":64,\"name\":\"기준 문서 확인\",\"chip\":\"\",\"meta\":\"도구 사용 · 담당자 확인\",\"lines\":2,\"binding\":false,\"action\":\"\"},{\"id\":\"children\",\"h\":64,\"name\":\"하위 문서 목록 조회\",\"chip\":\"\",\"meta\":\"도구 사용 · 담당자 확인 · ‘기준 문서 확인’ 결과 사용\",\"lines\":2,\"binding\":false,\"action\":\"\"}]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T2 after: the line is the one the product writes today",
+   "ok": true,
+   "detail": "도구 사용 · 담당자 확인"
+  },
+  {
+   "size": "1366x768",
+   "name": "T2 after: the job that takes an earlier result names that job",
+   "ok": true,
+   "detail": "도구 사용 · 담당자 확인 · ‘기준 문서 확인’ 결과 사용"
+  },
+  {
+   "size": "1366x768",
+   "name": "T2 after: a job row is at most 64px tall",
+   "ok": true,
+   "detail": "[64,64]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T2 after: rows are shorter than now",
+   "ok": true,
+   "detail": "128 < 249"
+  },
+  {
+   "size": "1366x768",
+   "name": "T2 after: 작업 추가 and 단계 추가 show",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T2 now: 작업 추가 and 단계 추가 are hidden in the summary",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T2: the jobs are in view on both sides without scrolling by hand",
+   "ok": true,
+   "detail": "[[true,true],[true,true]]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T2 option: without the mark the second job reads like the first",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T2 now: after 절차 편집 the edit view shows, with the note under each job",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T2 now: the edit view writes the same line the after side keeps",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T2 now: the caption says which of the two views this is",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "flow: back to the list on both sides, numbered T0",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "flow: the other procedure (people and a tool) opens in the edit view on both sides",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "flow: the guide opens — summary now, edit view after",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "flow: opening the stage on one side opens it on the other, and the badge follows",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "flow: the keyboard stays on the stage row that was pressed",
+   "ok": true,
+   "detail": "after/stage_toggle/documents"
+  },
+  {
+   "size": "1366x768",
+   "name": "flow: a job row opens the job page on both sides",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "flow: the keyboard lands on the way back",
+   "ok": true,
+   "detail": "after/node/"
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 after: the card names the tool and the service",
+   "ok": true,
+   "detail": "기준 문서 확인사내 Confluence"
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 after: one line of what the tool does",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 after: a job that takes nothing from an earlier job has no such line",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 after: 도구 변경 is in the card",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 after: inputs, results and address are closed at first",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 after: 상세 보기 opens them",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 after: the address is in the details",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 after: 예시 보기 sits on its label's line",
+   "ok": true,
+   "detail": "0"
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 after: 예시 보기 says the product window would open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 after: 도구 변경 says the product window would open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "flow: back from the job to the stage, open, on both sides",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "flow: the now side comes back to the summary, as the product does",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "flow: the keyboard is back on the job one came from",
+   "ok": true,
+   "detail": "after/node/page"
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 now: the tool section lists inputs, results and address in the open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 after: the tool section is not taller than now when closed",
+   "ok": true,
+   "detail": "152 <= 161"
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 after: the card says which job its input comes from",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 after: the card is as wide as what it holds (at most 640px), its text on the fields' text edge",
+   "ok": true,
+   "detail": "{\"w\":608,\"button\":[77,32],\"text\":13,\"field\":13}"
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 after: both inputs are in the details, each on its own line",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 option: without the mark the card drops that line; what was open stays open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 option: the fields switch says it does not apply to a job page",
+   "ok": true,
+   "detail": "이 화면에는 이름·분류·목적 칸이 없습니다 · T1, T2, T4, T5에서 보입니다"
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 after: 상세 보기 shows a focus ring from the keyboard",
+   "ok": true,
+   "detail": "solid 2px"
+  },
+  {
+   "size": "1366x768",
+   "name": "an arrow key pressed inside a side does not flip the view",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 after: Enter closes the details",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T4 now: such a procedure opens in the summary too",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T4 now: the summary has no mark on either job that needs a hand",
+   "ok": true,
+   "detail": "[[\"1. 기준 문서 확인\",\"\",\"도구 변경\"],[\"2. 하위 문서 목록 조회\",\"\",\"도구 변경\"],[\"3. 변경 이력 확인\",\"\",\"도구 연결\"],[\"4. 담당자 정보 조회\",\"\",\"도구 변경\"]]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T4 after: four jobs, each its name and one line",
+   "ok": true,
+   "detail": "[[\"기준 문서 확인\",\"\",\"도구 사용 · 담당자 확인\",64],[\"하위 문서 목록 조회\",\"\",\"도구 사용 · 담당자 확인 · ‘기준 문서 확인’ 결과 사용\",64],[\"변경 이력 확인\",\"도구 연결 전\",\"도구 사용 · 담당자 확인\",64],[\"담당자 정보 조회\",\"도구 확인 필요\",\"도구 사용 · 담당자 확인\",64]]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T4 after: the job without a tool carries the mark 도구 연결 전 and the button 도구 연결",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T4 after: the job to check carries the mark 도구 확인 필요",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T4 after: the mark is a filled chip, not a colour of the text alone",
+   "ok": true,
+   "detail": "[{\"color\":\"rgb(150, 89, 12)\",\"bg\":\"rgb(250, 241, 228)\",\"weight\":\"500\",\"radius\":\"4px\",\"gap\":8,\"h\":20,\"nameWeight\":\"600\"},{\"color\":\"rgb(150, 89, 12)\",\"bg\":\"rgb(250, 241, 228)\",\"weight\":\"500\",\"radius\":\"4px\",\"gap\":8,\"h\":20,\"nameWeight\":\"600\"}]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T4 after: the chip text is readable on the chip",
+   "ok": true,
+   "detail": "5.03 5.03"
+  },
+  {
+   "size": "1366x768",
+   "name": "T4 after: 도구 연결 sits on the job row, left of ⋯, clear of the text, 32px tall",
+   "ok": true,
+   "detail": "{\"inRow\":true,\"gap\":10,\"clear\":241,\"rowH\":64,\"h\":32,\"domBeforeMenu\":true}"
+  },
+  {
+   "size": "1366x768",
+   "name": "T4 after: the keyboard reaches 도구 연결 before ⋯, as the eye does",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T4: the jobs that need a hand are in view on the after side",
+   "ok": true,
+   "detail": "[true,true,true,true]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T4 now: after 절차 편집 the job without a tool has a grey mark and 도구 연결 on a line of its own",
+   "ok": true,
+   "detail": "{\"below\":true,\"tag\":\"도구 연결 전\"}"
+  },
+  {
+   "size": "1366x768",
+   "name": "T4-1 after: the job without a tool — its page shows the same mark and one button, 도구 연결",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T4-1 after: the button is where 도구 변경 is on a connected job, the same size",
+   "ok": true,
+   "detail": "{\"h\":32,\"right\":13,\"mid\":0,\"cardH\":60}"
+  },
+  {
+   "size": "1366x768",
+   "name": "T4: back to the board, open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T4-2 after: the job to check — its page says so and offers 도구 변경",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T4: the list counts the board's four jobs",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T5 now: the person's job is two lines, the tool job has the note under it",
+   "ok": true,
+   "detail": "[2,6]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T5 after: both jobs are a name and one line",
+   "ok": true,
+   "detail": "[{\"id\":\"checks\",\"h\":64,\"name\":\"설비 세 곳 점검\",\"chip\":\"\",\"meta\":\"사람이 확인 · 항목 3개\",\"lines\":2,\"binding\":false,\"action\":\"\"},{\"id\":\"doc\",\"h\":64,\"name\":\"점검 기준 문서 찾기\",\"chip\":\"\",\"meta\":\"도구 사용 · 담당자 확인\",\"lines\":2,\"binding\":false,\"action\":\"\"}]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T5 after: the person's job reads as it does now",
+   "ok": true,
+   "detail": "사람이 확인 · 항목 3개"
+  },
+  {
+   "size": "1366x768",
+   "name": "T5 after: the tool job keeps its name and the line it has now",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T5 after: the two rows are the same height",
+   "ok": true,
+   "detail": "64 64"
+  },
+  {
+   "size": "1366x768",
+   "name": "T5: a person's job says its page does not change and stays put",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T5-1 after: the tool job's page has the card — here the tool's name differs from the job's",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T5: back to the mixed procedure, open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "T5: the second stage says the mock opens only the first",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "a press the mock does not act on says it works as the product does",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "the note sits at the bottom, clear of the side headings",
+   "ok": true,
+   "detail": "{\"top\":660,\"labels\":176,\"bottom\":76}"
+  },
+  {
+   "size": "1366x768",
+   "name": "a switch above redraws the side without losing where one had scrolled to",
+   "ok": true,
+   "detail": "60 → 60"
+  },
+  {
+   "size": "1366x768",
+   "name": "T1 (fields on): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T1 (fields on): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T1 (fields off): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T1 (fields off): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T2 (fields on): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T2 (fields on): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T2 (fields off): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T2 (fields off): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 (fields on): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 (fields on): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 (fields off): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 (fields off): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T4 (fields on): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T4 (fields on): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T4 (fields off): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T4 (fields off): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T5 (fields on): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T5 (fields on): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T5 (fields off): no sideways scroll in either side",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T5 (fields off): no cut text on the after side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1366x768",
+   "name": "single view: only the after side, with its left menu",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "single view: the chat shows from 1200",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "single view: ← shows now",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "single view: a switch that only touches the after side says so when now is shown",
+   "ok": true,
+   "detail": "‘지금만’에서는 달라지는 것이 없습니다 · 바꾼 쪽에만 해당합니다"
+  },
+  {
+   "size": "1366x768",
+   "name": "keys 1–5 pick the screen",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "the reference line is closed until asked for",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "참고 opens the reference line, which also says the keys",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "the guide folds, the badge stays",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "no page errors",
+   "ok": true,
+   "detail": "[]"
+  }
+ ]
+}
