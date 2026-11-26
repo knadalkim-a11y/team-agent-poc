@@ -1,9 +1,15 @@
 {
  "mock": "design-mock-23-tool-job-list.html",
- "checks": 227,
- "passed": 227,
+ "checks": 293,
+ "passed": 293,
  "failed": 0,
  "results": [
+  {
+   "size": "1920x1080",
+   "name": "a wide window opens with all three sides, a narrower one with the two proposals",
+   "ok": true,
+   "detail": "now+after+view"
+  },
   {
    "size": "1920x1080",
    "name": "a short window starts with the explanation folded, a tall one open",
@@ -314,7 +320,7 @@
    "size": "1920x1080",
    "name": "T3 option: the fields switch says it does not apply to a job page",
    "ok": true,
-   "detail": "이 화면에는 이름·분류·목적 칸이 없습니다 · T1, T2, T4, T5에서 보입니다"
+   "detail": "이 화면에는 이름·분류·목적 칸이 없습니다 · T1, T2, T4, T5의 ‘바로 편집’에서 보입니다"
   },
   {
    "size": "1920x1080",
@@ -324,7 +330,7 @@
   },
   {
    "size": "1920x1080",
-   "name": "an arrow key pressed inside a side does not flip the view",
+   "name": "an arrow key pressed inside a side does not change what is shown",
    "ok": true,
    "detail": ""
   },
@@ -486,6 +492,198 @@
   },
   {
    "size": "1920x1080",
+   "name": "view first T1: opens to read — no fields, nothing to add",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "view first T1: 편집 is a button on the title row, beside ⋯, not a menu item",
+   "ok": true,
+   "detail": "{\"text\":\"편집\",\"inMenu\":false,\"h\":32,\"gap\":8,\"mid\":0,\"border\":\"1px\",\"pressed\":\"false\"}"
+  },
+  {
+   "size": "1920x1080",
+   "name": "view first T1: no 절차 편집 left in the menu",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "view first T1: the stage list starts higher than in the straight-to-editing proposal",
+   "ok": true,
+   "detail": "{\"view\":231,\"after\":415}"
+  },
+  {
+   "size": "1920x1080",
+   "name": "view first: 편집 opens the editing screen on that side only",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "view first: the keyboard stays on the button",
+   "ok": true,
+   "detail": "view/view_edit/"
+  },
+  {
+   "size": "1920x1080",
+   "name": "view first: a job page is the same as in the other proposal",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "view first: back from a job one is still editing",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "view first: 편집 마침 returns to reading",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "view first T2: the rows read the same as in the other proposal",
+   "ok": true,
+   "detail": "[[\"기준 문서 확인\",\"도구 사용 · 담당자 확인\",64],[\"하위 문서 목록 조회\",\"도구 사용 · 담당자 확인 · ‘기준 문서 확인’ 결과 사용\",63]]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "view first T2: no ⋯ on a stage or a job, no 작업 추가, no 단계 정보 수정 while reading",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "view first T2: the arrows of the stage and of its jobs end on one line",
+   "ok": true,
+   "detail": "{\"head\":13,\"row\":13}"
+  },
+  {
+   "size": "1920x1080",
+   "name": "view first T2: the jobs are in view",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "view first: back from a job opened while reading, one is reading again",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "view first T4: the two marks and 도구 연결 are there while reading",
+   "ok": true,
+   "detail": "[[\"기준 문서 확인\",\"\",\"\"],[\"하위 문서 목록 조회\",\"\",\"\"],[\"변경 이력 확인\",\"도구 연결 전\",\"도구 연결\"],[\"담당자 정보 조회\",\"도구 확인 필요\",\"\"]]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "view first T4: 도구 연결 sits on its row, left of the arrow, clear of the text",
+   "ok": true,
+   "detail": "{\"inRow\":true,\"gap\":10,\"clear\":230,\"h\":32}"
+  },
+  {
+   "size": "1920x1080",
+   "name": "view first T5: a procedure with people's jobs also opens to read (today it opens in the editing screen)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "view first T5: the person's job reads as it does now; the two rows are the same height but for the last one's missing line",
+   "ok": true,
+   "detail": "[[\"설비 세 곳 점검\",\"사람이 확인 · 항목 3개\",64],[\"점검 기준 문서 찾기\",\"도구 사용 · 담당자 확인\",63]]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T1 (all): no sideways scroll on any side shown",
+   "ok": true,
+   "detail": "[0,0,0]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T1 (all): no cut text on the view-first side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T2 (all): no sideways scroll on any side shown",
+   "ok": true,
+   "detail": "[0,0,0]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T2 (all): no cut text on the view-first side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 (all): no sideways scroll on any side shown",
+   "ok": true,
+   "detail": "[0,0,0]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T3 (all): no cut text on the view-first side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4 (all): no sideways scroll on any side shown",
+   "ok": true,
+   "detail": "[0,0,0]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T4 (all): no cut text on the view-first side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T5 (all): no sideways scroll on any side shown",
+   "ok": true,
+   "detail": "[0,0,0]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "T5 (all): no cut text on the view-first side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "sides: 지금 can be turned off, leaving the two proposals side by side",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "sides: one side alone shows the whole window, with its left menu",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "sides: the last one stays on",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "sides: ← goes to the side before",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
    "name": "a press the mock does not act on says it works as the product does",
    "ok": true,
    "detail": ""
@@ -506,7 +704,7 @@
    "size": "1920x1080",
    "name": "T1 (fields on): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1920x1080",
@@ -518,7 +716,7 @@
    "size": "1920x1080",
    "name": "T1 (fields off): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1920x1080",
@@ -530,7 +728,7 @@
    "size": "1920x1080",
    "name": "T2 (fields on): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1920x1080",
@@ -542,7 +740,7 @@
    "size": "1920x1080",
    "name": "T2 (fields off): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1920x1080",
@@ -554,7 +752,7 @@
    "size": "1920x1080",
    "name": "T3 (fields on): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1920x1080",
@@ -566,7 +764,7 @@
    "size": "1920x1080",
    "name": "T3 (fields off): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1920x1080",
@@ -578,7 +776,7 @@
    "size": "1920x1080",
    "name": "T4 (fields on): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1920x1080",
@@ -590,7 +788,7 @@
    "size": "1920x1080",
    "name": "T4 (fields off): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1920x1080",
@@ -602,7 +800,7 @@
    "size": "1920x1080",
    "name": "T5 (fields on): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1920x1080",
@@ -614,7 +812,7 @@
    "size": "1920x1080",
    "name": "T5 (fields off): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1920x1080",
@@ -642,9 +840,9 @@
   },
   {
    "size": "1920x1080",
-   "name": "single view: a switch that only touches the after side says so when now is shown",
+   "name": "single view: a switch that only touches the proposals says so when only now is shown",
    "ok": true,
-   "detail": "‘지금만’에서는 달라지는 것이 없습니다 · 바꾼 쪽에만 해당합니다"
+   "detail": "지금 쪽에서는 달라지는 것이 없습니다 · 바꾼 두 쪽에만 해당합니다"
   },
   {
    "size": "1920x1080",
@@ -675,6 +873,12 @@
    "name": "no page errors",
    "ok": true,
    "detail": "[]"
+  },
+  {
+   "size": "1366x768",
+   "name": "a wide window opens with all three sides, a narrower one with the two proposals",
+   "ok": true,
+   "detail": "after+view"
   },
   {
    "size": "1366x768",
@@ -1004,7 +1208,7 @@
    "size": "1366x768",
    "name": "T3 option: the fields switch says it does not apply to a job page",
    "ok": true,
-   "detail": "이 화면에는 이름·분류·목적 칸이 없습니다 · T1, T2, T4, T5에서 보입니다"
+   "detail": "이 화면에는 이름·분류·목적 칸이 없습니다 · T1, T2, T4, T5의 ‘바로 편집’에서 보입니다"
   },
   {
    "size": "1366x768",
@@ -1014,7 +1218,7 @@
   },
   {
    "size": "1366x768",
-   "name": "an arrow key pressed inside a side does not flip the view",
+   "name": "an arrow key pressed inside a side does not change what is shown",
    "ok": true,
    "detail": ""
   },
@@ -1176,6 +1380,198 @@
   },
   {
    "size": "1366x768",
+   "name": "view first T1: opens to read — no fields, nothing to add",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "view first T1: 편집 is a button on the title row, beside ⋯, not a menu item",
+   "ok": true,
+   "detail": "{\"text\":\"편집\",\"inMenu\":false,\"h\":32,\"gap\":8,\"mid\":0,\"border\":\"1px\",\"pressed\":\"false\"}"
+  },
+  {
+   "size": "1366x768",
+   "name": "view first T1: no 절차 편집 left in the menu",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "view first T1: the stage list starts higher than in the straight-to-editing proposal",
+   "ok": true,
+   "detail": "{\"view\":231,\"after\":415}"
+  },
+  {
+   "size": "1366x768",
+   "name": "view first: 편집 opens the editing screen on that side only",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "view first: the keyboard stays on the button",
+   "ok": true,
+   "detail": "view/view_edit/"
+  },
+  {
+   "size": "1366x768",
+   "name": "view first: a job page is the same as in the other proposal",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "view first: back from a job one is still editing",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "view first: 편집 마침 returns to reading",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "view first T2: the rows read the same as in the other proposal",
+   "ok": true,
+   "detail": "[[\"기준 문서 확인\",\"도구 사용 · 담당자 확인\",64],[\"하위 문서 목록 조회\",\"도구 사용 · 담당자 확인 · ‘기준 문서 확인’ 결과 사용\",63]]"
+  },
+  {
+   "size": "1366x768",
+   "name": "view first T2: no ⋯ on a stage or a job, no 작업 추가, no 단계 정보 수정 while reading",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "view first T2: the arrows of the stage and of its jobs end on one line",
+   "ok": true,
+   "detail": "{\"head\":13,\"row\":13}"
+  },
+  {
+   "size": "1366x768",
+   "name": "view first T2: the jobs are in view",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "view first: back from a job opened while reading, one is reading again",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "view first T4: the two marks and 도구 연결 are there while reading",
+   "ok": true,
+   "detail": "[[\"기준 문서 확인\",\"\",\"\"],[\"하위 문서 목록 조회\",\"\",\"\"],[\"변경 이력 확인\",\"도구 연결 전\",\"도구 연결\"],[\"담당자 정보 조회\",\"도구 확인 필요\",\"\"]]"
+  },
+  {
+   "size": "1366x768",
+   "name": "view first T4: 도구 연결 sits on its row, left of the arrow, clear of the text",
+   "ok": true,
+   "detail": "{\"inRow\":true,\"gap\":10,\"clear\":273,\"h\":32}"
+  },
+  {
+   "size": "1366x768",
+   "name": "view first T5: a procedure with people's jobs also opens to read (today it opens in the editing screen)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "view first T5: the person's job reads as it does now; the two rows are the same height but for the last one's missing line",
+   "ok": true,
+   "detail": "[[\"설비 세 곳 점검\",\"사람이 확인 · 항목 3개\",64],[\"점검 기준 문서 찾기\",\"도구 사용 · 담당자 확인\",63]]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T1 (pair): no sideways scroll on any side shown",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T1 (pair): no cut text on the view-first side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T2 (pair): no sideways scroll on any side shown",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T2 (pair): no cut text on the view-first side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 (pair): no sideways scroll on any side shown",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T3 (pair): no cut text on the view-first side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T4 (pair): no sideways scroll on any side shown",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T4 (pair): no cut text on the view-first side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T5 (pair): no sideways scroll on any side shown",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "1366x768",
+   "name": "T5 (pair): no cut text on the view-first side",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "1366x768",
+   "name": "sides: 지금 can be turned off, leaving the two proposals side by side",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "sides: one side alone shows the whole window, with its left menu",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "sides: the last one stays on",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "sides: ← goes to the side before",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
    "name": "a press the mock does not act on says it works as the product does",
    "ok": true,
    "detail": ""
@@ -1184,7 +1580,7 @@
    "size": "1366x768",
    "name": "the note sits at the bottom, clear of the side headings",
    "ok": true,
-   "detail": "{\"top\":660,\"labels\":176,\"bottom\":76}"
+   "detail": "{\"top\":660,\"labels\":198,\"bottom\":76}"
   },
   {
    "size": "1366x768",
@@ -1196,7 +1592,7 @@
    "size": "1366x768",
    "name": "T1 (fields on): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1366x768",
@@ -1208,7 +1604,7 @@
    "size": "1366x768",
    "name": "T1 (fields off): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1366x768",
@@ -1220,7 +1616,7 @@
    "size": "1366x768",
    "name": "T2 (fields on): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1366x768",
@@ -1232,7 +1628,7 @@
    "size": "1366x768",
    "name": "T2 (fields off): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1366x768",
@@ -1244,7 +1640,7 @@
    "size": "1366x768",
    "name": "T3 (fields on): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1366x768",
@@ -1256,7 +1652,7 @@
    "size": "1366x768",
    "name": "T3 (fields off): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1366x768",
@@ -1268,7 +1664,7 @@
    "size": "1366x768",
    "name": "T4 (fields on): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1366x768",
@@ -1280,7 +1676,7 @@
    "size": "1366x768",
    "name": "T4 (fields off): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1366x768",
@@ -1292,7 +1688,7 @@
    "size": "1366x768",
    "name": "T5 (fields on): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1366x768",
@@ -1304,7 +1700,7 @@
    "size": "1366x768",
    "name": "T5 (fields off): no sideways scroll in either side",
    "ok": true,
-   "detail": "[0,0]"
+   "detail": "[0,0,0]"
   },
   {
    "size": "1366x768",
@@ -1332,9 +1728,9 @@
   },
   {
    "size": "1366x768",
-   "name": "single view: a switch that only touches the after side says so when now is shown",
+   "name": "single view: a switch that only touches the proposals says so when only now is shown",
    "ok": true,
-   "detail": "‘지금만’에서는 달라지는 것이 없습니다 · 바꾼 쪽에만 해당합니다"
+   "detail": "지금 쪽에서는 달라지는 것이 없습니다 · 바꾼 두 쪽에만 해당합니다"
   },
   {
    "size": "1366x768",

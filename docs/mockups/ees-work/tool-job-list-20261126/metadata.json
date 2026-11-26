@@ -1,18 +1,23 @@
 {
- "revision": 1,
+ "revision": 2,
  "status": "review_mock_ready",
  "date": "2026-11-26",
- "request": "응 비교 시안으로 만들어줘",
+ "request": "'보기 먼저' 안도 같은 시안에 그려서 보여줘",
+ "previous_revision": {
+  "commit": "dfb3f43",
+  "request": "응 비교 시안으로 만들어줘",
+  "note": "1판: 지금과 '바로 편집' 두 쪽. 사용자가 본 뒤 '절차 편집이 따로 있는게 나을거같기도하고..'라고 해 '보기 먼저' 안을 셋째 쪽으로 더함"
+ },
  "context": "아니근데 '워크스페이스'에서 단계랑 작업 추가하는 기능들 왜 ui에서 안보이지? · '워크스페이스' 자체가, 편집전용 화면이잖아? 근데 왜 저게 또있는거야 · 최대한 눈에 보이는 정보는 단순하면서 직관적이어야해. 상세정보들은 추가적인 클릭을 통해서 보이는게 더 좋지않을까?",
- "base_commit": "57f8a02",
+ "base_commit": "dfb3f43",
  "product_commit": "598440d",
  "implementation_revision": null,
  "mock": {
   "file": "docs/mockups/ees-work/design-mock-23-tool-job-list.html",
-  "sha256": "325e9ecc57c47ae81223359466b12d3eefaea5a67f278278290424b1e0fa12be",
-  "bytes": 975089,
+  "sha256": "73660f091ded6336e40bb3c8a23c9f1d62378ebe87ea3a0fcba9c09d40dfa1b9",
+  "bytes": 1117322,
   "source": "docs/mockups/ees-work/design-mock-src/23-tool-job-list.html",
-  "source_sha256": "70ad8310a030a36c1fc80954d851e0f8c86f1c5a6d2031c90fe333b86e1fd538",
+  "source_sha256": "e2306a4ece0d72577c8bc1d5cd508ca2b9c8d6845af97c3474d08dde40208ad5",
   "product_css": {
    "chat-theme.css": "b0c9b3298702fe77d758839265370080b9cf33f403c558c96dc4e95e114f222e",
    "ees-work-launcher.css": "af59988c11386a52510b9b141177f1edb249e748693978e072ae235ff7b65562"
@@ -25,30 +30,42 @@
   "T4": "상태 모음 · 도구 연결 전(변경 이력 확인), 연결 확인 필요(담당자 정보 조회). 줄을 누르면 그 상태의 작업 화면",
   "T5": "사람이 하는 작업과 도구 작업이 함께 있는 절차(주간 설비 점검)"
  },
+ "sides": {
+  "now": "지금(main 598440d)",
+  "after": "바꾼 뒤 · 바로 편집: 요약 화면 없이 편집 화면이 바로 열림",
+  "view": "바꾼 뒤 · 보기 먼저: 모든 절차가 보는 화면으로 열리고 제목 줄의 '편집' 단추로 편집 화면에 들어감"
+ },
  "views": {
-  "side": "가운데 화면만 지금과 바꾼 뒤를 나란히",
-  "now": "지금만(창 전체)",
-  "after": "바꾼 뒤만(창 전체)"
+  "all": "세 쪽을 나란히(폭 1600px 이상에서 처음 모습)",
+  "pair": "바꾼 두 쪽을 나란히(더 좁은 창의 처음 모습)",
+  "one": "한 쪽만 켜면 창 전체(왼쪽 메뉴, 대화 포함)"
  },
  "option": {
-  "mark": "앞 작업의 결과를 받는 작업의 표시. off(시안의 기본) | on"
+  "mark": "앞 작업의 결과를 받는 작업의 표시(바꾼 두 쪽). on(시안의 기본) | off",
+  "form": "'바로 편집'의 이름·분류·목적 칸. on(지금처럼, 시안의 기본) | off(접기)"
  },
  "now_side": "main 598440d로 만든 프로그램을 개발 환경에 띄워 합성 자료로 그려진 HTML과 제품 CSS 그대로. 왼쪽 메뉴 안쪽도 제품 HTML. 바깥 틀, 윗줄, 오른쪽 대화는 모양을 그린 것. T4의 연결 확인 필요 줄과 그 작업 화면은 제품 코드에서 옮겨 적음",
  "window": {
-  "1920x1080": "나란히 볼 때 한쪽 960px(가운데 화면만). 한쪽만 볼 때 왼쪽 메뉴 256px, 가운데 1104px, 대화 560px",
-  "1366x768": "나란히 볼 때 한쪽 683px. 한쪽만 볼 때 왼쪽 메뉴 56px, 대화 480px"
+  "1920x1080": "세 쪽 640px씩, 두 쪽 960px씩(가운데 화면만). 한 쪽만 볼 때 왼쪽 메뉴 256px, 가운데 1104px, 대화 560px",
+  "1366x768": "두 쪽 683px씩. 한 쪽만 볼 때 왼쪽 메뉴 56px, 대화 480px"
  },
  "captures": [
   "T1-side-1366.png",
   "T1-side-1920.png",
   "T1-side-form-folded-1366.png",
   "T1-side-form-folded-1920.png",
+  "T1-three-1366.png",
+  "T1-three-1920.png",
   "T2-after-1366.png",
   "T2-after-1920.png",
+  "T2-after-alone-1366.png",
+  "T2-after-alone-1920.png",
   "T2-side-1366.png",
   "T2-side-1920.png",
   "T2-side-no-mark-1366.png",
   "T2-side-no-mark-1920.png",
+  "T2-three-1366.png",
+  "T2-three-1920.png",
   "T3-side-open-1366.png",
   "T3-side-open-1920.png",
   "T4-1-job-unconnected-1366.png",
@@ -59,13 +76,17 @@
   "T4-side-1920.png",
   "T4-side-now-edit-1366.png",
   "T4-side-now-edit-1920.png",
+  "T4-three-1366.png",
+  "T4-three-1920.png",
   "T5-side-1366.png",
-  "T5-side-1920.png"
+  "T5-side-1920.png",
+  "T5-three-1366.png",
+  "T5-three-1920.png"
  ],
  "checks": {
   "file": "evals/artifacts/tool-job-list-20261126/validation-report.json",
-  "checks": 227,
-  "passed": 227,
+  "checks": 293,
+  "passed": 293,
   "failed": 0
  }
 }

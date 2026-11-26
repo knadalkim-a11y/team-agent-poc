@@ -14,7 +14,7 @@ async function run(browser, width, height) {
   const page = await browser.newPage({ viewport: { width, height } });
   const errors = []; page.on('pageerror', e => errors.push(String(e))); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
   await page.goto('file://' + path.resolve(file)); await page.evaluate(() => document.fonts.ready);
-  const now = '.mk-pane[data-side=now] ', after = '.mk-pane[data-side=after] ';
+  const now = '.mk-pane[data-side=now] ', after = '.mk-pane[data-side=after] ', view = '.mk-pane[data-side=view] ';
   const show = async (scene, view, mark, form) => { await page.evaluate(([s, v, m, f]) => window.mockShow(s, v, m, f), [scene, view || 'side', mark || 'on', form || 'on']); await page.waitForTimeout(120); };
   // a closed <details> keeps its content's boxes (content-visibility), so ask the browser whether it is rendered
   const shown = sel => page.evaluate(s => { const e = document.querySelector(s); if (!e) return false; const c = getComputedStyle(e), r = e.getBoundingClientRect(); return c.display !== 'none' && c.visibility !== 'hidden' && r.width > 1 && r.height > 1 && e.checkVisibility(); }, sel);
@@ -28,6 +28,7 @@ async function run(browser, width, height) {
   const rows = side => page.evaluate(s => [...document.querySelectorAll(s + '.ew-job-row')].map(r => { const name = r.querySelector('.ew-job-row-label>span'), tag = name.querySelector('.ew-author-tag'); return { id: r.getAttribute('data-job-id'), h: Math.round(r.getBoundingClientRect().height), name: [...name.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim(), chip: tag ? tag.textContent.trim() : '', meta: [...r.querySelectorAll('.ew-job-meta')].map(m => m.innerText.trim()).join(''), lines: r.innerText.split('\n').map(x => x.trim()).filter(Boolean).length, binding: !!r.querySelector('[data-api-job-binding]'), action: (r.querySelector('.ew-api-row-action') || { textContent: '' }).textContent.trim() }; }), side);
   const overview = side => page.evaluate(s => document.querySelector(s + '#ees-work-designer').getAttribute('data-api-overview'), side);
 
+  check('a wide window opens with all three sides, a narrower one with the two proposals', (await state()).view === (width >= 1600 ? 'now+after+view' : 'after+view'), (await state()).view);
   check('a short window starts with the explanation folded, a tall one open', (await page.evaluate(() => document.querySelector('#mock-guide').getAttribute('data-collapsed'))) === String(height < 900));
   if (height < 900) {
     check('folded: the screens and the two switches are still there to press', (await shown('[data-step=T4]')) && (await shown('[data-form-pick=off]')) && (await shown('[data-mark-pick=off]')) && !(await shown('#mock-step-text')));
@@ -42,7 +43,7 @@ async function run(browser, width, height) {
 
   // ---- T1: the procedure as it opens
   await show('T1');
-  check('T1 badge says it is a mock and names the screen', (await text('#mock-badge')) === '시안 1 · 저장·실행 안 됨 · T1');
+  check('T1 badge says it is a mock and names the screen', (await text('#mock-badge')) === '시안 2 · 저장·실행 안 됨 · T1');
   check('T1 now: the summary hides 단계 추가', (await overview(now)) === 'true' && !(await shown(now + '[data-author-action=add_stage]')));
   check('T1 now: the way in is ⋯ → 절차 편집', (await text(now + '[data-author-action=api_structure_edit]')) === '절차 편집');
   check('T1 after: 단계 추가 shows as the procedure opens', await shown(after + '[data-author-action=add_stage]'));
@@ -146,7 +147,7 @@ async function run(browser, width, height) {
   const ring = await page.evaluate(s => { const c = getComputedStyle(document.querySelector(s)); return c.outlineStyle + ' ' + c.outlineWidth; }, after + '.ew-tool-card summary');
   check('T3 after: 상세 보기 shows a focus ring from the keyboard', /solid 2px/.test(ring), ring);
   await page.keyboard.press('ArrowLeft'); await page.waitForTimeout(80);
-  check('an arrow key pressed inside a side does not flip the view', (await state()).view === 'side');
+  check('an arrow key pressed inside a side does not change what is shown', (await state()).view === 'now+after');
   await page.keyboard.press('Enter'); await page.waitForTimeout(100);
   check('T3 after: Enter closes the details', !(await shown(after + '.ew-tool-card dl')));
 
@@ -204,6 +205,68 @@ async function run(browser, width, height) {
   await page.click(now + '[data-author-action=stage_toggle][data-id=record]'); await page.waitForTimeout(80);
   check('T5: the second stage says the mock opens only the first', (await noteText()).includes('첫 단계만'));
 
+  // ---- the 'view first' proposal
+  const pair = width >= 1600 ? 'all' : 'pair';
+  await show('T1', pair);
+  check('view first T1: opens to read — no fields, nothing to add', (await count(view + 'input[name=overview_name]')) === 0 && (await count(view + '[data-author-action=add_stage]')) === 0 && (await count(view + '[data-author-action=start_input_add]')) === 0 && (await text(view.trim() + '>.mk-pane-label small')) === '열자마자 보이는 화면');
+  const editButton = await page.evaluate(s => { const b = document.querySelector(s + '.ew-view-edit'), r = b.getBoundingClientRect(), m = document.querySelector(s + '.ew-procedure-menu>summary').getBoundingClientRect(), c = getComputedStyle(b); return { text: b.textContent, inMenu: !!b.closest('.ew-procedure-menu'), h: Math.round(r.height), gap: Math.round(m.left - r.right), mid: Math.round(Math.abs((r.top + r.bottom) / 2 - (m.top + m.bottom) / 2)), border: c.borderTopWidth, pressed: b.getAttribute('aria-pressed') }; }, view);
+  check('view first T1: 편집 is a button on the title row, beside ⋯, not a menu item', editButton.text === '편집' && !editButton.inMenu && editButton.h === 32 && editButton.gap === 8 && editButton.mid <= 1 && editButton.border === '1px' && editButton.pressed === 'false', JSON.stringify(editButton));
+  check('view first T1: no 절차 편집 left in the menu', (await page.locator(view + '.ew-procedure-menu button').allTextContents()).join('|') === '업무 절차 정보·분류 수정|다른 이름으로 저장|내용 확인|게시 내림');
+  const listTops = { view: await listTop(view), after: await listTop(after) };
+  check('view first T1: the stage list starts higher than in the straight-to-editing proposal', listTops.view < listTops.after - 150, JSON.stringify(listTops));
+  await shot('T1-three');
+  await page.click(view + '.ew-view-edit'); await page.waitForTimeout(120);
+  check('view first: 편집 opens the editing screen on that side only', (await shown(view + 'input[name=overview_name]')) && (await shown(view + '[data-author-action=add_stage]')) && (await text(view + '.ew-view-edit')) === '편집 마침' && (await text(view.trim() + '>.mk-pane-label small')) === '‘편집’을 누른 뒤' && (await state()).viewEdit && (await shown(after + '[data-author-action=add_stage]')));
+  check('view first: the keyboard stays on the button', (await focused()) === 'view/view_edit/', await focused());
+  await page.click(view + '[data-author-action=stage_toggle]'); await page.waitForTimeout(120);
+  await page.click(view + '[data-author-action=node][data-id=page]'); await page.waitForTimeout(120);
+  check('view first: a job page is the same as in the other proposal', (await badge()) === 'T3' && (await text(view + '.ew-tool-card-name')) === (await text(after + '.ew-tool-card-name')) && (await count(view + '.ew-view-edit')) === 0);
+  await page.click(view + '.ew-job-detail-header [data-author-action=node]'); await page.waitForTimeout(120);
+  check('view first: back from a job one is still editing', (await shown(view + '[data-author-action=add_job]')) && (await text(view + '.ew-view-edit')) === '편집 마침');
+  await page.click(view + '.ew-view-edit'); await page.waitForTimeout(120);
+  check('view first: 편집 마침 returns to reading', (await count(view + '[data-author-action=add_job]')) === 0 && (await text(view + '.ew-view-edit')) === '편집' && !(await state()).viewEdit);
+  await show('T2', pair);
+  const readRows = await rows(view), editRows2 = await rows(after);
+  check('view first T2: the rows read the same as in the other proposal', readRows.length === 2 && readRows.every((r, i) => r.name === editRows2[i].name && r.meta === editRows2[i].meta && r.lines === 2 && r.h <= 64), JSON.stringify(readRows.map(r => [r.name, r.meta, r.h])));
+  check('view first T2: no ⋯ on a stage or a job, no 작업 추가, no 단계 정보 수정 while reading', (await count(view + '.ew-job-menu-button')) === 0 && (await count(view + '[data-author-action=add_job]')) === 0 && (await count(view + '[data-author-action=stage_edit]')) === 0);
+  const edge = await page.evaluate(s => { const head = document.querySelector(s + '.ew-stage-toggle>img').getBoundingClientRect(), row = document.querySelector(s + '.ew-job-row .ew-author-job>img:last-child').getBoundingClientRect(), list = document.querySelector(s + '.ew-stage-list').getBoundingClientRect(); return { head: Math.round(list.right - head.right), row: Math.round(list.right - row.right) }; }, view);
+  check('view first T2: the arrows of the stage and of its jobs end on one line', Math.abs(edge.head - edge.row) <= 1 && edge.row >= 8 && edge.row <= 24, JSON.stringify(edge));
+  check('view first T2: the jobs are in view', (await inView(view)).every(Boolean));
+  await shot('T2-three');
+  await page.click(view + '[data-author-action=node][data-id=children]'); await page.waitForTimeout(120);
+  await page.click(view + '.ew-job-detail-header [data-author-action=node]'); await page.waitForTimeout(120);
+  check('view first: back from a job opened while reading, one is reading again', (await count(view + '[data-author-action=add_job]')) === 0 && (await count(view + '.ew-job-row')) === 2 && (await overview(now)) === 'true');
+  await show('T4', pair);
+  const readBoard = await rows(view);
+  check('view first T4: the two marks and 도구 연결 are there while reading', readBoard.length === 4 && readBoard[2].chip === '도구 연결 전' && readBoard[2].action === '도구 연결' && readBoard[3].chip === '도구 확인 필요' && (await inView(view)).every(Boolean), JSON.stringify(readBoard.map(r => [r.name, r.chip, r.action])));
+  const readPlace = await page.evaluate(s => { const row = document.querySelector(s + '.ew-job-row[data-job-id=history]'), b = row.querySelector('.ew-api-row-action').getBoundingClientRect(), r = row.getBoundingClientRect(), a = row.querySelector('.ew-author-job>img:last-child').getBoundingClientRect(), tag = row.querySelector('.ew-author-tag').getBoundingClientRect(); return { inRow: b.top >= r.top && b.bottom <= r.bottom, gap: Math.round(a.left - b.right), clear: Math.round(b.left - tag.right), h: Math.round(b.height) }; }, view);
+  check('view first T4: 도구 연결 sits on its row, left of the arrow, clear of the text', readPlace.inRow && readPlace.gap >= 6 && readPlace.gap <= 16 && readPlace.clear > 8 && readPlace.h === 32, JSON.stringify(readPlace));
+  await shot('T4-three');
+  await show('T5', pair);
+  const readMixed = await rows(view), nowMixed = await rows(now);
+  check('view first T5: a procedure with people\'s jobs also opens to read (today it opens in the editing screen)', (await count(view + 'input[name=overview_name]')) === 0 && (await count(view + '[data-author-action=add_stage]')) === 0 && (await count(now + '[data-author-action=add_stage]')) === 1 && readMixed.length === 2);
+  check('view first T5: the person\'s job reads as it does now; the two rows are the same height but for the last one\'s missing line', readMixed[0].name === nowMixed[0].name && readMixed[0].meta === nowMixed[0].meta && Math.abs(readMixed[0].h - readMixed[1].h) <= 1, JSON.stringify(readMixed.map(r => [r.name, r.meta, r.h])));
+  await shot('T5-three');
+  for (const scene of ['T1', 'T2', 'T3', 'T4', 'T5']) {
+    await show(scene, pair);
+    const over = await page.evaluate(() => [...document.querySelectorAll('.mk-pane[data-shown=true]')].map(p => { const s = p.querySelector('.ew-author-scroll') || p.querySelector('#ees-work-panel'); return s.scrollWidth - s.clientWidth; }));
+    check(`${scene} (${pair}): no sideways scroll on any side shown`, over.every(v => v <= 0), JSON.stringify(over));
+    const cut = await page.evaluate(() => [...document.querySelectorAll('.mk-pane[data-side=view] :is(.ew-job-row-label>span,.ew-job-meta,.ew-view-edit,.ew-api-row-action,.ew-author-tag,h2,.ew-stage-name)')].filter(e => e.getBoundingClientRect().width > 0 && (e.scrollWidth > e.clientWidth + 1)).map(e => e.textContent.trim().slice(0, 20)));
+    check(`${scene} (${pair}): no cut text on the view-first side`, cut.length === 0, JSON.stringify(cut));
+  }
+  // which sides are shown
+  await show('T2', 'all');
+  await page.click('[data-pane-pick=now]'); await page.waitForTimeout(100);
+  check('sides: 지금 can be turned off, leaving the two proposals side by side', (await state()).view === 'after+view' && !(await shown(now + '#ees-work-panel')) && (await shown(after + '#ees-work-panel')) && (await shown(view + '#ees-work-panel')));
+  await page.click('[data-pane-pick=after]'); await page.waitForTimeout(100);
+  check('sides: one side alone shows the whole window, with its left menu', (await state()).view === 'view' && (await shown(view + '.fu-side')));
+  await page.click('[data-pane-pick=view]'); await page.waitForTimeout(100);
+  check('sides: the last one stays on', (await state()).view === 'view' && (await noteText()).includes('하나는'));
+  await page.evaluate(() => document.activeElement && document.activeElement.blur());
+  await page.keyboard.press('ArrowLeft'); await page.waitForTimeout(100);
+  check('sides: ← goes to the side before', (await state()).view === 'after');
+  await shot('T2-after-alone');
+
   // ---- things the mock does not do say so; where one had scrolled to is kept
   await show('T2');
   await page.click(after + '[data-author-action=add_job]'); await page.waitForTimeout(80);
@@ -235,7 +298,7 @@ async function run(browser, width, height) {
   await page.keyboard.press('ArrowLeft'); await page.waitForTimeout(100);
   check('single view: ← shows now', (await state()).view === 'now' && (await shown('.mk-pane[data-side=now] .fu-side')));
   await page.click('[data-mark-pick=off]'); await page.waitForTimeout(80);
-  check('single view: a switch that only touches the after side says so when now is shown', (await noteText()).includes('지금만'), await noteText());
+  check('single view: a switch that only touches the proposals says so when only now is shown', (await noteText()).includes('바꾼 두 쪽'), await noteText());
   await page.click('[data-mark-pick=on]');
   await page.keyboard.press('5'); await page.waitForTimeout(100);
   check('keys 1–5 pick the screen', (await state()).where === 'T5');
