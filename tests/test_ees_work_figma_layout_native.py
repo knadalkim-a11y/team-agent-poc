@@ -189,9 +189,10 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         self.assertEqual(observed['cardMotion']['duration'].split(', '), ['0.12s'] * 4)
         self.assertEqual(observed['cardMotion']['easing'],
                          ', '.join(['cubic-bezier(0.2, 0.8, 0.2, 1)'] * 4))
-        hover('[data-ees-work-toolbar] [data-ees-chat-toggle]', 'rgb(248, 249, 250)')
+        # --ees-surface-hover is #f3f5f8 since design mock 22 revision 1 (2026-11-26).
+        hover('[data-ees-work-toolbar] [data-ees-chat-toggle]', 'rgb(243, 245, 248)')
         observed['headerHover'] = background('[data-ees-work-toolbar] [data-ees-chat-toggle]')
-        self.assertEqual(observed['headerHover'], 'rgb(248, 249, 250)')
+        self.assertEqual(observed['headerHover'], 'rgb(243, 245, 248)')
         self.click('#ew-author-search')
         self.key('Tab', 9)
         # The search row ends with the new-procedure button; the rows follow it.
@@ -244,16 +245,18 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
             if tabs:
                 # Task-detail tabs retain their compact style; the stage and
                 # authoring pages use the larger primary navigation of mock 1.
+                # Design mock 22 revision 1 (2026-11-26): the primary tabs stand 28px apart,
+                # are 44px high and a step heavier, and every tab marks its place in the accent.
                 primary_tabs=label=='work-stage' or label.startswith('author-')
                 self.assertEqual(result['tabs'], {
-                    'gap':'20px',
-                    'active': {'color': 'rgb(29, 33, 40)', 'background': 'rgba(0, 0, 0, 0)',
-                               'font': '14px' if primary_tabs else '12px', 'line': '22px' if primary_tabs else '18px', 'weight': '500', 'height': 40 if primary_tabs else 36,
-                               'paddingTop': '8px' if primary_tabs else '6px','paddingBottom':'10px'},
+                    'gap':'28px' if primary_tabs else '20px',
+                    'active': {'color': 'rgb(23, 27, 34)', 'background': 'rgba(0, 0, 0, 0)',
+                               'font': '14px' if primary_tabs else '12px', 'line': '22px' if primary_tabs else '18px', 'weight': '600' if primary_tabs else '500', 'height': 44 if primary_tabs else 36,
+                               'paddingTop': '10px' if primary_tabs else '6px','paddingBottom':'12px' if primary_tabs else '10px'},
                     'inactive': {'color': 'rgb(94, 101, 115)', 'background': 'rgba(0, 0, 0, 0)',
-                                 'font': '14px' if primary_tabs else '12px', 'line': '22px' if primary_tabs else '18px', 'weight': '400', 'height': 40 if primary_tabs else 36,
-                                 'paddingTop': '8px' if primary_tabs else '6px','paddingBottom':'10px'},
-                    'underline': 'rgb(29, 33, 40)', 'underlineHeight': '2px'}, label)
+                                 'font': '14px' if primary_tabs else '12px', 'line': '22px' if primary_tabs else '18px', 'weight': '500' if primary_tabs else '400', 'height': 44 if primary_tabs else 36,
+                                 'paddingTop': '10px' if primary_tabs else '6px','paddingBottom':'12px' if primary_tabs else '10px'},
+                    'underline': 'rgb(43, 95, 168)', 'underlineHeight': '2px'}, label)
             self.assertFalse(self.geometry()['overflow'], label)
             shared[label] = result
 
@@ -286,7 +289,9 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
             self.click('[data-author-action=tab][data-tab=' + tab + ']')
             self.wait("document.querySelector('.ew-author-tabs [data-tab=" + tab + "]')?.getAttribute('aria-selected') === 'true'")
             capture_style('author-' + tab, '.ew-author-tabs')
-        hover('.ew-author-tabs [aria-selected=false]', 'rgb(231, 232, 235)')
+        # A primary tab answers the pointer with its ink, not with a grey block (design mock 22 revision 1).
+        hover('.ew-author-tabs [aria-selected=false]', 'rgba(0, 0, 0, 0)')
+        self.wait("getComputedStyle(document.querySelector('.ew-author-tabs [aria-selected=false]:hover')).color === 'rgb(23, 27, 34)'")
         self.open_workspace_assets()
         self.click('[data-action=tools]')
         self.wait("document.querySelector('#ees-work-designer[data-author-tab=tools]')")
@@ -305,7 +310,8 @@ class FigmaLayoutNativeTests(IntegratedNativeCase):
         capture_style('work-stage', '.ew-tabs')
         capture_tab_focus('work-stage', '.ew-tabs')
         self.screenshot('shared-panel-stage-1366')
-        hover('.ew-tabs [aria-pressed=false]', 'rgb(231, 232, 235)')
+        hover('.ew-tabs [aria-pressed=false]', 'rgba(0, 0, 0, 0)')
+        self.wait("getComputedStyle(document.querySelector('.ew-tabs [aria-pressed=false]:hover')).color === 'rgb(23, 27, 34)'")
         self.open_run(workflow_id, run)
         self.wait("document.querySelector('#ees-work-panel:not(.ew-vd) .ew-tabs')")
         capture_style('work-task', '.ew-tabs')

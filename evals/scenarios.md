@@ -90,7 +90,7 @@
 | Windows 폴더 변경 대기·수동 진행 | [제한적 rename 재시도·경로 보호·기존 Resume 연결](#windows-program-rename-20260914) |
 | ees_specialists 자산 관리 필드 충돌 | [0.2.6 공식 자동 정렬본 인식·ees.7 실행 확인·ApplyDemo 재개](#specialists-editor-format-20260914) |
 | WinError64 수신 소실·임시 복구·재발 방지 | [09-14 증거, 후보 검토, 현재 검사·배포 구분](#accept64-guard-20260914) |
-| 서버 종료 실패와 명시적 복구 | [process_stop 실패·복구 결과](#ees-stop-recovery) |
+| 서버 종료 실패와 명시적 복구 | [process_stop 실패·복구 결과](#ees-stop-recovery), [2026-11-25 재발](no-run-mode-20261102.md#main-62d58c2-apply-prep-20261125) |
 | 대화 폭·파란 조절 테두리 | [1920px 화면 보완](#ees-chat-width-resize), [사용자 정상 확인](#ees-stop-recovery) |
 | WO 코드 인식·폴더 변경 실패 | [공식 편집기 정렬본](#wo-editor-format-adoption), [rename/Resume](#ees-wrapper-manual-resume), [Portal 적용 실패](#ees-portal-upgrade-apply-failure) |
 | Jira·GitHub·Confluence 대표 질문 | [v0.2.6 구성·갱신·조회 범위](#connector-demo-starters) |
