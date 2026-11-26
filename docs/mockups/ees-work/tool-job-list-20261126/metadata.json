@@ -4,15 +4,15 @@
  "date": "2026-11-26",
  "request": "응 비교 시안으로 만들어줘",
  "context": "아니근데 '워크스페이스'에서 단계랑 작업 추가하는 기능들 왜 ui에서 안보이지? · '워크스페이스' 자체가, 편집전용 화면이잖아? 근데 왜 저게 또있는거야 · 최대한 눈에 보이는 정보는 단순하면서 직관적이어야해. 상세정보들은 추가적인 클릭을 통해서 보이는게 더 좋지않을까?",
- "base_commit": "09bafa3",
+ "base_commit": "57f8a02",
  "product_commit": "598440d",
  "implementation_revision": null,
  "mock": {
   "file": "docs/mockups/ees-work/design-mock-23-tool-job-list.html",
-  "sha256": "fce3eca4eff8c48fddbadf8327779289d333a975c2ce33e0bd794ad786f4921f",
-  "bytes": 974856,
+  "sha256": "325e9ecc57c47ae81223359466b12d3eefaea5a67f278278290424b1e0fa12be",
+  "bytes": 975089,
   "source": "docs/mockups/ees-work/design-mock-src/23-tool-job-list.html",
-  "source_sha256": "387620dcee6cea8733b15a927f4edcf53526659e5d3394559c0c44182eb3faf0",
+  "source_sha256": "70ad8310a030a36c1fc80954d851e0f8c86f1c5a6d2031c90fe333b86e1fd538",
   "product_css": {
    "chat-theme.css": "b0c9b3298702fe77d758839265370080b9cf33f403c558c96dc4e95e114f222e",
    "ees-work-launcher.css": "af59988c11386a52510b9b141177f1edb249e748693978e072ae235ff7b65562"
@@ -64,8 +64,8 @@
  ],
  "checks": {
   "file": "evals/artifacts/tool-job-list-20261126/validation-report.json",
-  "checks": 224,
-  "passed": 224,
+  "checks": 227,
+  "passed": 227,
   "failed": 0
  }
 }

@@ -1,12 +1,12 @@
 {
  "mock": "design-mock-23-tool-job-list.html",
- "checks": 224,
- "passed": 224,
+ "checks": 227,
+ "passed": 227,
  "failed": 0,
  "results": [
   {
    "size": "1920x1080",
-   "name": "a short window starts with the guide folded, a tall one open",
+   "name": "a short window starts with the explanation folded, a tall one open",
    "ok": true,
    "detail": ""
   },
@@ -666,7 +666,7 @@
   },
   {
    "size": "1920x1080",
-   "name": "the guide folds, the badge stays",
+   "name": "the explanation folds; the badge and the buttons stay",
    "ok": true,
    "detail": ""
   },
@@ -678,9 +678,27 @@
   },
   {
    "size": "1366x768",
-   "name": "a short window starts with the guide folded, a tall one open",
+   "name": "a short window starts with the explanation folded, a tall one open",
    "ok": true,
    "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "folded: the screens and the two switches are still there to press",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "folded: the fields switch works without opening the explanation",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "folded: the four jobs of T4 are in view on the after side",
+   "ok": true,
+   "detail": "[true,true,true,true]"
   },
   {
    "size": "1366x768",
@@ -1338,7 +1356,7 @@
   },
   {
    "size": "1366x768",
-   "name": "the guide folds, the badge stays",
+   "name": "the explanation folds; the badge and the buttons stay",
    "ok": true,
    "detail": ""
   },

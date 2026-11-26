@@ -3466,7 +3466,8 @@ body{display:flex;flex-direction:column}
 .mk-guide .mk-fold{margin-left:auto;border-color:transparent}
 .mk-text{margin:6px 0 0;display:flex;flex-wrap:wrap;gap:2px 20px;min-width:0}
 .mk-text b{font-weight:400;font-size:12px;color:#5e6573;margin-right:6px}
-.mk-guide[data-collapsed="true"] :is(.mk-hide,.mk-text){display:none}
+/* folding takes the explanation away, not the buttons: the screens and the two switches stay within reach on a short window */
+.mk-guide[data-collapsed="true"] :is(.mk-text,#mock-ref-toggle){display:none}
 /* what a press in the mock would do in the product: said for a moment at the bottom, clear of both sides' headings */
 .mk-note{position:fixed;z-index:96;left:50%;bottom:76px;transform:translateX(-50%);max-width:calc(100% - 32px);padding:6px 12px;border:1px dashed #5e6573;border-radius:2px;background:#fff;box-shadow:0 8px 24px #1018281f;font-size:12px;line-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mk-note:empty{display:none}
@@ -4040,7 +4041,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   var SUB={history:'T4-1',owner:'T4-2',doc:'T5-1'};
   var SAME='지금 제품과 같은 동작입니다 · 시안에서는 동작하지 않습니다';
   var state={view:'side',mark:'on',form:'on',screen:'proc',open:false,board:false,mixed:false,nowEdit:false,job:'children',ref:false};
-  var noteTimer=0,align=false;
+  var noteTimer=0,align=false,fresh=false;
   function compact(){return window.innerWidth<1440;}
   function note(text){var box=$('#mock-note');box.textContent=text;clearTimeout(noteTimer);noteTimer=setTimeout(function(){box.textContent='';},3200);}
   // which numbered screen the two sides are on now: the badge and the text follow where one has walked to
@@ -4080,7 +4081,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
       var list=$('.ew-stage-list',pane),box=now.getBoundingClientRect();
       // only when the jobs would not all be in view: on a tall window nothing moves
       if(align&&heading&&list){if(list.getBoundingClientRect().bottom>box.bottom-8)now.scrollTop+=heading.getBoundingClientRect().top-box.top-12;}
-      else if(kept.screen===state.screen)now.scrollTop=kept.top;
+      else if(!fresh&&kept.screen===state.screen)now.scrollTop=kept.top;   // a screen picked from the strip starts at its top
     }
     // under 1440 the product folds the left menu to a rail: the same markup, marked compact, its groups closed
     var rail=$('.fu-side',pane);rail.setAttribute('data-compact',String(compact()));
@@ -4094,7 +4095,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   function render(){
     var id=where(),base=id.slice(0,2),data=SCENES[base];
     $('#mock-stage').setAttribute('data-view',state.view);
-    all('.mk-pane').forEach(fill);align=false;
+    all('.mk-pane').forEach(fill);align=false;fresh=false;
     $('#mock-badge').textContent='시안 1 · 저장·실행 안 됨 · '+id;
     document.title='도구 작업 줄 단순화 시안 1 · '+data.name+' · EES Workflow';
     all('[data-step]').forEach(function(button){button.setAttribute('aria-pressed',String(button.getAttribute('data-step')===base));});
@@ -4105,7 +4106,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
     [['언제',data.when],['바뀐 것',data.changed]].concat(state.ref?[['참고',NOTE]]:[]).forEach(function(pair){var span=document.createElement('span'),b=document.createElement('b');b.textContent=pair[0];span.appendChild(b);span.appendChild(document.createTextNode(pair[1]));text.appendChild(span);});
   }
   // a numbered screen from the strip: the stage list is brought to the same height on both sides, so what is compared is in view
-  function scene(name){var set=SCENES[name].set;Object.keys(set).forEach(function(k){state[k]=set[k];});align=set.screen==='proc'&&set.open;}
+  function scene(name){var set=SCENES[name].set;Object.keys(set).forEach(function(k){state[k]=set[k];});align=set.screen==='proc'&&set.open;fresh=true;}
   // what a press inside a side does: the two sides share one place (which screen, which stage, which job).
   // returns what to put the keyboard focus on afterwards, or false when nothing moved
   function act(target){

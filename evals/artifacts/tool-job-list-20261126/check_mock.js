@@ -28,8 +28,17 @@ async function run(browser, width, height) {
   const rows = side => page.evaluate(s => [...document.querySelectorAll(s + '.ew-job-row')].map(r => { const name = r.querySelector('.ew-job-row-label>span'), tag = name.querySelector('.ew-author-tag'); return { id: r.getAttribute('data-job-id'), h: Math.round(r.getBoundingClientRect().height), name: [...name.childNodes].filter(n => n.nodeType === 3).map(n => n.textContent).join('').trim(), chip: tag ? tag.textContent.trim() : '', meta: [...r.querySelectorAll('.ew-job-meta')].map(m => m.innerText.trim()).join(''), lines: r.innerText.split('\n').map(x => x.trim()).filter(Boolean).length, binding: !!r.querySelector('[data-api-job-binding]'), action: (r.querySelector('.ew-api-row-action') || { textContent: '' }).textContent.trim() }; }), side);
   const overview = side => page.evaluate(s => document.querySelector(s + '#ees-work-designer').getAttribute('data-api-overview'), side);
 
-  check('a short window starts with the guide folded, a tall one open', (await page.evaluate(() => document.querySelector('#mock-guide').getAttribute('data-collapsed'))) === String(height < 900));
-  if (height < 900) await page.click('#mock-fold');
+  check('a short window starts with the explanation folded, a tall one open', (await page.evaluate(() => document.querySelector('#mock-guide').getAttribute('data-collapsed'))) === String(height < 900));
+  if (height < 900) {
+    check('folded: the screens and the two switches are still there to press', (await shown('[data-step=T4]')) && (await shown('[data-form-pick=off]')) && (await shown('[data-mark-pick=off]')) && !(await shown('#mock-step-text')));
+    await page.click('[data-form-pick=off]'); await page.waitForTimeout(120);
+    check('folded: the fields switch works without opening the explanation', !(await shown(after + 'input[name=overview_name]')));
+    await page.click('[data-form-pick=on]'); await page.waitForTimeout(120);
+    await show('T4');
+    const seen = await page.evaluate(s => { const sc = document.querySelector(s + '.ew-author-scroll').getBoundingClientRect(); return [...document.querySelectorAll(s + '.ew-job-row')].map(r => { const b = r.getBoundingClientRect(); return b.top >= sc.top - 1 && b.bottom <= sc.bottom + 1; }); }, after);
+    check('folded: the four jobs of T4 are in view on the after side', seen.length === 4 && seen.every(Boolean), JSON.stringify(seen));
+    await page.click('#mock-fold');
+  }
 
   // ---- T1: the procedure as it opens
   await show('T1');
@@ -237,7 +246,7 @@ async function run(browser, width, height) {
   check('참고 opens the reference line, which also says the keys', (await page.locator('#mock-step-text').textContent()).includes('main 598440d') && (await page.locator('#mock-step-text').textContent()).includes('숫자 키 1~5'));
   await page.click('#mock-ref-toggle');
   await page.click('#mock-fold'); await page.waitForTimeout(80);
-  check('the guide folds, the badge stays', (await shown('#mock-badge')) && !(await shown('#mock-step-text')));
+  check('the explanation folds; the badge and the buttons stay', (await shown('#mock-badge')) && (await shown('[data-step=T1]')) && !(await shown('#mock-step-text')) && !(await shown('#mock-ref-toggle')));
   await page.click('#mock-fold');
   check('no page errors', errors.length === 0, JSON.stringify(errors));
   await page.close();
