@@ -1,0 +1,1297 @@
+{
+ "file": "docs/mockups/ees-work/design-mock-22-visual-polish.html",
+ "checks": 215,
+ "failed": 0,
+ "results": [
+  {
+   "size": "1920x1080",
+   "name": "opens on P1, side by side",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 side: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 side: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 side: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 side: left menu and chat are hidden",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 now: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 now: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 now: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1: now keeps the product values",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1: after takes the new values, three text levels",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: only the five type steps",
+   "ok": true,
+   "detail": "12px/18px 13px/20px 14px/22px 16px/24px 24px/32px"
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: only the four corner values",
+   "ok": true,
+   "detail": "12px 50% 8px 999px"
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 side: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 side: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 side: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 side: left menu and chat are hidden",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 now: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 now: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 now: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 after: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 after: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 after: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2: now keeps the product values",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2: after takes the new values, three text levels",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 after: only the five type steps",
+   "ok": true,
+   "detail": "12px/18px 13px/20px 14px/22px 16px/24px 24px/32px"
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 after: only the four corner values",
+   "ok": true,
+   "detail": "12px 50% 5px 8px"
+  },
+  {
+   "size": "1920x1080",
+   "name": "P3 side: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P3 side: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P3 side: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P3 side: left menu and chat are hidden",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P3 now: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P3 now: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P3 now: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P3 after: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P3 after: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P3 after: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P3: now keeps the product values",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P3: after takes the new values, three text levels",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P3 after: only the five type steps",
+   "ok": true,
+   "detail": "12px/18px 13px/20px 14px/22px 16px/24px"
+  },
+  {
+   "size": "1920x1080",
+   "name": "P3 after: only the four corner values",
+   "ok": true,
+   "detail": "12px 8px"
+  },
+  {
+   "size": "1920x1080",
+   "name": "P4 side: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P4 side: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P4 side: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P4 side: left menu and chat are hidden",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P4 now: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P4 now: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P4 now: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P4 after: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P4 after: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P4 after: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P4: now keeps the product values",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P4: after takes the new values, three text levels",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P4 after: only the five type steps",
+   "ok": true,
+   "detail": "12px/18px 13px/20px 14px/22px 16px/24px"
+  },
+  {
+   "size": "1920x1080",
+   "name": "P4 after: only the four corner values",
+   "ok": true,
+   "detail": "12px 50% 8px"
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: title 24, stage name 14, field label 13",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: one-line fields are 40px high",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: name field is not stretched",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: no box around the three fields",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: the quiet text levels reach the centre",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: bottom buttons end where the list ends",
+   "ok": true,
+   "detail": "1278 vs 1278"
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: dots share one column on stage and job rows",
+   "ok": true,
+   "detail": "[[1219,1249],[1219,1249],[1219,1249]]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: arrows share one column on stage and job rows",
+   "ok": true,
+   "detail": "[[1251,1265],[1251,1265],[1251,1265],[1251,1265]]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: counts end at the same place on every stage",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: one left edge inside a stage",
+   "ok": true,
+   "detail": "[381,381,381,381,381,381,381]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: '도구 변경' sits inside the tool note",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: note text does not run under '도구 변경'",
+   "ok": true,
+   "detail": "609 < 1178"
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: saved lamp is drawn",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: 저장·게시 are off (nothing to save) and still readable",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: the tab mark is 2px and inside the strip",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: the page menu is an outlined 32px button",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: focus on a link is the 2px accent line",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: focus on a tab is drawn inside the strip",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: focus on a stage row is drawn inside the list",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: focus on a field is the same line on its border",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1 after: focus on 공장 is drawn",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1: after is at most 3% taller than now",
+   "ok": true,
+   "detail": "965 -> 982"
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 after: name, check boxes, 입력 and 자세히 share one left edge",
+   "ok": true,
+   "detail": "[381,381,381,381,381]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 after: that edge is the one P1 uses for a stage name",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 after: the job in hand is tinted, its number in the accent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 after: numbers are 24px circles",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 after: one solid action, 지금 실행",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 after: 실행 is an outlined 32px button, no narrower than now",
+   "ok": true,
+   "detail": "{\"x\":1099,\"y\":580,\"w\":106,\"h\":32,\"r\":1205,\"b\":612}"
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 after: an empty check box has a 3:1 line",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 after: rows touch, so the rail does not break",
+   "ok": true,
+   "detail": "[[395,567],[567,754]]"
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2 after: the tab mark is 2px and inside the strip",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2: the job list is at most 3% taller than now",
+   "ok": true,
+   "detail": "357 -> 361"
+  },
+  {
+   "size": "1920x1080",
+   "name": "after: title, tabs and first content sit at the same height in the panel on P1 and P2",
+   "ok": true,
+   "detail": "{\"P1\":[52,120,185],\"P2\":[52,120,185]}"
+  },
+  {
+   "size": "1920x1080",
+   "name": "P3: both sides say the same words",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P3 after: the notice is on the scale (16 and 13)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P4 now: the product notice",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P4 after: two pieces of work, each with 시작",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P4 after: no solid button",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P4 after: 새 업무 절차 starts on the list edge and hugs its words",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P1: pressing things changes nothing and the menu stays shut",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "P2: a check box does not tick",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "key 2 shows P2",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "key 3 shows P3",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "key 4 shows P4",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "key 1 shows P1",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "← shows now",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "→ shows after",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "values table opens over the screen without pushing it",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "guide folds",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1920x1080",
+   "name": "at 1920 the left menu is open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "opens on P1, side by side",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 side: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 side: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 side: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 side: left menu and chat are hidden",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 now: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 now: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 now: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1: now keeps the product values",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1: after takes the new values, three text levels",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: only the five type steps",
+   "ok": true,
+   "detail": "12px/18px 13px/20px 14px/22px 16px/24px 24px/32px"
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: only the four corner values",
+   "ok": true,
+   "detail": "12px 50% 8px 999px"
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 side: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 side: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 side: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 side: left menu and chat are hidden",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 now: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 now: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 now: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 after: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 after: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 after: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P2: now keeps the product values",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P2: after takes the new values, three text levels",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 after: only the five type steps",
+   "ok": true,
+   "detail": "12px/18px 13px/20px 14px/22px 16px/24px 24px/32px"
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 after: only the four corner values",
+   "ok": true,
+   "detail": "12px 50% 5px 8px"
+  },
+  {
+   "size": "1366x768",
+   "name": "P3 side: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P3 side: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P3 side: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P3 side: left menu and chat are hidden",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P3 now: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P3 now: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P3 now: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P3 after: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P3 after: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P3 after: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P3: now keeps the product values",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P3: after takes the new values, three text levels",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P3 after: only the five type steps",
+   "ok": true,
+   "detail": "13px/20px 14px/22px 16px/24px"
+  },
+  {
+   "size": "1366x768",
+   "name": "P3 after: only the four corner values",
+   "ok": true,
+   "detail": "12px 8px"
+  },
+  {
+   "size": "1366x768",
+   "name": "P4 side: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P4 side: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P4 side: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P4 side: left menu and chat are hidden",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P4 now: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P4 now: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P4 now: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P4 after: the right version is shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P4 after: badge says mock and the screen number",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P4 after: no sideways page scroll",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P4: now keeps the product values",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P4: after takes the new values, three text levels",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P4 after: only the five type steps",
+   "ok": true,
+   "detail": "12px/18px 13px/20px 14px/22px 16px/24px"
+  },
+  {
+   "size": "1366x768",
+   "name": "P4 after: only the four corner values",
+   "ok": true,
+   "detail": "12px 50% 8px"
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: title 24, stage name 14, field label 13",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: one-line fields are 40px high",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: name field is not stretched",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: no box around the three fields",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: the quiet text levels reach the centre",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: bottom buttons end where the list ends",
+   "ok": true,
+   "detail": "844 vs 844"
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: dots share one column on stage and job rows",
+   "ok": true,
+   "detail": "[[785,815],[785,815],[785,815]]"
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: arrows share one column on stage and job rows",
+   "ok": true,
+   "detail": "[[817,831],[817,831],[817,831],[817,831]]"
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: counts end at the same place on every stage",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: one left edge inside a stage",
+   "ok": true,
+   "detail": "[141,141,141,141,141,141,141]"
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: '도구 변경' sits inside the tool note",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: note text does not run under '도구 변경'",
+   "ok": true,
+   "detail": "369 < 744"
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: saved lamp is drawn",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: 저장·게시 are off (nothing to save) and still readable",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: the tab mark is 2px and inside the strip",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: the page menu is an outlined 32px button",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: focus on a link is the 2px accent line",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: focus on a tab is drawn inside the strip",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: focus on a stage row is drawn inside the list",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1 after: focus on a field is the same line on its border",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1: after is at most 3% taller than now",
+   "ok": true,
+   "detail": "965 -> 982"
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 after: name, check boxes, 입력 and 자세히 share one left edge",
+   "ok": true,
+   "detail": "[141,141,141,141,141]"
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 after: that edge is the one P1 uses for a stage name",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 after: the job in hand is tinted, its number in the accent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 after: numbers are 24px circles",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 after: one solid action, 지금 실행",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 after: 실행 is an outlined 32px button, no narrower than now",
+   "ok": true,
+   "detail": "{\"x\":665,\"y\":642,\"w\":106,\"h\":32,\"r\":771,\"b\":674}"
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 after: an empty check box has a 3:1 line",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 after: rows touch, so the rail does not break",
+   "ok": true,
+   "detail": "[[457,629],[629,816]]"
+  },
+  {
+   "size": "1366x768",
+   "name": "P2 after: the tab mark is 2px and inside the strip",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P2: the job list is at most 3% taller than now",
+   "ok": true,
+   "detail": "357 -> 361"
+  },
+  {
+   "size": "1366x768",
+   "name": "after: title, tabs and first content sit at the same height in the panel on P1 and P2",
+   "ok": true,
+   "detail": "{\"P1\":[52,120,185],\"P2\":[52,120,185]}"
+  },
+  {
+   "size": "1366x768",
+   "name": "P3: both sides say the same words",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P3 after: the notice is on the scale (16 and 13)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P4 now: the product notice",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P4 after: two pieces of work, each with 시작",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P4 after: no solid button",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P4 after: 새 업무 절차 starts on the list edge and hugs its words",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P1: pressing things changes nothing and the menu stays shut",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "P2: a check box does not tick",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "key 2 shows P2",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "key 3 shows P3",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "key 4 shows P4",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "key 1 shows P1",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "← shows now",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "→ shows after",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "values table opens over the screen without pushing it",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "guide folds",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "1366x768",
+   "name": "under 1440 the left menu is a rail",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "all",
+   "name": "no page errors",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "all",
+   "name": "no request leaves the file",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}

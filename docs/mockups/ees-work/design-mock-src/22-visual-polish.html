@@ -27,8 +27,8 @@ body{display:flex;flex-direction:column}
 .mk-guide .mk-fold{margin-left:auto;border-color:transparent}
 .mk-text{margin:6px 0 0;display:flex;flex-wrap:wrap;gap:2px 20px;min-width:0}
 .mk-text b{font-weight:400;font-size:12px;color:#5e6573;margin-right:6px}
-.mk-words{margin:8px 0 0;border-collapse:collapse;font-size:12px;line-height:18px}
-.mk-words th,.mk-words td{text-align:left;font-weight:400;padding:2px 20px 2px 0;vertical-align:top}
+.mk-words{position:absolute;z-index:95;top:100%;left:16px;max-width:calc(100% - 32px);margin:0;padding:0;border-collapse:separate;border-spacing:0;border:1px dashed #5e6573;border-top:0;background:#fff;box-shadow:0 8px 24px #1018281f;font-size:12px;line-height:18px}
+.mk-words th,.mk-words td{text-align:left;font-weight:400;padding:4px 16px;vertical-align:top}
 .mk-words th{color:#5e6573}
 .mk-guide[data-collapsed="true"] :is(.mk-hide,.mk-text,.mk-words){display:none}
 .mk-stage{flex:1;min-height:0;display:grid;position:relative}
@@ -100,7 +100,8 @@ body{display:flex;flex-direction:column}
 </style>
 <!-- Context only: how the frame above would look with the same polish. It is drawn here, not product CSS. -->
 <style data-mock-context="frame-polish">
-/* the frame with the same values: what the shell (Svelte) and the chat theme would take on */
+/* the outer frame, the top bar and the chat are drawn here, not taken from the product: on this side they are
+   redrawn with the same values to show the direction. Whether the product can take the same look there is not checked. */
 [data-polish="on"] .fu-shell{color:var(--ees-text-primary)}
 [data-polish="on"] .fu-brand{padding:0 14px;font-size:15px;letter-spacing:-.01em}
 [data-polish="on"] .fu-logo{border-radius:7px}
@@ -129,29 +130,31 @@ body{display:flex;flex-direction:column}
 <!-- New screen CSS for this proposal: the polish layer. Everything under [data-polish="on"] is written with product
      tokens and product selectors, to be reused when a version of this mock is chosen for the product. -->
 <style data-new-screen="visual-polish">
-/* 시안 1 · the same screens with one set of values. Nothing moves and no flow changes: the type scale, the
-   spacing, the lines and the emphasis are set from one small table. The product's markup is unchanged; every rule
-   below sits on top of the product style sheet under [data-polish="on"]. */
+/* 시안 1 · the same screens with one set of values. Nothing moves and no flow changes: type, lines, corners and
+   emphasis are set from the one table below. The product's markup is unchanged; every rule sits on top of the product
+   style sheet under [data-polish="on"]. (In this file the rules after the table carry two :not(#…) so the layer wins
+   over the product sheet, whose strongest rules have two ids. In the product these values go into its own rules.) */
 
 /* 1. One set of values ------------------------------------------------------------------------------------------ */
-[data-polish="on"]{
-  /* ink and the two quieter text levels (the product has secondary = tertiary); the quietest still reads 4.5:1 on
-     white, on the left menu, on a note and on the tint */
-  --ees-text-primary:#171b22;--ees-text-strong:#0f1218;--ees-text-secondary:#4a5263;--ees-text-tertiary:#666e80;
-  /* lines: one hairline for dividing, one for controls (no lighter than the product has now), one for a check box
-     (3:1 on white, so an empty box is seen) */
+/* said on the panel too: the product sheet sets --ees-text-tertiary on #ees-work-panel */
+[data-polish="on"],[data-polish="on"] #ees-work-panel{
+  /* text: ink, then two quieter levels. The quietest is the product's present grey, so nothing gets fainter;
+     the middle one is darker than now. (the product has secondary = tertiary) */
+  --ees-text-primary:#171b22;--ees-text-strong:#171b22;--ees-text-secondary:#414959;--ees-text-tertiary:#5e6573;
+  /* lines: a hairline for dividing, one for controls (no lighter than now), one for an empty check box (3:1) */
   --ees-line-divider:#e9ebef;--ees-line-control:#c3c8d1;--ees-line-control-hover:#aeb5c1;--ees-line-check:#8a92a2;
   /* surfaces */
   --ees-surface-sidebar:#f6f7f9;--ees-surface-hover:#f3f5f8;--ees-surface-panel-hover:#eef1f5;--ees-surface-muted:#f1f3f6;
-  /* where I am: the product's own steel blue (#2f5f98, the assistant mark) made the one accent */
-  --ees-accent:#2b5fa8;--ees-accent-strong:#1f4a87;--ees-accent-tint:#edf2fa;--ees-accent-line:#c5d5ee;
+  /* where I am: the product's steel blue (#2f5f98, the helper's mark) made the one accent; -strong is its hover */
+  --ees-accent:#2b5fa8;--ees-accent-strong:#1f4a87;--ees-accent-tint:#edf2fa;
   --ees-surface-selected:var(--ees-accent-tint);
   --ees-brand-solid:#171b22;--ees-brand-hover:#2a303b;
-  --ees-focus-ring:0 0 0 3px #2b5fa82e;
-  /* corners: controls, surfaces, marks */
+  /* a thing that cannot be pressed yet: still found (3:1 word), clearly not live */
+  --ees-text-disabled:#8c94a3;--ees-line-disabled:#dcdfe6;
+  /* corners: controls 8, surfaces 12, marks round (a check box keeps its own 5) */
   --ees-radius-control:8px;--ees-radius-surface:12px;--ees-radius-mark:999px;
-  /* depth: a surface that holds rows, a thing that floats */
-  --ees-shadow-raised:0 1px 2px #1018280d,0 1px 1px #10182808;--ees-shadow-float:0 8px 24px #1018281f;
+  /* depth: a surface that holds rows lifts a little */
+  --ees-shadow-raised:0 1px 2px #1018280d,0 1px 1px #10182808;
   /* type: five steps */
   --ees-type-title:700 24px/32px var(--ees-font-sans);--ees-type-heading:700 16px/24px var(--ees-font-sans);
   --ees-type-body:400 14px/22px var(--ees-font-sans);--ees-type-label:400 13px/20px var(--ees-font-sans);
@@ -162,170 +165,187 @@ body{display:flex;flex-direction:column}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel{font:var(--ees-type-body);color:var(--ees-text-primary)}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(h2,h3,h4){letter-spacing:-.01em}
 
-/* tabs: the same words, the place marked in the accent */
-[data-polish="on"]:not(#ees-now):not(#ees-then) :is(#ees-work-panel,#ees-work-designer) :is(.ew-tabs,.ew-author-tabs){gap:28px;border-bottom:1px solid var(--ees-line-divider)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) :is(#ees-work-panel,#ees-work-designer) :is(.ew-tabs,.ew-author-tabs)>button{padding:10px 0 12px;font:var(--ees-type-body);font-weight:500;color:var(--ees-text-tertiary);transition:color var(--ees-motion-fast)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) :is(#ees-work-panel,#ees-work-designer) :is(.ew-tabs,.ew-author-tabs)>button:hover{color:var(--ees-text-primary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) :is(#ees-work-panel,#ees-work-designer) :is(.ew-tabs,.ew-author-tabs)>button:is([aria-pressed=true],[aria-selected=true]){color:var(--ees-text-primary);font-weight:600}
-[data-polish="on"]:not(#ees-now):not(#ees-then) :is(#ees-work-panel,#ees-work-designer) :is(.ew-tabs,.ew-author-tabs)>button:is([aria-pressed=true],[aria-selected=true])::after{bottom:-1px;height:2px;border-radius:2px 2px 0 0;background:var(--ees-accent)}
+/* keyboard focus: one mark everywhere, a 2px line in the accent. Things that sit flush in a list or a strip draw it
+   inside their own edge so nothing cuts it off. */
+[data-polish="on"]:not(#ees-now):not(#ees-then) :is(#ees-work-panel,#ees-work-entry) :is(button,summary,a,input,select,textarea):focus-visible{outline:2px solid var(--ees-accent);outline-offset:2px;box-shadow:none}
+[data-polish="on"]:not(#ees-now):not(#ees-then) :is(#ees-work-panel,#ees-work-entry) :is(.ew-tabs>button,.ew-author-tabs>button,.ew-stage-toggle,.ew-author-job,[data-scope-trigger],.ew-mode>button):focus-visible{outline-offset:-2px}
 
-/* fields: one height, one corner, the accent when in use */
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(input:not([type=checkbox]):not([type=radio]),select,textarea){min-height:40px;padding:8px 12px;border:1px solid var(--ees-line-control);border-radius:var(--ees-radius-control);font:var(--ees-type-body);color:var(--ees-text-primary);background-color:var(--ees-surface-default);transition:border-color var(--ees-motion-fast),box-shadow var(--ees-motion-fast)}
+/* the page head: the same rhythm on every screen (way back 20, title 32, one line under it, tabs) */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(#ees-work-content,.ew-author-scroll){padding-top:24px}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-center-breadcrumb,.ew-author-breadcrumb){min-height:20px;margin:0 0 8px;font:var(--ees-type-label);color:var(--ees-text-tertiary)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-author-breadcrumb>button,.ew-center-breadcrumb .ew-run-back){min-height:20px;padding:0;font:var(--ees-type-label);color:var(--ees-text-tertiary)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-author-breadcrumb>button,.ew-center-breadcrumb .ew-run-back):hover{color:var(--ees-text-primary)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-center-breadcrumb>span:last-child{color:var(--ees-text-primary)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-vd-title,.ew-author-definition-head) h2{font:var(--ees-type-title)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-center-scope,.ew-author-definition-head>.ew-author-muted){margin:4px 0 0;font:var(--ees-type-label);color:var(--ees-text-tertiary)}
+/* the menu of the page: an outlined square, so it is seen without hovering */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-procedure-menu>summary,.ew-center-heading-actions>.ew-icon-button){width:32px;height:32px;padding:8px;border:1px solid var(--ees-line-control);border-radius:var(--ees-radius-control);background:var(--ees-surface-default)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-procedure-menu>summary,.ew-center-heading-actions>.ew-icon-button):hover{border-color:var(--ees-line-control-hover);background:var(--ees-surface-hover)}
+
+/* tabs: the same words, the place marked in the accent */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-tabs,.ew-author-tabs){gap:28px;margin:12px 0 20px;border-bottom:1px solid var(--ees-line-divider)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-tabs,.ew-author-tabs)>button{padding:10px 0 12px;font:var(--ees-type-body);font-weight:500;color:var(--ees-text-tertiary);background:transparent;transition:color var(--ees-motion-fast)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-tabs,.ew-author-tabs)>button:hover{color:var(--ees-text-primary);background:transparent}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-tabs,.ew-author-tabs)>button:is([aria-pressed=true],[aria-selected=true]){color:var(--ees-text-primary);font-weight:600}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-tabs,.ew-author-tabs)>button:is([aria-pressed=true],[aria-selected=true])::after{bottom:0;height:2px;border-radius:2px 2px 0 0;background:var(--ees-accent)}
+
+/* a section: its name (heading step), how many, then its rows */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-content-heading,.ew-start-row,.ew-center-task-heading) h3{font:var(--ees-type-heading)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-content-heading,.ew-start-row) small,[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-stage-completed{font:var(--ees-type-label);color:var(--ees-text-tertiary)}
+
+/* fields: one height for a one-line field, one corner, the accent when in use */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(input:not([type=checkbox]):not([type=radio]),select,textarea){min-height:40px;padding:8px 12px;border:1px solid var(--ees-line-control);border-radius:var(--ees-radius-control);font:var(--ees-type-body);color:var(--ees-text-primary);background-color:var(--ees-surface-default);transition:border-color var(--ees-motion-fast)}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(input:not([type=checkbox]):not([type=radio]),select,textarea):hover{border-color:var(--ees-line-control-hover)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(input:not([type=checkbox]):not([type=radio]),select,textarea):focus-visible{outline:0;border-color:var(--ees-accent);box-shadow:var(--ees-focus-ring)}
-/* an example in a field is guidance, so it stays readable (4.5:1) */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(input:not([type=checkbox]):not([type=radio]),select,textarea):focus-visible{outline-offset:-1px;border-color:var(--ees-accent)}
+/* an example in a field is guidance, so it stays readable */
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(input,textarea)::placeholder{color:var(--ees-text-tertiary);opacity:1}
 /* a choice shows that it opens */
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel select{padding-right:36px;background-image:url('/_ees14/v4/f17e6.svg');background-repeat:no-repeat;background-position:right 12px center;background-size:14px}
 
-/* buttons: quiet by default, one solid action where the screen has one */
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-author>footer>button,.ew-secondary,.ew-primary){min-height:36px;padding:0 16px;border-radius:var(--ees-radius-control);font:var(--ees-type-body);font-weight:600;transition:background-color var(--ees-motion-fast),border-color var(--ees-motion-fast),box-shadow var(--ees-motion-fast)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-author>footer>button:not(.ew-primary):not(:disabled){border:1px solid var(--ees-line-control);background:var(--ees-surface-default);color:var(--ees-text-primary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-author>footer>button:not(.ew-primary):not(:disabled):hover{background:var(--ees-surface-hover);border-color:var(--ees-line-control-hover)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-author>footer>button:disabled{border:1px solid var(--ees-line-divider);background:var(--ees-surface-default);color:#a3aab7;box-shadow:none}
+/* buttons, two sizes. Regular (36px): the action of a page or of a top-level row. Small (32px): inside a row.
+   Quiet (outlined) by default; solid only for the one action a screen has. */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-author>footer>button,.ew-secondary,.ew-primary,.ew-stage-run-button){width:auto;min-width:72px;height:36px;min-height:36px;padding:0 16px;border-radius:var(--ees-radius-control);font:var(--ees-type-body);font-weight:600;text-decoration:none;transition:background-color var(--ees-motion-fast),border-color var(--ees-motion-fast)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-vd-run,.ew-api-row-action){height:32px;min-height:32px;padding:0 12px;border:1px solid var(--ees-line-control);border-radius:var(--ees-radius-control);background:var(--ees-surface-default);font:var(--ees-type-label);font-weight:600;color:var(--ees-text-primary);text-decoration:none;transition:background-color var(--ees-motion-fast),border-color var(--ees-motion-fast)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-author>footer>button:not(.ew-primary):not(:disabled),[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-secondary:not(.ew-stage-run-button):not(:disabled){border:1px solid var(--ees-line-control);background:var(--ees-surface-default);color:var(--ees-text-primary)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-author>footer>button:not(.ew-primary):not(:disabled):hover,[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-secondary:not(.ew-stage-run-button),.ew-vd-run,.ew-api-row-action):not(:disabled):hover{border-color:var(--ees-line-control-hover);background:var(--ees-surface-hover);text-decoration:none}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-author>footer>button:disabled{opacity:1;border:1px solid var(--ees-line-disabled);background:var(--ees-surface-default);color:var(--ees-text-disabled);box-shadow:none}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-primary,.ew-stage-run-button):not(:disabled){border:0;background:var(--ees-brand-solid);color:var(--ees-text-inverse);box-shadow:var(--ees-shadow-raised)}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-primary,.ew-stage-run-button):not(:disabled):hover{background:var(--ees-brand-hover)}
-/* keyboard focus on anything pressable: a solid line in the accent, clear of the edge */
-[data-polish="on"]:not(#ees-now):not(#ees-then) :is(#ees-work-panel,#ees-work-entry) :is(button,summary,a):focus-visible{outline:2px solid var(--ees-accent);outline-offset:2px;box-shadow:none}
-/* the small round-cornered icon buttons (⋯, open, help) */
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-icon-button,.ew-procedure-menu>summary,.ew-job-menu-button,.ew-help-trigger){border-radius:var(--ees-radius-control);background:transparent;transition:background-color var(--ees-motion-fast)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-icon-button,.ew-procedure-menu>summary,.ew-job-menu-button,.ew-help-trigger):hover{background:var(--ees-surface-panel-hover)}
-/* what adds something (＋ 단계 추가, ＋ 작업 추가, ＋ 추가) and what opens more (자세히, 단계 정보 수정) read as links */
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-stage-add,[data-author-action=add_job],[data-author-action=start_input_add],[data-author-action=stage_edit],.ew-vd-more .ew-text){font:var(--ees-type-label);font-weight:500;color:var(--ees-accent);border-radius:6px}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-stage-add,[data-author-action=add_job],[data-author-action=start_input_add],[data-author-action=stage_edit],.ew-vd-more .ew-text):hover{color:var(--ees-accent-strong);background:var(--ees-accent-tint)}
+/* the three dots of a row: bare, shown on hover */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-job-menu-button,.ew-help-trigger){border-radius:var(--ees-radius-control);background:transparent;transition:background-color var(--ees-motion-fast)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-job-menu-button,.ew-help-trigger):hover{background:var(--ees-surface-panel-hover)}
+/* what adds something or opens more reads as a link: one shape, the accent, a tint on hover, never an underline */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-stage-add,[data-author-action=add_job],[data-author-action=start_input_add],[data-author-action=stage_edit],.ew-vd-more>.ew-text,.ew-home-new){display:inline-flex;align-items:center;gap:6px;width:auto;min-height:28px;padding:4px 8px;border:0;border-radius:var(--ees-radius-control);background:transparent;font:var(--ees-type-label);font-weight:500;color:var(--ees-accent);text-decoration:none;cursor:pointer}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-stage-add,[data-author-action=add_job],[data-author-action=start_input_add],[data-author-action=stage_edit],.ew-vd-more>.ew-text,.ew-home-new):hover{color:var(--ees-accent-strong);background:var(--ees-accent-tint);text-decoration:none}
+/* at a left edge the word, not the hover shape, keeps the edge */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-stage-add,[data-author-action=add_job],.ew-vd-more>.ew-text,.ew-home-new){margin-left:-8px}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel [data-author-action=stage_edit]{margin-right:-8px}
+/* the plus of an 'add' link takes the colour of its word */
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-stage-add,[data-author-action=add_job])>img{display:none}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-stage-add,[data-author-action=add_job])::before{content:"";flex:none;width:14px;height:14px;background:currentColor;-webkit-mask:url('/_ees14/v4/9ce50.svg') center/contain no-repeat;mask:url('/_ees14/v4/9ce50.svg') center/contain no-repeat}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-stage-add,[data-author-action=add_job],.ew-home-new)::before{content:"";flex:none;width:14px;height:14px;background:currentColor;-webkit-mask:url('/_ees14/v4/9ce50.svg') center/contain no-repeat;mask:url('/_ees14/v4/9ce50.svg') center/contain no-repeat}
+/* a state: a 6px lamp and a word */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-author-heading>.ew-author-tag{gap:6px;padding:2px 9px 2px 8px;border-radius:var(--ees-radius-mark);font:var(--ees-type-meta);font-weight:600}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-author-heading>.ew-author-tag[data-state=published]{color:var(--ees-status-success)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-author-heading>.ew-author-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+/* rows: a name (14px, 600), one quieter line under it (13px), what stands on the right (13px, 500) */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-job-row .ew-job-row-label>span,.ew-vd-name){font:var(--ees-type-body);font-weight:600}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-job-row .ew-job-meta,.ew-center-task-description,.ew-home-row p){font:var(--ees-type-label);color:var(--ees-text-tertiary)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-center-task-description b{font-weight:600;color:var(--ees-text-secondary)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-stage-count,.ew-vd-count,.ew-vd-state,.ew-center-counts){font:var(--ees-type-label);font-weight:500;color:var(--ees-text-secondary)}
+/* a list of rows: one surface that lifts a little, hairlines between rows */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-stage-list,.ew-center-task-list,.ew-home-list){border:1px solid var(--ees-line-divider);border-radius:var(--ees-radius-surface);box-shadow:var(--ees-shadow-raised);overflow:hidden;background:var(--ees-surface-default)}
+/* a number in a circle: 24px, the same on every screen */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel :is(.ew-author-stage-number,.ew-center-task-number){flex:0 0 24px;width:24px;height:24px;border:1px solid var(--ees-line-control);background:var(--ees-surface-default);font:var(--ees-type-meta);font-weight:600;color:var(--ees-text-secondary)}
 
 /* 3. Writing a procedure (업무 절차) ------------------------------------------------------------------------------ */
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-author-scroll{padding-top:14px;font:var(--ees-type-body)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-author-breadcrumb{margin:0 0 8px}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-author-breadcrumb>button{font:var(--ees-type-label);color:var(--ees-text-tertiary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-author-breadcrumb>button:hover{color:var(--ees-text-primary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-author-definition-head h2{font:var(--ees-type-title)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-author-definition-head>.ew-author-muted{margin-top:4px;font:var(--ees-type-label);color:var(--ees-text-tertiary)}
-/* the state of the procedure: a lamp and a word */
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-author-heading>.ew-author-tag{gap:6px;padding:2px 9px 2px 8px;border-radius:var(--ees-radius-mark);font:var(--ees-type-meta);font-weight:600}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-author-heading>.ew-author-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-procedure-menu>summary{width:32px;height:32px;padding:8px}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-author-tabs{margin:10px 0 16px}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-author-scroll{font:var(--ees-type-body)}
 /* the name, kind and purpose: fields on the page, not a box inside a box */
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-procedure-info{padding:0;border:0;border-radius:0;background:transparent;gap:14px 20px}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-procedure-info label{gap:6px;font:var(--ees-type-label);font-weight:500;color:var(--ees-text-secondary)}
-/* a section: its name, how many, then its rows */
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-content-heading{align-items:baseline;gap:8px;margin-top:24px;padding:0 0 10px}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer :is(.ew-content-heading,.ew-start-row) h3{font:var(--ees-type-heading)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer :is(.ew-content-heading,.ew-start-row) small{font:var(--ees-type-label);color:var(--ees-text-tertiary)}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-content-heading .ew-help-trigger{align-self:center}
-/* the list of stages: one raised surface, hairlines between rows */
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-stage-list{border:1px solid var(--ees-line-divider);border-radius:var(--ees-radius-surface);box-shadow:var(--ees-shadow-raised);overflow:hidden}
+/* stages: hairlines between them; an open one shows a line under its name. Its number is not filled: only where
+   I am takes a fill, and an open stage is not that. */
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-stage-list>.ew-content-stage{padding:0;border-radius:0}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-stage-list>.ew-content-stage+.ew-content-stage{border-top:1px solid var(--ees-line-divider)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-stage-head{padding:0 12px 0 16px}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-stage-head{padding:0 12px 0 16px;transition:background-color var(--ees-motion-fast)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-stage-head:hover{background:var(--ees-surface-hover)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-content-stage:has(>.ew-stage-head>.ew-stage-toggle[aria-expanded=true])>.ew-stage-head{border-bottom:1px solid var(--ees-line-divider)}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-stage-toggle{min-height:52px;padding:12px 0;gap:12px;border-radius:0;font:var(--ees-type-body)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-author-stage-number{width:24px;height:24px;border-color:var(--ees-line-control);font:var(--ees-type-meta);font-weight:600;font-variant-numeric:tabular-nums;color:var(--ees-text-secondary)}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-stage-name{font:var(--ees-type-body);font-weight:700}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-stage-count{font:var(--ees-type-meta);color:var(--ees-text-tertiary)}
-/* the open stage: the number filled, a quiet band under the name */
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-content-stage:has(>.ew-stage-head>.ew-stage-toggle[aria-expanded=true])>.ew-stage-head{background:#fafbfc;border-bottom:1px solid var(--ees-line-divider)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-stage-toggle[aria-expanded=true] .ew-author-stage-number{border-color:var(--ees-brand-solid);background:var(--ees-brand-solid);color:var(--ees-text-inverse)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-stage-body{padding:6px 16px 10px 52px}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-stage-description{min-height:40px}
+/* the count keeps its place whether or not the stage shows its three dots */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-stage-head .ew-stage-count{margin-right:42px}
+/* inside a stage everything starts on the stage name's edge and ends on the arrow's edge */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-stage-body{padding:4px 12px 8px 52px}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-stage-description{min-height:36px}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-stage-description p{font:var(--ees-type-label);color:var(--ees-text-tertiary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-stage-description button{padding:4px 8px}
-/* a job in a stage */
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row .ew-job-row-label>span{font:var(--ees-type-body);font-weight:500}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row .ew-job-meta{font:var(--ees-type-meta);color:var(--ees-text-tertiary)}
-/* a row keeps two fixed columns, so the arrow and the three dots sit in the same place on every row */
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:2px;align-items:center}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row>.ew-author-job{grid-column:1;grid-row:1}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row>.ew-job-menu-button{grid-column:2;grid-row:1}
+/* a job in a stage: the dots and the arrow keep the two columns the stage name's row has */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row{display:grid;grid-template-columns:minmax(0,1fr) 30px 14px;column-gap:2px;align-items:center}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row>.ew-author-job{grid-column:1/-1;grid-row:1;padding:10px 0;gap:0}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row>.ew-author-job>.ew-job-row-label{margin-right:40px}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row>.ew-author-job>img{flex:none;width:14px;height:14px;margin:0}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row>.ew-job-menu-button{grid-column:2;grid-row:1;z-index:1}
 /* what the tool takes and gives back is a note under the row, and '도구 변경' belongs to that note */
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row>.ew-api-job-binding{grid-column:1/-1;grid-row:2;margin:2px 0 14px;padding:10px 112px 10px 14px;border-radius:var(--ees-radius-control);background:var(--ees-surface-muted)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row>.ew-api-row-action{grid-column:1/-1;grid-row:2;justify-self:end;align-self:center;z-index:1;min-height:30px;margin:2px 10px 14px 0;padding:0 10px;border:1px solid var(--ees-line-control);border-radius:var(--ees-radius-control);background:var(--ees-surface-default);font:var(--ees-type-label);font-weight:500;color:var(--ees-text-primary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row>.ew-api-row-action:hover{border-color:var(--ees-line-control-hover);background:var(--ees-surface-hover)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row>.ew-api-job-binding{grid-column:1/-1;grid-row:2;margin:0 0 10px;padding:8px 112px 8px 12px;border-radius:var(--ees-radius-control);background:var(--ees-surface-muted)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row>.ew-api-job-binding>div{font:var(--ees-type-label);font-weight:500;color:var(--ees-text-primary)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row>.ew-api-job-binding>small{font:var(--ees-type-meta);color:var(--ees-text-tertiary)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row>.ew-api-row-action{grid-column:1/-1;grid-row:2;justify-self:end;align-self:center;z-index:1;margin:0 10px 10px 0}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row>.ew-api-row-action>img{display:none}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row .ew-api-job-binding>div{font:var(--ees-type-label);font-weight:500;color:var(--ees-text-primary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-job-row .ew-api-job-binding>small{font:var(--ees-type-meta);color:var(--ees-text-tertiary)}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-content-start-inputs{margin-top:24px;padding-top:20px;border-top-color:var(--ees-line-divider)}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer .ew-start-row{align-items:baseline;gap:8px}
-/* the bottom bar: what is saved, then the two actions */
+/* the bottom bar: what is saved, then the two actions. It ends where the content ends: the scrolling part keeps
+   room for its scroll bar, so the bar keeps the same room. */
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer>footer{min-height:60px;border-top-color:var(--ees-line-divider);overflow-y:hidden;scrollbar-gutter:stable;scrollbar-width:thin}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer>footer>small{display:flex;align-items:center;gap:8px;font:var(--ees-type-label);color:var(--ees-text-secondary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer>footer>small[data-status=saved]::before{content:"";flex:none;width:6px;height:6px;border-radius:50%;background:#2a744c}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-designer>footer>small[data-status=saved]::before{content:"";flex:none;width:6px;height:6px;border-radius:50%;background:var(--ees-status-success)}
 
 /* 4. Doing the work (업무 › 단계) ---------------------------------------------------------------------------------- */
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-breadcrumb{font:var(--ees-type-label);color:var(--ees-text-tertiary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-breadcrumb>span:last-child{color:var(--ees-text-primary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-title h2{font:var(--ees-type-title)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-scope{margin-top:4px;font:var(--ees-type-label);color:var(--ees-text-tertiary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-tabs{margin:14px 0 24px}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-task-heading{align-items:center;margin-bottom:12px}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-task-heading h3{font:var(--ees-type-heading)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-stage-completed{font:var(--ees-type-label);color:var(--ees-text-secondary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-counts{font:var(--ees-type-label);color:var(--ees-text-secondary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-stage-run-button{width:auto;min-width:112px;height:36px;font:var(--ees-type-body);font-weight:600}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-task-heading{align-items:center;margin:0 0 12px}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-counts .ew-vd-dot{width:6px;height:6px}
 /* the run sheet: the jobs of a stage in order, joined by a rail */
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-task-list{border:1px solid var(--ees-line-divider);border-radius:var(--ees-radius-surface);box-shadow:var(--ees-shadow-raised);overflow:hidden;background:var(--ees-surface-default)}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-task-row{position:relative;border:0}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-task-row+.ew-center-task-row{border-top:1px solid var(--ees-line-divider)}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-task-row::before{content:"";position:absolute;z-index:1;left:27px;top:0;bottom:0;width:1px;background:var(--ees-line-control)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-task-row:first-child::before{top:28px}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-task-row:last-child::before{bottom:auto;height:28px}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-task-row:first-child::before{top:26px}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-task-row:last-child::before{bottom:auto;height:26px}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-task-row:only-child::before{display:none}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-item{min-height:60px;padding-top:12px;padding-bottom:12px}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-task-number{position:relative;z-index:2;width:24px;height:24px;border:1px solid var(--ees-line-control);background:var(--ees-surface-default);font:var(--ees-type-meta);font-weight:600;font-variant-numeric:tabular-nums;color:var(--ees-text-secondary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-name{font:var(--ees-type-body);font-weight:700}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-task-description{font:var(--ees-type-label);color:var(--ees-text-tertiary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-task-description b{font-weight:600;color:var(--ees-text-secondary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd :is(.ew-vd-count,.ew-vd-state){font:var(--ees-type-label);font-weight:500;color:var(--ees-text-secondary)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-item{min-height:56px;padding-top:6px;padding-bottom:6px;border-radius:0}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-center-task-number{position:relative;z-index:2}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-name:hover{color:var(--ees-accent-strong)}
 /* the job in hand: the accent on its number and along its edge, a light tint instead of the grey band */
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-entry[data-expanded=true]{background:transparent}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-entry[data-expanded=true]>.ew-vd-item{border-radius:0;background:var(--ees-accent-tint);box-shadow:inset 3px 0 0 var(--ees-accent)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-entry[data-expanded=true]>.ew-vd-item{background:var(--ees-accent-tint);box-shadow:inset 3px 0 0 var(--ees-accent)}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-entry[data-expanded=true] .ew-center-task-number{border-color:var(--ees-accent);background:var(--ees-accent);color:#fff}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-run{width:auto;min-width:0;min-height:32px;padding:0 12px 0 10px;border:1px solid var(--ees-line-control);border-radius:var(--ees-radius-control);background:var(--ees-surface-default);font:var(--ees-type-label);font-weight:600;color:var(--ees-text-primary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-run:hover{border-color:var(--ees-line-control-hover);background:var(--ees-surface-hover)}
-/* the checks of a job */
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-checks{margin:0 16px 0 50px;padding-bottom:10px}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-checks>li{gap:12px;min-height:38px;font:var(--ees-type-body)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-checks label{gap:12px;min-height:38px}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-checks input[type=checkbox]{appearance:none;-webkit-appearance:none;width:18px;height:18px;border:1.5px solid var(--ees-line-check);border-radius:5px;background:var(--ees-surface-default);transition:border-color var(--ees-motion-fast),box-shadow var(--ees-motion-fast)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-checks label:hover input[type=checkbox]{border-color:var(--ees-accent);box-shadow:var(--ees-focus-ring)}
+/* the checks of a job: on the job name's edge */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-checks{margin:0 16px 0 52px;padding-bottom:8px}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-checks>li{gap:12px;font:var(--ees-type-body)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-checks label{gap:12px}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-checks input[type=checkbox]{appearance:none;-webkit-appearance:none;width:18px;height:18px;border:1.5px solid var(--ees-line-check);border-radius:5px;background:var(--ees-surface-default);transition:border-color var(--ees-motion-fast)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-checks label:hover input[type=checkbox]{border-color:var(--ees-accent)}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-checks .ew-vd-check-done{width:18px;height:18px;border-radius:5px}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-checks small{font:var(--ees-type-meta);color:var(--ees-text-tertiary)}
-/* what a job asks for, under its row */
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-under{padding-left:50px}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-under>.ew-vd-evidence{margin:0;padding:16px 20px 14px 0;border:0;border-radius:0;background:transparent}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-under>.ew-vd-more{padding:0 20px 14px 0}
+/* what a job asks for, under its row: the same edge, no box inside the row */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-under{padding-left:52px}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-under>.ew-vd-evidence{margin:0;padding:14px 20px 10px 0;border:0;border-radius:0;background:transparent}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-under>.ew-vd-more{padding:0 20px 12px 0}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-tool-detail h4{font:var(--ees-type-label);font-weight:600;color:var(--ees-text-secondary)}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-tool-values :is(dt,dt label){font:var(--ees-type-label);color:var(--ees-text-secondary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel.ew-vd .ew-vd-tool-values input{min-height:36px;padding:6px 12px}
-[data-polish="on"]:not(#ees-now):not(#ees-then) [data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-more>.ew-text{margin-left:-8px;padding:4px 8px;font:var(--ees-type-label);font-weight:500;color:var(--ees-accent);text-decoration:none}
-[data-polish="on"]:not(#ees-now):not(#ees-then) [data-ees-work-surface] #ees-work-panel.ew-vd .ew-vd-more>.ew-text:hover{color:var(--ees-accent-strong);background:var(--ees-accent-tint)}
 
-/* 5. The first screen of 업무 (what it lists comes from 시안 20 · GF1; the values are this sheet's) -------------------- */
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home{display:grid;gap:12px;max-width:960px}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home-list{display:grid;border:1px solid var(--ees-line-divider);border-radius:var(--ees-radius-surface);box-shadow:var(--ees-shadow-raised);overflow:hidden;background:var(--ees-surface-default)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home-row{display:flex;align-items:center;gap:20px;padding:18px 16px 18px 20px}
+/* 5. The first screen of 업무 -------------------------------------------------------------------------------------- */
+/* as it is now (a notice): the same words on the scale */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-empty.ew-work-home{padding:0}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-empty.ew-work-home h3{margin:0 0 4px;font:var(--ees-type-heading);color:var(--ees-text-primary)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-empty.ew-work-home p{margin:0;font:var(--ees-type-label);color:var(--ees-text-tertiary)}
+/* with the list of 시안 20 (GF1): the name of a piece of work is a heading; its start is a regular quiet button */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home{display:grid;justify-items:start;gap:8px;max-width:960px}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home-list{justify-self:stretch}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home-row{display:flex;align-items:center;gap:20px;padding:16px 16px 16px 20px}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home-row+.ew-home-row{border-top:1px solid var(--ees-line-divider)}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home-row>div{flex:1;min-width:0;display:grid;gap:2px}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home-row h3{margin:0;font:var(--ees-type-heading)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home-row p{margin:0;font:var(--ees-type-body);color:var(--ees-text-secondary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home-row small{display:flex;align-items:center;gap:6px;margin-top:4px;font:var(--ees-type-label);color:var(--ees-text-tertiary);font-variant-numeric:tabular-nums}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home-row small i{flex:none;width:6px;height:6px;border-radius:50%;background:#2a744c}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home-row .ew-secondary{flex:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--ees-line-control);background:var(--ees-surface-default);color:var(--ees-text-primary);cursor:pointer}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home-row .ew-secondary:hover{background:var(--ees-surface-hover);border-color:var(--ees-line-control-hover)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home-new{justify-self:start;display:inline-flex;align-items:center;min-height:32px;padding:0 8px;border:0;background:transparent;font:var(--ees-type-label);font-weight:500;color:var(--ees-accent);border-radius:6px;cursor:pointer}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home-new:hover{color:var(--ees-accent-strong);background:var(--ees-accent-tint)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home-row p{margin:0}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home-row small{display:flex;align-items:center;gap:6px;margin-top:2px;font:var(--ees-type-meta);color:var(--ees-text-tertiary)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home-row small i{flex:none;width:6px;height:6px;border-radius:50%;background:var(--ees-status-success)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-panel .ew-home-row .ew-secondary{flex:none;display:inline-flex;align-items:center;gap:6px;cursor:pointer}
 
 /* 6. The left menu (product markup) ------------------------------------------------------------------------------ */
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry .ew-mode{padding:3px;border-radius:10px;background:#eaecf0}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry .ew-mode>button{border-radius:8px;font:var(--ees-type-label);font-weight:500;color:var(--ees-text-secondary)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry .ew-mode{padding:3px;border-radius:var(--ees-radius-surface);background:#eaecf0}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry .ew-mode>button{border-radius:var(--ees-radius-control);font:var(--ees-type-label);font-weight:500;color:var(--ees-text-secondary)}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry .ew-mode>button[aria-pressed=true]{background:#fff;color:var(--ees-text-primary);font-weight:600;box-shadow:0 1px 2px #10182814}
 [data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry .ew-nav-caption{font:var(--ees-type-meta);font-weight:500;color:var(--ees-text-tertiary)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry .ew-scope{border-color:var(--ees-line-control);border-radius:10px;overflow:hidden;background:#fff}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry :is(.ew-nav-links,.ew-workflows,.ew-recent) button{border-radius:var(--ees-radius-control);transition:background-color var(--ees-motion-fast)}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry :is(.ew-nav-links,.ew-workflows,.ew-recent) button:hover{background:#eceef2}
-[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry .ew-workflows button[aria-current=page],[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry [data-action=procedures][aria-current=page]{background:var(--ees-accent-tint);color:var(--ees-accent-strong);font-weight:600;box-shadow:inset 3px 0 0 var(--ees-accent)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry [data-scope-trigger]{border-color:var(--ees-line-control);background:#fff}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry [data-scope-trigger] small{font:var(--ees-type-meta);color:var(--ees-text-tertiary)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry [data-scope-trigger] span{font:var(--ees-type-label);font-weight:500}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry :is(.ew-category-toggle,.ew-nav-links button,.ew-workflows button,.ew-recent button) span{font:var(--ees-type-body);font-weight:inherit}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry .ew-scope-field:not(:only-child):first-child [data-scope-trigger]{border-radius:var(--ees-radius-control) var(--ees-radius-control) 0 0}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry .ew-scope-field:not(:only-child):last-child [data-scope-trigger]{border-radius:0 0 var(--ees-radius-control) var(--ees-radius-control)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry .ew-assets-toggle{border-radius:var(--ees-radius-control);background:transparent;font:var(--ees-type-label);font-weight:500;color:var(--ees-text-secondary)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry :is(.ew-nav-links,.ew-workflows,.ew-recent) button,[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry .ew-category-toggle{border-radius:var(--ees-radius-control);transition:background-color var(--ees-motion-fast)}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry :is(.ew-nav-links,.ew-workflows,.ew-recent) button:hover,[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry :is(.ew-assets-toggle,.ew-category-toggle):hover{background:#eceef2}
+/* where I am: the tint and the accent word; hovering does not take the mark away */
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry :is(.ew-workflows button,[data-action=procedures])[aria-current=page],[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry :is(.ew-workflows button,[data-action=procedures])[aria-current=page]:hover{background:var(--ees-accent-tint);color:var(--ees-accent);font-weight:600;box-shadow:none}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry [data-action=procedures][aria-current=page]>img{display:none}
+[data-polish="on"]:not(#ees-now):not(#ees-then) #ees-work-entry [data-action=procedures][aria-current=page]::before{content:"";flex:none;width:16px;height:16px;background:currentColor;-webkit-mask:url('/_ees14/v4/e8a37.svg') center/contain no-repeat;mask:url('/_ees14/v4/e8a37.svg') center/contain no-repeat}
 
 /* 7. Said last: every 'font:' above resets this ------------------------------------------------------------------ */
 /* counts and times keep their columns */
@@ -340,6 +360,7 @@ body{display:flex;flex-direction:column}
    <button data-step="P1" aria-pressed="true">작성 화면 <small>P1</small></button>
    <button data-step="P2" aria-pressed="false">업무 단계 화면 <small>P2</small></button>
    <button data-step="P3" aria-pressed="false">처음 화면 <small>P3</small></button>
+   <button data-step="P4" aria-pressed="false">처음 화면 · 업무 목록 <small>P4</small></button>
   </div>
   <div class="mk-group mk-hide" role="group" aria-label="보는 방법">
    <b>보기</b>
@@ -354,15 +375,17 @@ body{display:flex;flex-direction:column}
  <table class="mk-words" id="mock-words" hidden>
   <thead><tr><th>기준</th><th>지금 제품</th><th>이 시안</th></tr></thead>
   <tbody>
-   <tr><td>글자 크기</td><td>10가지 · 12px가 가장 많음 · 본문 13px</td><td>5단계: 24 · 16 · 14 · 13 · 12px · 본문 14px</td></tr>
-   <tr><td>글자 색</td><td>본문 #1D2128 · 보조와 더 옅은 보조가 같은 색(#5E6573)</td><td>본문 #171B22 · 보조 #4A5263 · 더 옅은 보조 #666E80(흰 바탕·왼쪽 메뉴·옅은 파랑 면 어디서나 4.5:1 이상)</td></tr>
-   <tr><td>강조색</td><td>없음(회색으로 고른 곳 표시)</td><td>강철 파랑 #2B5FA8 하나 · 지금 있는 곳·고른 줄·덧붙이기·초점에만</td></tr>
-   <tr><td>진한 단추</td><td>#1D2128</td><td>#171B22 · 규칙은 그대로(21번 시안의 ‘게시’ 무게 규칙 포함)</td></tr>
-   <tr><td>모서리</td><td>9가지(3~12px)</td><td>3가지: 입력칸·단추 8px · 목록·카드 12px · 표시 둥글게</td></tr>
+   <tr><td>글자 크기</td><td>10가지 · 12px가 가장 많음 · 본문 13px</td><td>5단계: 제목 24 · 구역과 업무 이름 16 · 본문과 줄 이름 14 · 보조 13 · 표시 12px</td></tr>
+   <tr><td>글자 색</td><td>본문 #1D2128 · 보조와 더 옅은 보조가 같은 색(#5E6573)</td><td>본문 #171B22 · 보조 #414959(지금보다 진하게) · 더 옅은 보조 #5E6573(지금 값 그대로) · 지금보다 흐려지는 글자 없음</td></tr>
+   <tr><td>강조색</td><td>왼쪽 메뉴에서 고른 항목의 아이콘과 도우미 표시만 파랑(#2F5F98) · 고른 줄은 회색 띠</td><td>강철 파랑 #2B5FA8 하나(올렸을 때만 더 진한 #1F4A87) · 지금 있는 곳, 덧붙이는 글자 단추, 키보드 초점에만</td></tr>
+   <tr><td>진한 단추</td><td>#1D2128</td><td>#171B22 · 규칙은 그대로(21번 시안의 ‘게시’ 무게 규칙 포함) · 화면에 하나</td></tr>
+   <tr><td>단추 크기</td><td>화면마다 다름(30~36px)</td><td>두 가지: 화면의 단추 36px(저장·게시·지금 실행·시작) · 줄 안의 단추 32px(실행·도구 변경)</td></tr>
+   <tr><td>모서리</td><td>3·4·6·7·8px</td><td>입력칸·단추·누르는 글자 8px · 목록 12px · 체크 칸 5px · 상태 표시와 번호는 둥글게</td></tr>
    <tr><td>선</td><td>카드·입력칸·줄·탭·바닥 모두 1px 테두리</td><td>입력칸과 목록 바깥만 테두리 · 카드 안 카드 없음 · 줄 사이는 가는 선 · 빈 체크 칸 테두리는 3:1</td></tr>
-   <tr><td>깊이</td><td>거의 없음</td><td>2단계: 목록이 살짝 뜸 · 떠 있는 것(메뉴·창)</td></tr>
+   <tr><td>깊이</td><td>거의 없음</td><td>목록 면만 살짝 뜸(메뉴·창은 이 시안에서 다루지 않음)</td></tr>
+   <tr><td>키보드 초점</td><td>곳마다 다름(검은 선, 안쪽 선, 그림자)</td><td>한 가지: 파랑 2px 선</td></tr>
    <tr><td>글꼴</td><td>Noto Sans KR · Inter</td><td>그대로(2026-11-17 결정)</td></tr>
-   <tr><td>화면 구조·흐름</td><td></td><td>그대로 · 다른 곳 둘: P1의 ‘도구 변경’ 자리(도구 설명 칸 안), P3의 내용(시안 20번의 처음 화면)</td></tr>
+   <tr><td>화면 구조·흐름</td><td></td><td>그대로 · 다른 곳 둘: P1의 ‘도구 변경’ 자리(도구 설명 칸 안), P4의 내용(시안 20번의 처음 화면)</td></tr>
   </tbody>
  </table>
 </div>
@@ -410,7 +433,7 @@ body{display:flex;flex-direction:column}
     </form></section><div class="ew-content-heading"><h3>단계와 작업</h3><small>2개 단계</small><button type="button" data-author-action="help" data-id="stages_and_jobs" class="ew-help-trigger" aria-label="단계와 작업 도움말" aria-haspopup="dialog"><img class="ew-icon" src="/_ees14/v4/41b38.svg" alt="" aria-hidden="true"></button></div><div class="ew-stage-list"><section class="ew-content-stage" data-stage-id="stage"><div class="ew-stage-head"><button type="button" data-author-action="stage_toggle" data-id="stage" class="ew-stage-toggle" aria-expanded="true" aria-controls="ew-stage-body-stage"><span class="ew-author-stage-number">1</span><span class="ew-stage-name">점검</span><small class="ew-stage-count">2개 작업</small><img class="ew-icon" src="/_ees14/v4/e1049.svg" alt="" aria-hidden="true"></button><button type="button" data-author-action="stage_menu" data-id="stage" class="ew-job-menu-button ew-stage-menu-button" aria-label="점검 메뉴" aria-expanded="false" aria-haspopup="menu"><img class="ew-icon" src="/_ees14/v4/a953c.svg" alt="" aria-hidden="true"></button></div><div id="ew-stage-body-stage" class="ew-stage-body"><div class="ew-stage-description"><p>설명 없음</p><button type="button" data-author-action="stage_edit" data-id="stage" class="ew-author-link">단계 정보 수정</button></div><div class="ew-stage-jobs"><div class="ew-job-row" data-job-id="checks" data-returned="false"><button type="button" data-author-action="node" data-id="checks" class="ew-author-job"><span class="ew-job-row-label"><span>설비 세 곳 점검</span><small class="ew-job-meta">사람이 확인 · 항목 3개</small></span><img class="ew-icon" src="/_ees14/v4/f0554.svg" alt="" aria-hidden="true"></button><button type="button" data-author-action="job_menu" data-id="checks" class="ew-job-menu-button" aria-label="설비 세 곳 점검 메뉴" aria-expanded="false" aria-haspopup="menu"><img class="ew-icon" src="/_ees14/v4/a953c.svg" alt="" aria-hidden="true"></button></div><div class="ew-job-row" data-job-id="doc" data-returned="false"><button type="button" data-author-action="node" data-id="doc" class="ew-author-job"><span class="ew-job-row-label"><span>점검 기준 문서 찾기</span><small class="ew-job-meta">도구 사용 · 담당자 확인</small></span><img class="ew-icon" src="/_ees14/v4/f0554.svg" alt="" aria-hidden="true"></button><button type="button" data-author-action="job_menu" data-id="doc" class="ew-job-menu-button" aria-label="점검 기준 문서 찾기 메뉴" aria-expanded="false" aria-haspopup="menu"><img class="ew-icon" src="/_ees14/v4/a953c.svg" alt="" aria-hidden="true"></button><button type="button" data-author-action="job_api_setup" data-id="doc" class="ew-author-link ew-api-row-action"><img class="ew-icon" src="/_ees14/v4/cb8e2.svg" alt="" aria-hidden="true">도구 변경</button><div data-api-job-binding="" class="ew-api-job-binding"><div>페이지 ID · 실행 시 입력</div><small>받는 결과 · 문서 제목, 페이지 ID, 문서 유형</small><small>사내 Confluence　GET　/{id}</small></div></div><button type="button" data-author-action="add_job" data-parent="stage" class="ew-author-link"><img class="ew-icon" src="/_ees14/v4/9ce50.svg" alt="" aria-hidden="true">작업 추가</button></div></div></section><section class="ew-content-stage" data-stage-id="record"><div class="ew-stage-head"><button type="button" data-author-action="stage_toggle" data-id="record" class="ew-stage-toggle" aria-expanded="false" aria-controls="ew-stage-body-record"><span class="ew-author-stage-number">2</span><span class="ew-stage-name">기록</span><small class="ew-stage-count">2개 작업</small><img class="ew-icon" src="/_ees14/v4/f0554.svg" alt="" aria-hidden="true"></button></div></section></div><button type="button" data-author-action="add_stage" class="ew-author-link ew-stage-add"><img class="ew-icon" src="/_ees14/v4/9ce50.svg" alt="" aria-hidden="true">단계 추가</button><section class="ew-schedule-section ew-content-start-inputs"><div class="ew-author-heading ew-start-row"><h3>시작할 때 물어볼 것</h3><small>0개</small><button type="button" data-author-action="start_input_add" class="ew-author-link" data-mutation="" aria-label="시작할 때 물어볼 것 추가">＋ 추가</button></div></section></section></div><footer><small data-author-status="" data-author-revision="4" data-dirty="false" data-status="saved" tabindex="-1">저장됨</small><button type="button" data-author-action="save" data-mutation="" disabled="" title="저장됨">저장</button><button type="button" data-author-action="publish" data-mutation="" disabled="">게시</button></footer></section></div></section></template>
 <template id="tpl-panel-P2"><section id="ees-work-panel" tabindex="-1" data-ees-work="" data-ees-source-slot="" aria-label="업무 패널" data-ees-mode="work" class="ew-vd"><div id="ees-work-content" class="ew-scroll ew-center-content ew-centered-stage"><nav class="ew-center-breadcrumb" aria-label="업무 경로"><button type="button" class="ew-run-back" data-action="stage_back">주간 설비 점검</button><span aria-hidden="true">›</span><span aria-current="page">점검</span></nav><header class="ew-vd-head"><div class="ew-stage-heading"><div class="ew-vd-title"><h2>점검</h2><p class="ew-center-scope">전체 공장 · EMS</p></div><div class="ew-center-heading-actions"><button type="button" class="ew-icon-button" aria-label="단계 더 보기" data-action="stage_details"><img class="ew-icon" src="/_ees14/v4/a953c.svg" alt="" aria-hidden="true"></button></div></div></header><nav class="ew-tabs ew-center-tabs" aria-label="업무 진행 보기"><button type="button" data-action="stage_tab" data-tab="work" aria-pressed="true">업무 내용</button><button type="button" data-action="stage_tab" data-tab="log" aria-pressed="false">실행 기록</button><button type="button" data-action="stage_tab" data-tab="rules" aria-pressed="false">판정 기준</button></nav><div class="ew-center-task-heading ew-stage-summary"><h3>작업 2개</h3><span class="ew-stage-completed">0 / 2 완료</span><div class="ew-center-counts"><span><i class="ew-vd-dot" data-verdict="none"></i>확인 필요 1</span><span><i class="ew-vd-dot" data-verdict="none"></i>실행 필요 1</span></div><button type="button" class="ew-secondary ew-stage-run-button" data-action="execute_scope" data-node-id="stage" data-mutation="" aria-label="점검 단계 실행"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4.5 2.75L11 7L4.5 11.25V2.75Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"></path></svg><span>지금 실행</span></button></div><div class="ew-vd-body ew-center-task-list" id="ees-stage-tasks"><section class="ew-vd-entry ew-center-task-row" data-key="stage-job-checks" data-stage-job="checks" data-vd-item="checks" data-handler="human" data-expanded="false"><div class="ew-vd-item"><span class="ew-center-task-number" aria-hidden="true">1</span><div class="ew-vd-item-top"><button type="button" class="ew-vd-name" data-action="job" data-job-id="checks">설비 세 곳 점검</button><small class="ew-center-task-description"><b data-decision-actor="">직접 판정</b> · 펌프, 밸브, 배관을 차례로 봅니다.</small></div><div class="ew-vd-item-meta"><div class="ew-vd-decision"><span class="ew-vd-count" data-decision-status="">1 / 3</span></div></div></div><ol class="ew-vd-checks" aria-label="설비 세 곳 점검 확인 항목"><li data-done="true"><span class="ew-vd-check-done" role="img" aria-label="확인함"><img class="ew-icon" src="/_ees14/v4/9d8d5.svg" alt="" aria-hidden="true"></span><span>펌프 누수 없음</span><small>2026. 11. 26. 03:14 · EMS 공용 계정</small></li><li data-done="false"><label><input type="checkbox" data-stage-check="" data-job-id="checks" data-item-id="item-2" data-mutation=""><span>밸브 개폐 정상</span></label></li><li data-done="false"><label><input type="checkbox" data-stage-check="" data-job-id="checks" data-item-id="item-3" data-mutation=""><span>배관 진동 없음</span></label></li></ol></section><section class="ew-vd-entry ew-center-task-row" data-key="stage-job-doc" data-stage-job="doc" data-vd-item="doc" data-handler="human" data-expanded="true"><div class="ew-vd-item"><span class="ew-center-task-number" aria-hidden="true">2</span><div class="ew-vd-item-top"><button type="button" class="ew-vd-name" data-action="stage_values" data-job-id="doc" aria-expanded="true" aria-controls="stage-under-doc">점검 기준 문서 찾기</button><small class="ew-center-task-description"><b data-decision-actor="">직접 판정</b> · 점검 기준 문서의 페이지 ID를 넣고, 찾은 문서가 맞는지 봅니다.</small></div><div class="ew-vd-item-meta"><button type="button" class="ew-vd-run" data-action="stage_execute" data-job-id="doc" aria-label="점검 기준 문서 찾기 실행" data-mutation=""><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M4.5 2.75L11 7L4.5 11.25V2.75Z" stroke="currentColor" stroke-width="1.25" stroke-linejoin="round"></path></svg><span>실행</span></button><div class="ew-vd-decision"><span class="ew-vd-state" data-decision-status=""><span>실행 필요</span></span></div></div></div><div class="ew-vd-under" id="stage-under-doc"><div class="ew-vd-evidence ew-vd-job-values" id="stage-values-doc"><div class="ew-vd-tool-detail" data-stage-values="" data-job-id="doc"><section><h4>입력</h4><dl class="ew-vd-tool-values ew-vd-ask-values"><dt><label for="ew-stage-doc-page-id">페이지 ID</label></dt><dd><input name="page-id" data-work-input="" data-value-present="false" data-input-type="text" id="ew-stage-doc-page-id" required="" placeholder="예: 123456789" type="text" value=""></dd></dl></section></div></div><p class="ew-vd-more"><button type="button" class="ew-text" data-action="job" data-job-id="doc" aria-label="점검 기준 문서 찾기 자세히">자세히</button></p></div></section></div></div></section></template>
 <template id="tpl-panel-P3"><section id="ees-work-panel" tabindex="-1" data-ees-work="" data-ees-source-slot="" aria-label="업무 패널" data-ees-mode="work"><div id="ees-work-content" class="ew-scroll ew-center-content"><div class="ew-empty ew-work-home"><h3>업무 절차를 선택해 주세요</h3><p>공장·시스템을 선택한 뒤 왼쪽 업무 목록에서 절차를 여세요.</p></div></div></section></template>
-<template id="tpl-panel-P3-after"><section id="ees-work-panel" tabindex="-1" data-ees-work="" data-ees-source-slot="" aria-label="업무 패널" data-ees-mode="work"><div id="ees-work-content" class="ew-scroll ew-center-content"><section class="ew-home" aria-label="업무 목록"><div class="ew-home-list"><article class="ew-home-row"><div><h3>주간 설비 점검</h3><p>매주 월요일 설비 상태를 확인하고 이상을 기록합니다.</p><small>할 일 4개</small></div><button type="button" class="ew-secondary" data-action="overview_start"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"></path></svg><span>시작</span></button></article><article class="ew-home-row"><div><h3>Confluence 문서 확인 가이드</h3><p>문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다.</p><small><i></i>지난번 11월 25일 16:40 끝냄 · 설비 점검 안내 (예시) 외 2건</small></div><button type="button" class="ew-secondary" data-action="overview_start"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"></path></svg><span>시작</span></button></article></div><button type="button" class="ew-home-new" data-action="procedure_new">＋ 새 업무 절차</button></section></div></section>
+<template id="tpl-panel-P3-after"><section id="ees-work-panel" tabindex="-1" data-ees-work="" data-ees-source-slot="" aria-label="업무 패널" data-ees-mode="work"><div id="ees-work-content" class="ew-scroll ew-center-content"><section class="ew-home" aria-label="업무 목록"><div class="ew-home-list"><article class="ew-home-row"><div><h3>주간 설비 점검</h3><p>매주 월요일 설비 상태를 확인하고 이상을 기록합니다.</p><small>할 일 4개</small></div><button type="button" class="ew-secondary" data-action="overview_start"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"></path></svg><span>시작</span></button></article><article class="ew-home-row"><div><h3>Confluence 문서 확인 가이드</h3><p>문서 주소를 넣으면 그 문서와 바로 아래 문서를 찾아 줍니다.</p><small><i></i>지난번 11월 25일 16:40 끝냄 · 설비 점검 안내 (예시) 외 2건</small></div><button type="button" class="ew-secondary" data-action="overview_start"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M8 5.5v13l10-6.5z"></path></svg><span>시작</span></button></article></div><button type="button" class="ew-home-new" data-action="procedure_new">새 업무 절차</button></section></div></section>
 </template>
 <template id="tpl-chat-now"><header><b>업무 도우미</b><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M14 5h5v5M19 5l-6 6M10 19H5v-5M5 19l6-6"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg><small>새 대화</small><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="7" stroke-dasharray="3 3"/></svg><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M5 8h9M18 8h1M5 16h1M10 16h9"/><circle cx="16" cy="8" r="2"/><circle cx="8" cy="16" r="2"/></svg></header>
 <div class="fu-welcome"><span class="fu-welcome-mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#37658B" stroke-width="1.9" stroke-linejoin="round" aria-hidden="true"><path d="M12 4l8 4-8 4-8-4z"/><path d="M4 12l8 4 8-4"/><path d="M4 16l8 4 8-4"/></svg></span><h3>안녕하세요, EMS 공용 계정<span>무엇을 도와드릴까요?</span></h3>
@@ -428,15 +451,18 @@ body{display:flex;flex-direction:column}
   var SCENES={
     P1:{name:'작성 화면',area:'업무 절차',entry:'author',chat:'author',panel:{off:'P1',on:'P1'},
       when:'업무 절차를 고칠 때(워크스페이스)',
-      changed:'글자 크기를 5단계로(제목 24 · 구역 16 · 본문 14 · 보조 13 · 표시 12) · 이름·분류·목적을 감싼 상자를 없애고 입력칸만 테두리 · 단계 목록은 한 면(옅은 그림자, 줄 사이 가는 선) · 펼친 단계는 번호를 채움 · 덧붙이는 것(＋ 단계 추가, ＋ 작업 추가, 단계 정보 수정)은 파랑 글자 · ‘도구 변경’을 도구 설명 칸 안으로 옮겨 › 와 ⋯ 가 줄마다 같은 자리 · 바닥 단추의 오른쪽 끝을 내용과 맞춤'},
+      changed:'글자를 5단계로(제목 24, 구역 16, 본문 14, 보조 13, 표시 12) · 이름·분류·목적을 감싼 상자를 없애고 입력칸만 테두리 · 단계 목록은 한 면(옅은 그림자, 줄 사이 가는 선) · 덧붙이는 것(단계 추가, 작업 추가, 단계 정보 수정)은 파랑 글자 · ‘도구 변경’을 도구 설명 칸 안으로 옮기고 ⋯ 와 › 를 단계 줄과 같은 세로줄에 · 바닥 단추의 오른쪽 끝을 내용과 맞춤 · 제목 옆 ⋯ 는 테두리 있는 단추'},
     P2:{name:'업무 단계 화면',area:'업무',entry:'work',chat:'work',panel:{off:'P2',on:'P2'},
       when:'업무를 시작해 단계의 작업을 할 때',
-      changed:'작업 번호를 세로줄로 이어 순서를 보임 · 하고 있는 작업은 옅은 파랑 면과 왼쪽 막대(회색 띠 대신) · 체크 칸을 18px로 · 작업 아래의 입력과 ‘자세히’를 작업 이름과 같은 세로선에 두고 그 안의 상자 테두리를 없앰 · ‘자세히’는 파랑 글자'},
-    P3:{name:'처음 화면',area:'업무',entry:'home',chat:'work',panel:{off:'P3',on:'P3-after'},
+      changed:'작업 번호를 세로줄로 이어 순서를 보임 · 하고 있는 작업은 옅은 파랑 면과 왼쪽 막대(회색 띠 대신), 번호도 파랑 · ‘실행’은 테두리 있는 단추 · 빈 체크 칸을 18px에 더 진한 테두리로 · 작업 아래의 입력과 ‘자세히’를 작업 이름과 같은 세로선에 · ‘자세히’는 파랑 글자'},
+    P3:{name:'처음 화면',area:'업무',entry:'home',chat:'work',panel:{off:'P3',on:'P3'},
       when:'처음 들어왔을 때(업무)',
-      changed:'이 화면만 내용도 다름 · 빈 안내는 값만 바꿔서는 달라지지 않아, 구현해 두고 보류한 시안 20번의 처음 화면(할 수 있는 업무 목록)을 같은 값으로 그림 · 고를 것이 여럿이라 진한 단추는 없음'}
+      changed:'내용은 그대로, 글자만 단계에 맞춤(16 · 13) · 값만 바꿔서는 빈 화면이 나아지지 않음 → P4'},
+    P4:{name:'처음 화면 · 업무 목록',area:'업무',entry:'home',chat:'work',panel:{off:'P3',on:'P3-after'},
+      when:'처음 들어왔을 때(업무) · 구현해 두고 보류한 시안 20번의 처음 화면을 넣는다면',
+      changed:'이 화면만 내용이 다름 · 빈 안내 대신 할 수 있는 업무 목록(시안 20번), 같은 값으로 그림 · 고를 것이 여럿이라 진한 단추는 없음 · 이것을 넣는 것은 다듬기와 따로 정할 일'}
   };
-  var NOTE='가운데 업무 화면과 왼쪽 메뉴 안쪽은 제품 화면 그대로에 값만 바꾼 것 · 바깥 틀, 윗줄, 오른쪽 대화는 모양 재현 · 대화의 영어 제안은 개발 환경에 보이는 기본 문구라 그대로 둠';
+  var NOTE='가운데 업무 화면과 왼쪽 메뉴 안쪽은 제품 화면 그대로에 값만 바꾼 것 · 바깥 틀, 윗줄, 오른쪽 대화는 제품이 아니라 모양을 그린 것이고 다듬은 쪽은 같은 값으로 다시 그림(인사말 24px, 입력창 테두리 옅게) · 대화의 영어 제안은 개발 환경에 보이는 기본 문구라 그대로 둠';
   var VIEWS={side:'나란히',now:'지금만',after:'다듬은 뒤만'};
   var state={scene:'P1',view:'side'};
   function compact(){return window.innerWidth<1440;}
@@ -473,13 +499,17 @@ body{display:flex;flex-direction:column}
     if(target.id==='mock-words-toggle'){var words=$('#mock-words');words.hidden=!words.hidden;target.setAttribute('aria-expanded',String(!words.hidden));return;}
     if(target.closest('.mk-pane')){event.preventDefault();}
   });
-  // 1 2 3: screens. ← →: flip between now and after when one is shown.
+  // a mock shows: a check box does not tick, a menu does not open
+  document.addEventListener('click',function(event){
+    var held=event.target.closest?event.target.closest('.mk-pane :is(input[type=checkbox],label,summary)'):null;if(held)event.preventDefault();
+  },true);
+  // 1 2 3 4: screens. ← →: flip between now and after when one is shown.
   document.addEventListener('keydown',function(event){
     if(event.target.closest&&event.target.closest('input,textarea,select'))return;
-    if(['1','2','3'].indexOf(event.key)>=0){state.scene='P'+event.key;render();}
+    if(['1','2','3','4'].indexOf(event.key)>=0){state.scene='P'+event.key;render();}
     else if(event.key==='ArrowLeft'||event.key==='ArrowRight'){if(state.view==='side')return;state.view=event.key==='ArrowLeft'?'now':'after';render();}
   });
-  var query=/[?&#]screen=(P[123])/.exec(location.search+location.hash),view=/[?&#]view=(side|now|after)/.exec(location.search+location.hash);
+  var query=/[?&#]screen=(P[1234])/.exec(location.search+location.hash),view=/[?&#]view=(side|now|after)/.exec(location.search+location.hash);
   if(query)state.scene=query[1];if(view)state.view=view[1];
   var wasCompact=compact();window.addEventListener('resize',function(){if(compact()!==wasCompact){wasCompact=compact();render();}});
   window.mockShow=function(scene,viewName){if(SCENES[scene])state.scene=scene;if(VIEWS[viewName])state.view=viewName;render();};
