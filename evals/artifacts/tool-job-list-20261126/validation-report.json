@@ -1,8 +1,8 @@
 {
  "mock": "design-mock-23-tool-job-list.html",
  "revision": 3,
- "checks": 339,
- "passed": 339,
+ "checks": 376,
+ "passed": 376,
  "failed": 0,
  "results": [
   {
@@ -2038,6 +2038,228 @@
    "name": "no page errors",
    "ok": true,
    "detail": "[]"
+  },
+  {
+   "size": "1440x900",
+   "name": "opened: the buttons of the strip are one line",
+   "ok": true,
+   "detail": "[\"false\",0]"
+  },
+  {
+   "size": "1536x900",
+   "name": "opened: the buttons of the strip are one line",
+   "ok": true,
+   "detail": "[\"false\",0]"
+  },
+  {
+   "size": "1700x900",
+   "name": "opened: the buttons of the strip are one line",
+   "ok": true,
+   "detail": "[\"false\",0]"
+  },
+  {
+   "size": "640x900",
+   "name": "narrow: the mock opens with the proposal alone, as wide as the window, and says which side it is",
+   "ok": true,
+   "detail": "{\"folded\":\"true\",\"strip\":79,\"pane\":[640,821],\"label\":\"바꾼 뒤위쪽 ‘볼 것’에서 ‘지금’을 누르면 지금 화면\"}"
+  },
+  {
+   "size": "640x900",
+   "name": "narrow: the explanation starts folded and the strip leaves at least three quarters of the height to the screen",
+   "ok": true,
+   "detail": "{\"folded\":\"true\",\"strip\":79,\"pane\":[640,821],\"label\":\"바꾼 뒤위쪽 ‘볼 것’에서 ‘지금’을 누르면 지금 화면\"}"
+  },
+  {
+   "size": "640x900",
+   "name": "narrow: nothing scrolls sideways as it opens",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "640x900",
+   "name": "narrow: 지금 shows today's screen instead of the proposal (one at a time)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "640x900",
+   "name": "narrow: 바꾼 뒤 brings the proposal back",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "640x900",
+   "name": "narrow: the stage opens and its first job is within reach",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "640x900",
+   "name": "narrow: a job opens its page, the tool card fits the window",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "640x900",
+   "name": "narrow: back from the job, the job one came from is in view",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "640x900",
+   "name": "narrow: T4 shows the mark on the closed stage",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "640x900",
+   "name": "narrow: the six rows fit the width; 도구 연결 keeps clear of ⋯",
+   "ok": true,
+   "detail": "[{\"over\":0,\"action\":null,\"in\":true},{\"over\":0,\"action\":null,\"in\":true},{\"over\":0,\"action\":null,\"in\":true},{\"over\":0,\"action\":10,\"in\":true},{\"over\":0,\"action\":null,\"in\":true},{\"over\":0,\"action\":null,\"in\":true}]"
+  },
+  {
+   "size": "640x900",
+   "name": "narrow: a job that needs a hand opens its page",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "640x900",
+   "name": "narrow: widening the window keeps the side one was on; the other can be turned on beside it",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "640x900",
+   "name": "narrow → wide: both sides side by side again",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "640x900",
+   "name": "wide → narrow: back to one side",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "640x900",
+   "name": "narrow: no page errors",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "420x800 touch",
+   "name": "narrow: the mock opens with the proposal alone, as wide as the window, and says which side it is",
+   "ok": true,
+   "detail": "{\"folded\":\"true\",\"strip\":151,\"pane\":[420,649],\"label\":\"바꾼 뒤위쪽 ‘볼 것’에서 ‘지금’을 누르면 지금 화면\"}"
+  },
+  {
+   "size": "420x800 touch",
+   "name": "narrow: the explanation starts folded and the strip leaves at least three quarters of the height to the screen",
+   "ok": true,
+   "detail": "{\"folded\":\"true\",\"strip\":151,\"pane\":[420,649],\"label\":\"바꾼 뒤위쪽 ‘볼 것’에서 ‘지금’을 누르면 지금 화면\"}"
+  },
+  {
+   "size": "420x800 touch",
+   "name": "narrow: nothing scrolls sideways as it opens",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "420x800 touch",
+   "name": "narrow: 지금 shows today's screen instead of the proposal (one at a time)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "420x800 touch",
+   "name": "narrow: 바꾼 뒤 brings the proposal back",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "420x800 touch",
+   "name": "narrow: the stage opens and its first job is within reach",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "420x800 touch",
+   "name": "narrow: a job opens its page, the tool card fits the window",
+   "ok": true,
+   "detail": "[0,0]"
+  },
+  {
+   "size": "420x800 touch",
+   "name": "narrow: back from the job, the job one came from is in view",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "420x800 touch",
+   "name": "narrow: T4 shows the mark on the closed stage",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "420x800 touch",
+   "name": "narrow: the six rows fit the width; 도구 연결 keeps clear of ⋯",
+   "ok": true,
+   "detail": "[{\"over\":0,\"action\":null,\"in\":true},{\"over\":0,\"action\":null,\"in\":true},{\"over\":0,\"action\":null,\"in\":true},{\"over\":0,\"action\":10,\"in\":true},{\"over\":0,\"action\":null,\"in\":true},{\"over\":0,\"action\":null,\"in\":true}]"
+  },
+  {
+   "size": "420x800 touch",
+   "name": "narrow: a job that needs a hand opens its page",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "420x800 touch",
+   "name": "narrow: widening the window keeps the side one was on; the other can be turned on beside it",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "420x800 touch",
+   "name": "narrow → wide: both sides side by side again",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "420x800 touch",
+   "name": "wide → narrow: back to one side",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "420x800 touch",
+   "name": "narrow: no page errors",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "frame 640x600",
+   "name": "in a sandboxed frame: the mock runs and draws the screen",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "size": "frame 640x600",
+   "name": "in a sandboxed frame: pressing through the flow works and never scrolls the page around the mock",
+   "ok": true,
+   "detail": "250 → 250"
+  },
+  {
+   "size": "frame 640x600",
+   "name": "in a sandboxed frame: no page errors",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "size": "file",
+   "name": "without its script the page says to open the file in a browser",
+   "ok": true,
+   "detail": ""
   }
  ]
 }

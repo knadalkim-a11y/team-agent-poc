@@ -18,15 +18,15 @@
   }
  ],
  "context": "아니근데 '워크스페이스'에서 단계랑 작업 추가하는 기능들 왜 ui에서 안보이지? · '워크스페이스' 자체가, 편집전용 화면이잖아? 근데 왜 저게 또있는거야 · 최대한 눈에 보이는 정보는 단순하면서 직관적이어야해. 상세정보들은 추가적인 클릭을 통해서 보이는게 더 좋지않을까?",
- "base_commit": "47be1fa",
+ "base_commit": "061acf6",
  "product_commit": "598440d",
  "implementation_revision": null,
  "mock": {
   "file": "docs/mockups/ees-work/design-mock-23-tool-job-list.html",
-  "sha256": "c600d03da27c94be88989614046f18db5d5ed3966e9c956d5d98c183000405fc",
-  "bytes": 1053174,
+  "sha256": "932af60bffa6f41e2bf04d7ea412201b9d32b7718ac52be013f82b362ed1c7ef",
+  "bytes": 1055074,
   "source": "docs/mockups/ees-work/design-mock-src/23-tool-job-list.html",
-  "source_sha256": "bdb6aa5c627100a1b186af31ed74e77b0a8f6c2a8003b9ce230cd3ef29e356cf",
+  "source_sha256": "03b4494e61b6ff187232eb5dc4f735c2e97dd6da9dc2eb4c15ff9e6aba0cb3ae",
   "product_css": {
    "chat-theme.css": "b0c9b3298702fe77d758839265370080b9cf33f403c558c96dc4e95e114f222e",
    "ees-work-launcher.css": "af59988c11386a52510b9b141177f1edb249e748693978e072ae235ff7b65562"
@@ -54,7 +54,9 @@
  "now_side": "main 598440d로 만든 프로그램을 개발 환경에 띄워 합성 자료로 그려진 HTML과 제품 CSS 그대로. 왼쪽 메뉴 안쪽도 제품 HTML. 바깥 틀, 윗줄, 오른쪽 대화는 모양을 그린 것. T4의 '문서 요약 확인', '담당자 정보 조회', '변경 알림 대상 조회' 세 줄과 그 작업 화면, T4의 저장하지 않은 편집 중 바닥 줄은 제품 코드에서 옮겨 적음",
  "capture_notes": {
   "T1-side-long-purpose": "검사가 긴 업무 목적(85자)을 넣어 본 모습. 시안의 자료에는 없는 값",
-  "T4-side-open": "손볼 작업 셋이 보이게 목록을 내린 모습"
+  "T4-side-open": "손볼 작업 셋이 보이게 목록을 내린 모습",
+  "narrow-T1": "좁은 창(640×900, 420×800)에서 열었을 때",
+  "narrow-T4-open": "좁은 창에서 손볼 작업이 있는 단계를 펼친 모습"
  },
  "independent_review": {
   "date": "2026-11-27",
@@ -63,7 +65,8 @@
  },
  "window": {
   "1920x1080": "두 쪽 960px씩(가운데 화면만). 한 쪽만 볼 때 왼쪽 메뉴 256px, 가운데 1104px, 대화 560px",
-  "1366x768": "두 쪽 683px씩. 한 쪽만 볼 때 왼쪽 메뉴 56px, 대화 480px"
+  "1366x768": "두 쪽 683px씩. 한 쪽만 볼 때 왼쪽 메뉴 56px, 대화 480px",
+  "1000px 미만": "두 쪽을 나란히 둘 폭이 없어 한 쪽씩 본다(가운데 화면만, 처음은 바꾼 뒤, 위쪽 볼 것에서 지금으로 바꿈). 안내는 접힌 채 열린다. 대화 옆 미리보기 패널이나 전화기에서 열 때의 모습"
  },
  "captures": [
   "T1-side-1366.png",
@@ -99,12 +102,16 @@
   "T4-side-open-1366.png",
   "T4-side-open-1920.png",
   "T5-side-1366.png",
-  "T5-side-1920.png"
+  "T5-side-1920.png",
+  "narrow-T1-420.png",
+  "narrow-T1-640.png",
+  "narrow-T4-open-420.png",
+  "narrow-T4-open-640.png"
  ],
  "checks": {
   "file": "evals/artifacts/tool-job-list-20261126/validation-report.json",
-  "checks": 339,
-  "passed": 339,
+  "checks": 376,
+  "passed": 376,
   "failed": 0
  }
 }

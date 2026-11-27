@@ -365,9 +365,91 @@ async function run(browser, width, height) {
   await page.close();
 }
 
+// A window too narrow for two sides (a preview panel beside a chat, a phone): one side at a time.
+async function runNarrow(browser, width, height, touch) {
+  current = width + 'x' + height + (touch ? ' touch' : '');
+  const ctx = await browser.newContext({ viewport: { width, height }, hasTouch: !!touch });
+  const page = await ctx.newPage(); page.setDefaultTimeout(8000);
+  const errors = []; page.on('pageerror', e => errors.push(String(e))); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+  await page.goto('file://' + path.resolve(file)); await page.evaluate(() => document.fonts.ready);
+  const now = '.mk-pane[data-side=now] ', after = '.mk-pane[data-side=after] ';
+  const press = async sel => { const el = page.locator(sel).first(); if (touch) await el.tap(); else await el.click(); await page.waitForTimeout(150); };
+  const state = () => page.evaluate(() => window.mockState());
+  const shown = sel => page.evaluate(s => { const e = document.querySelector(s); if (!e) return false; const c = getComputedStyle(e), r = e.getBoundingClientRect(); return c.display !== 'none' && c.visibility !== 'hidden' && r.width > 1 && r.height > 1 && e.checkVisibility(); }, sel);
+  const inWindow = sel => page.evaluate(s => { const e = document.querySelector(s); if (!e) return false; const r = e.getBoundingClientRect(); return r.left >= 0 && r.top >= 0 && r.right <= innerWidth + 1 && r.bottom <= innerHeight + 1; }, sel);
+  const sideways = () => page.evaluate(() => { const sc = document.querySelector('.mk-pane[data-shown=true] .ew-author-scroll'); return [document.documentElement.scrollWidth - innerWidth, sc ? sc.scrollWidth - sc.clientWidth : 0]; });
+  const shot = async name => { if (shotDir) { await page.waitForTimeout(3300); await page.screenshot({ path: path.join(shotDir, `${name}-${width}.png`) }); } };
+  const box = await page.evaluate(() => { const g = document.querySelector('#mock-guide'), p = document.querySelector('.mk-pane[data-shown=true]').getBoundingClientRect(); return { folded: g.getAttribute('data-collapsed'), strip: Math.round(g.getBoundingClientRect().height), pane: [Math.round(p.width), Math.round(p.height)], label: document.querySelector('.mk-pane[data-shown=true] .mk-pane-label').textContent.trim() }; });
+  check('narrow: the mock opens with the proposal alone, as wide as the window, and says which side it is', (await state()).view === 'after' && box.pane[0] === width && box.label.startsWith('바꾼 뒤') && !(await shown(after + '.fu-side')), JSON.stringify(box));
+  check('narrow: the explanation starts folded and the strip leaves at least three quarters of the height to the screen', box.folded === 'true' && box.strip <= height * 0.25 && (await shown('[data-step=T4]')) && (await shown('[data-form-pick=now]')) && (await shown('[data-card-pick=fold]')), JSON.stringify(box));
+  check('narrow: nothing scrolls sideways as it opens', (await sideways()).every(v => v <= 0), JSON.stringify(await sideways()));
+  await shot('narrow-T1');
+  await press('[data-pane-pick=now]');
+  check('narrow: 지금 shows today\'s screen instead of the proposal (one at a time)', (await state()).view === 'now' && (await shown(now + '#ees-work-panel')) && !(await shown(after + '#ees-work-panel')));
+  await press('[data-pane-pick=after]');
+  check('narrow: 바꾼 뒤 brings the proposal back', (await state()).view === 'after');
+  await press(after + '[data-author-action=stage_toggle]');
+  check('narrow: the stage opens and its first job is within reach', (await state()).where === 'T2' && (await inWindow(after + '[data-author-action=node][data-id=page]')));
+  await press(after + '[data-author-action=node][data-id=children]');
+  check('narrow: a job opens its page, the tool card fits the window', (await state()).where === 'T3' && (await shown(after + '.ew-tool-card')) && (await sideways()).every(v => v <= 0), JSON.stringify(await sideways()));
+  await press(after + '.ew-job-detail-header [data-author-action=node]');
+  check('narrow: back from the job, the job one came from is in view', (await state()).where === 'T2' && (await inWindow(after + '[data-author-action=node][data-id=children]')));
+  await press('[data-step=T4]');
+  check('narrow: T4 shows the mark on the closed stage', (await state()).where === 'T4' && (await shown(after + '.ew-stage-name .ew-author-tag')) && (await sideways()).every(v => v <= 0));
+  await press(after + '[data-author-action=stage_toggle]');
+  await page.evaluate(s => document.querySelector(s + '.ew-job-row[data-job-id=notify]').scrollIntoView({ block: 'end' }), after); await page.waitForTimeout(100);
+  const marks = await page.evaluate(s => [...document.querySelectorAll(s + '.ew-job-row')].map(r => { const b = r.querySelector('.ew-api-row-action'), m = r.querySelector('.ew-job-menu-button').getBoundingClientRect(), row = r.getBoundingClientRect(); return { over: r.scrollWidth - r.clientWidth, action: b ? Math.round(m.left - b.getBoundingClientRect().right) : null, in: row.right <= innerWidth + 1 }; }), after);
+  check('narrow: the six rows fit the width; 도구 연결 keeps clear of ⋯', marks.length === 6 && marks.every(m => m.over <= 0 && m.in && (m.action === null || m.action >= 4)) && (await sideways()).every(v => v <= 0), JSON.stringify(marks));
+  await shot('narrow-T4-open');
+  await press(after + '[data-author-action=node][data-id=notify]');
+  check('narrow: a job that needs a hand opens its page', (await state()).where === 'T4-3' && (await shown(after + '.ew-tool-card-io [data-from=gone]')) && (await sideways()).every(v => v <= 0));
+  await page.setViewportSize({ width: 1280, height: 800 }); await page.waitForTimeout(200);
+  check('narrow: widening the window keeps the side one was on; the other can be turned on beside it', (await state()).view === 'after');
+  await page.click('[data-pane-pick=now]'); await page.waitForTimeout(150);
+  check('narrow → wide: both sides side by side again', (await state()).view === 'now+after');
+  await page.setViewportSize({ width, height }); await page.waitForTimeout(200);
+  check('wide → narrow: back to one side', (await state()).view === 'after');
+  check('narrow: no page errors', errors.length === 0, JSON.stringify(errors));
+  await ctx.close();
+}
+
+// The mock inside a sandboxed frame, as a preview panel shows a file: it must run there and must not move the page around it.
+async function runEmbedded(browser, width, height) {
+  current = 'frame ' + width + 'x' + height;
+  const page = await browser.newPage({ viewport: { width: width + 40, height: 700 } });
+  const errors = []; page.on('pageerror', e => errors.push(String(e))); page.on('console', m => { if (m.type() === 'error') errors.push(m.text()); });
+  page.setDefaultTimeout(8000);
+  // the page around the mock is a file too: a blank page may not load a local file into a frame
+  const host = path.join(path.dirname(path.resolve(reportPath)), 'embed-host.html');
+  fs.writeFileSync(host, `<!doctype html><meta charset="utf-8"><body style="margin:20px"><div style="height:300px"></div><iframe sandbox="allow-scripts" src="file://${path.resolve(file)}" style="width:${width}px;height:${height}px;border:0"></iframe><div style="height:600px"></div></body>`);
+  await page.goto('file://' + host); await page.waitForTimeout(900);
+  const frame = page.frames().find(f => f !== page.mainFrame());
+  check('in a sandboxed frame: the mock runs and draws the screen', !!frame && (await frame.evaluate(() => !!window.mockState && document.querySelectorAll('.mk-pane[data-shown=true] #ees-work-panel').length === 1)));
+  await page.evaluate(() => scrollTo(0, 250)); const at = await page.evaluate(() => scrollY);
+  await frame.locator('.mk-pane[data-side=after] [data-author-action=stage_toggle]').click(); await page.waitForTimeout(150);
+  await frame.locator('.mk-pane[data-side=after] [data-author-action=node][data-id=children]').click(); await page.waitForTimeout(150);
+  await frame.locator('.mk-pane[data-side=after] .ew-job-detail-header [data-author-action=node]').click(); await page.waitForTimeout(150);
+  check('in a sandboxed frame: pressing through the flow works and never scrolls the page around the mock', (await frame.evaluate(() => window.mockState().where)) === 'T2' && (await page.evaluate(() => scrollY)) === at, at + ' → ' + (await page.evaluate(() => scrollY)));
+  check('in a sandboxed frame: no page errors', errors.length === 0, JSON.stringify(errors));
+  await page.close();
+}
+
 (async () => {
   const browser = await chromium.launch();
   await run(browser, 1920, 1080); await run(browser, 1366, 768);
+  // widths between the two: the buttons of the strip stay on one line with the explanation open
+  for (const w of [1440, 1536, 1700]) {
+    current = w + 'x900'; const page = await browser.newPage({ viewport: { width: w, height: 900 } });
+    await page.goto('file://' + path.resolve(file)); await page.evaluate(() => document.fonts.ready);
+    const line = await page.evaluate(() => { const a = document.querySelector('#mock-badge').getBoundingClientRect(), b = document.querySelector('#mock-fold').getBoundingClientRect(); return [document.querySelector('#mock-guide').getAttribute('data-collapsed'), Math.round(Math.abs((a.top + a.bottom) / 2 - (b.top + b.bottom) / 2))]; });
+    check('opened: the buttons of the strip are one line', line[0] === 'false' && line[1] <= 2, JSON.stringify(line));
+    await page.close();
+  }
+  // a step that cannot be pressed is a failed check, not a stopped run
+  for (const part of [() => runNarrow(browser, 640, 900), () => runNarrow(browser, 420, 800, true), () => runEmbedded(browser, 640, 600)]) { try { await part(); } catch (e) { check('the run reached its end', false, String(e).split('\n')[0]); } }
+  // what a viewer that keeps the script from running would show instead of an empty page
+  current = 'file'; const html = fs.readFileSync(file, 'utf8');
+  check('without its script the page says to open the file in a browser', /id="mock-step-text">[^<]*내려받아 브라우저로 열어 주세요/.test(html));
   await browser.close();
   const failed = results.filter(r => !r.ok);
   fs.writeFileSync(reportPath, JSON.stringify({ mock: path.basename(file), revision: 3, checks: results.length, passed: results.length - failed.length, failed: failed.length, results }, null, 1));

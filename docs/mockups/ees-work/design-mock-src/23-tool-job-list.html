@@ -45,14 +45,22 @@ body{display:flex;flex-direction:column}
 .mk-stage:not([data-count="1"]) .mk-pane-label{display:block}
 .mk-stage:not([data-count="1"]) .fu-shell{grid-template-columns:minmax(0,1fr)}
 .mk-stage:not([data-count="1"]) :is(.fu-side,.fu-chat){display:none}
-/* two things still to decide, each with a switch above: naming the earlier job a job takes its result from (both
-   proposals; on in this mock), and folding the name, category and purpose fields away in the 'straight to editing'
-   proposal (shown, as the product does today, unless picked). */
+/* two things still to decide, each with a switch above: folding the name, category and purpose fields into one line
+   (folded in this mock), and showing a tool's inputs and results at once or inside 상세 보기 (at once in this mock). */
 .mk-guide button[aria-disabled="true"]{color:#8c94a3}
 /* ‘지금처럼’: the fields stay open and there is nothing to fold them with */
 .mk-pane [data-author-action=info_toggle][hidden]{display:none!important}
-/* a narrower window: the strip stays one line */
-@media (max-width:1439px){.mk-row{column-gap:10px}.mk-group{gap:4px}.mk-guide button{padding:0 8px}}
+/* a narrower window (a laptop): the strip stays one line */
+@media (max-width:1699px){.mk-row{column-gap:10px}.mk-group{gap:4px}.mk-guide button{padding:0 8px}}
+/* a window too narrow for two sides (a preview panel beside a chat, a phone): one side at a time and only the work
+   panel, with a shorter strip. Which side is on is still said above it. */
+@media (max-width:999px){
+ .mk-guide{padding:6px 12px 8px}
+ .mk-guide button small{display:none}
+ .mk-stage .mk-pane-label{display:block;padding:3px 12px}
+ .mk-stage .fu-shell{grid-template-columns:minmax(0,1fr)}
+ .mk-stage :is(.fu-side,.fu-chat){display:none}
+}
 </style>
 <!-- Context only: the frame around the work panel (left menu shell, top bar, chat). The product draws these in its
      Svelte shell; the mock copies their measured sizes and colours. The left menu content and the work panel on the
@@ -209,7 +217,7 @@ body{display:flex;flex-direction:column}
   <button class="mk-hide" id="mock-ref-toggle" aria-expanded="false">참고</button>
   <button class="mk-fold" id="mock-fold" aria-expanded="true">안내 접기</button>
  </div>
- <p class="mk-text" id="mock-step-text"></p>
+ <p class="mk-text" id="mock-step-text">아래에 화면이 보이지 않으면 이 미리보기가 시안의 동작을 막은 것입니다 · 파일을 내려받아 브라우저로 열어 주세요</p>
  <span class="mk-note" id="mock-note" role="status"></span>
 </div>
 <div class="mk-stage" id="mock-stage" data-view="side">
@@ -387,6 +395,10 @@ body{display:flex;flex-direction:column}
   var state={panes:{now:true,after:true},form:'fold',card:'open',info:false,screen:'proc',open:false,board:false,mixed:false,nowEdit:false,job:'children',ref:false};
   var noteTimer=0,align=false,fresh=false,left={};   // left: where each side's stage list was scrolled to when a job was opened
   function compact(){return window.innerWidth<1440;}
+  // too narrow to hold two sides (a preview panel, a phone): one side at a time
+  function narrow(){return window.innerWidth<1000;}
+  // bring what the keyboard is on into view inside its own side; the page around the mock is never scrolled
+  function reveal(el,pane){var box=scroller(pane);if(!box||!box.contains(el))return;var a=el.getBoundingClientRect(),b=box.getBoundingClientRect();if(a.top<b.top-1)box.scrollTop-=b.top+8-a.top;else if(a.bottom>b.bottom+1)box.scrollTop+=a.bottom-(b.bottom-8);}
   function shown(){return SIDES.filter(function(side){return state.panes[side];});}
   function note(text){var box=$('#mock-note');box.textContent=text;clearTimeout(noteTimer);noteTimer=setTimeout(function(){box.textContent='';},3200);}
   // which numbered screen the sides are on now: the badge and the text follow where one has walked to
@@ -406,7 +418,8 @@ body{display:flex;flex-direction:column}
     return 'now-'+kind+(state.nowEdit?'edit-':'sum-')+open;
   }
   function caption(side){
-    if(side==='after'||state.screen!=='proc')return '';
+    if(side==='after')return narrow()?'위쪽 ‘볼 것’에서 ‘지금’을 누르면 지금 화면':'';
+    if(state.screen!=='proc')return '';
     if(state.mixed)return '';
     return state.nowEdit?'⋯ → 절차 편집을 누른 뒤':state.board?'요약 화면':'열자마자 보이는 화면';
   }
@@ -509,6 +522,7 @@ pane.setAttribute('data-form',state.form);
     if(target.hasAttribute('data-step')){scene(target.getAttribute('data-step'));render();return;}
     if(target.hasAttribute('data-pane-pick')){
       var side=target.getAttribute('data-pane-pick');
+      if(narrow()){panes([side]);render();return;}             // no room for two: the button picks the side
       if(state.panes[side]&&shown().length===1){note('하나는 켜 두어야 합니다');return;}
       state.panes[side]=!state.panes[side];render();return;
     }
@@ -521,7 +535,7 @@ pane.setAttribute('data-form',state.form);
     event.preventDefault();
     if(target.hasAttribute('data-author-action')){
       var focus=act(target);
-      if(focus){render();var next=$(focus,pane);if(next){next.focus({preventScroll:true});next.scrollIntoView({block:'nearest'});}}
+      if(focus){render();var next=$(focus,pane);if(next){next.focus({preventScroll:true});reveal(next,pane);}}
       return;
     }
     note(SAME);
@@ -544,11 +558,16 @@ pane.setAttribute('data-form',state.form);
     }
   });
   var whereTo=location.search+location.hash,query=/[?&#]screen=(T[12345])/.exec(whereTo),view=/[?&#]view=(side|now|after)/.exec(whereTo),form=/[?&#]form=(fold|now)/.exec(whereTo),card=/[?&#]card=(open|fold)/.exec(whereTo);
-  if(query)scene(query[1]);if(view)panes(VIEWS[view[1]]);if(form)state.form=form[1];if(card)state.card=card[1];
+  if(narrow())panes(['after']);
+  if(query)scene(query[1]);if(view&&!(narrow()&&view[1]==='side'))panes(VIEWS[view[1]]);if(form)state.form=form[1];if(card)state.card=card[1];
   // on a short window the explanation would push what is compared out of view: it starts folded there
-  if(window.innerHeight<900)fold(true);
-  var wasCompact=compact();window.addEventListener('resize',function(){if(compact()!==wasCompact){wasCompact=compact();render();}});
-  window.mockShow=function(name,viewName,formName,cardName){if(SCENES[name]&&SCENES[name].set)scene(name);if(VIEWS[viewName])panes(VIEWS[viewName]);if(formName){state.form=formName;state.info=false;}state.card=cardName||'open';render();};
+  if(window.innerHeight<900||narrow())fold(true);
+  var wasCompact=compact(),wasNarrow=narrow();window.addEventListener('resize',function(){
+    var redraw=compact()!==wasCompact;wasCompact=compact();
+    if(narrow()!==wasNarrow){wasNarrow=narrow();redraw=true;if(wasNarrow&&shown().length>1)panes(['after']);}
+    if(redraw)render();
+  });
+  window.mockShow=function(name,viewName,formName,cardName){if(SCENES[name]&&SCENES[name].set)scene(name);if(VIEWS[viewName])panes(narrow()&&viewName==='side'?['after']:VIEWS[viewName]);if(formName){state.form=formName;state.info=false;}state.card=cardName||'open';render();};
   window.mockState=function(){var copy=JSON.parse(JSON.stringify(state));copy.where=where();copy.view=shown().join('+');return copy;};
   render();
 })();
