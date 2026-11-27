@@ -1,0 +1,168 @@
+{
+ "mock": {
+  "file": "docs/mockups/ees-work/design-mock-23-tool-job-list.html",
+  "commit": "e9008a6",
+  "sha256": "932af60bffa6f41e2bf04d7ea412201b9d32b7718ac52be013f82b362ed1c7ef",
+  "side": "after"
+ },
+ "wheel": {
+  "file": "open_webui-0.11.3+ees.14-py3-none-any.whl",
+  "sha256": "1169471e5280df2b1e024dfacecf52cce2edee3f2dbe1f9cc7256c0685df4785",
+  "note": "built in the development environment from the working tree of this change; not the CI build"
+ },
+ "scope": "elements of the work panel only (the left menu and the chat are context)",
+ "against_mock": {
+  "T1 1920x1080": {
+   "elements": 56,
+   "elements_with_other_box_or_spacing": 1,
+   "of_which_moved_only": 1,
+   "elements_with_other_colour": 0
+  },
+  "T1o 1920x1080": {
+   "elements": 62,
+   "elements_with_other_box_or_spacing": 1,
+   "of_which_moved_only": 1,
+   "elements_with_other_colour": 1
+  },
+  "T2 1920x1080": {
+   "elements": 82,
+   "elements_with_other_box_or_spacing": 1,
+   "of_which_moved_only": 1,
+   "elements_with_other_colour": 0
+  },
+  "T3 1920x1080": {
+   "elements": 98,
+   "elements_with_other_box_or_spacing": 6,
+   "of_which_moved_only": 2,
+   "elements_with_other_colour": 0
+  },
+  "T3d 1920x1080": {
+   "elements": 98,
+   "elements_with_other_box_or_spacing": 6,
+   "of_which_moved_only": 2,
+   "elements_with_other_colour": 0
+  },
+  "T4 1920x1080": {
+   "elements": 57,
+   "elements_with_other_box_or_spacing": 1,
+   "of_which_moved_only": 1,
+   "elements_with_other_colour": 0
+  },
+  "T41 1920x1080": {
+   "elements": 71,
+   "elements_with_other_box_or_spacing": 6,
+   "of_which_moved_only": 2,
+   "elements_with_other_colour": 0
+  },
+  "T43 1920x1080": {
+   "elements": 94,
+   "elements_with_other_box_or_spacing": 6,
+   "of_which_moved_only": 2,
+   "elements_with_other_colour": 0
+  },
+  "T44 1920x1080": {
+   "elements": 93,
+   "elements_with_other_box_or_spacing": 6,
+   "of_which_moved_only": 2,
+   "elements_with_other_colour": 0
+  },
+  "T4o 1920x1080": {
+   "elements": 112,
+   "elements_with_other_box_or_spacing": 2,
+   "of_which_moved_only": 2,
+   "elements_with_other_colour": 0
+  },
+  "T5 1920x1080": {
+   "elements": 89,
+   "elements_with_other_box_or_spacing": 1,
+   "of_which_moved_only": 1,
+   "elements_with_other_colour": 0
+  },
+  "T51 1920x1080": {
+   "elements": 93,
+   "elements_with_other_box_or_spacing": 6,
+   "of_which_moved_only": 2,
+   "elements_with_other_colour": 0
+  },
+  "T1 1366x768": {
+   "elements": 56,
+   "elements_with_other_box_or_spacing": 1,
+   "of_which_moved_only": 1,
+   "elements_with_other_colour": 0
+  },
+  "T1o 1366x768": {
+   "elements": 62,
+   "elements_with_other_box_or_spacing": 1,
+   "of_which_moved_only": 1,
+   "elements_with_other_colour": 1
+  },
+  "T2 1366x768": {
+   "elements": 82,
+   "elements_with_other_box_or_spacing": 1,
+   "of_which_moved_only": 1,
+   "elements_with_other_colour": 0
+  },
+  "T3 1366x768": {
+   "elements": 98,
+   "elements_with_other_box_or_spacing": 6,
+   "of_which_moved_only": 2,
+   "elements_with_other_colour": 0
+  },
+  "T3d 1366x768": {
+   "elements": 98,
+   "elements_with_other_box_or_spacing": 6,
+   "of_which_moved_only": 2,
+   "elements_with_other_colour": 0
+  },
+  "T4 1366x768": {
+   "elements": 57,
+   "elements_with_other_box_or_spacing": 1,
+   "of_which_moved_only": 1,
+   "elements_with_other_colour": 0
+  },
+  "T41 1366x768": {
+   "elements": 71,
+   "elements_with_other_box_or_spacing": 6,
+   "of_which_moved_only": 2,
+   "elements_with_other_colour": 0
+  },
+  "T43 1366x768": {
+   "elements": 94,
+   "elements_with_other_box_or_spacing": 6,
+   "of_which_moved_only": 2,
+   "elements_with_other_colour": 0
+  },
+  "T44 1366x768": {
+   "elements": 93,
+   "elements_with_other_box_or_spacing": 6,
+   "of_which_moved_only": 2,
+   "elements_with_other_colour": 0
+  },
+  "T4o 1366x768": {
+   "elements": 112,
+   "elements_with_other_box_or_spacing": 2,
+   "of_which_moved_only": 2,
+   "elements_with_other_colour": 0
+  },
+  "T5 1366x768": {
+   "elements": 89,
+   "elements_with_other_box_or_spacing": 1,
+   "of_which_moved_only": 1,
+   "elements_with_other_colour": 0
+  },
+  "T51 1366x768": {
+   "elements": 93,
+   "elements_with_other_box_or_spacing": 6,
+   "of_which_moved_only": 2,
+   "elements_with_other_colour": 0
+  }
+ },
+ "what_differs": [
+  "one or two elements a screen sit 1px off (sub-pixel rounding)",
+  "four hidden radio inputs on the job page: the mock's frame gives them a 3px top margin",
+  "T1o: the name field's border colour (the product moves focus to it when the fields open)"
+ ],
+ "not_created_in_the_product": [
+  "T4-2 (도구 확인 필요): needs an account that may not see the connected API; covered by the screen-code tests only"
+ ]
+}

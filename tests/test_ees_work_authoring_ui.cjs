@@ -2480,3 +2480,176 @@ test('mock 21 PR review: the try of another factory is never drawn or acted on w
  h.selection={...h.selection,factory_id:'F1'};h.render();await flush();await flush();
  assert.equal(h.tryReads.at(-1).factory_id,'F1');assert.equal(tryInput(h,'doc','page_id').value,'123');assert.equal(h.tries.size,2,'one try per factory');
 });
+
+// ---- Tool jobs in a procedure (2026-11-27, design mock 23 revision 3; docs/mockups/ees-work/TASK.md#tool-job-list-implementation-20261127) ----
+// The mock's state board: one stage with six tool jobs. Three need a hand: one has no tool yet, one's tool is not
+// among those this account may see, and one took its value from a job that is no longer in the procedure.
+function toolBoardDefinition(){
+ const value=definition();delete value.nodes.j;value.name='Confluence 문서 확인 가이드';value.nodes.t.name='문서 구조 확인';
+ const api=(operation,inputs,outputs=['title','id'])=>({operation_id:operation,version:1,inputs,outputs});
+ const from=job=>({result:{job_id:job,field:'id',confirmed:true}});
+ const jobs=[
+  {id:'page',name:'기준 문서 확인',api_binding:api('page',{id:{input:'page_id'}}),inputs:[{id:'page_id',name:'페이지 ID',type:'text',scope:'run',required:true}]},
+  {id:'digest',name:'문서 요약 확인',deps:['children'],api_binding:api('page',{id:from('children')})},
+  {id:'children',name:'하위 문서 목록 조회',deps:['page'],api_binding:api('children',{id:from('page'),limit:{constant:5}})},
+  {id:'history',name:'변경 이력 확인'},
+  {id:'owner',name:'담당자 정보 조회',api_binding:api('retired',{})},
+  {id:'notify',name:'변경 알림 대상 조회',api_binding:api('page',{id:from('deleted')})},
+ ];
+ for(const item of jobs)value.nodes[item.id]={type:'j',parent:'t',children:[],deps:[],mode:'tool',inputs:[],result_block:'human_confirm',human_confirmation:true,...item};
+ value.nodes.t.children=jobs.map(item=>item.id);return value;
+}
+const toolBoardCatalog=()=>({apis:[
+ {id:'page',service_id:'confluence',name:'기준 문서 확인',purpose:'페이지 ID로 문서 제목과 문서 유형을 확인합니다.',method:'GET',url:'https://wiki.example.invalid/rest/api/content/{id}',version:1,state:'active',can_use:true,inputs:[{name:'id',in:'path',type:'string',required:true,label:'페이지 ID'}],fields:[{path:'title',type:'string',label:'문서 제목'},{path:'id',type:'string',label:'페이지 ID'}],example:{title:'가이드',id:'100'},result_path:''},
+ {id:'children',service_id:'confluence',name:'하위 문서 목록 조회',purpose:'기준 문서 바로 아래의 페이지를 조회합니다.',method:'GET',url:'https://wiki.example.invalid/rest/api/content/{id}/child/page',version:1,state:'active',can_use:true,inputs:[{name:'id',in:'path',type:'string',required:true,label:'페이지 ID'},{name:'limit',in:'query',type:'integer',required:false,label:'표시할 문서 수'}],fields:[{path:'title',type:'string',label:'문서 제목'},{path:'id',type:'string',label:'페이지 ID'}],example:null,result_path:''}],
+ services:[{id:'confluence',name:'사내 Confluence'}],can_manage:true});
+function toolBoard(value=toolBoardDefinition()){const h=harness({legacyToolAuthoring:false});h.state.operations={api_catalog:toolBoardCatalog()};h.render();installDefinition(h,value);return h;}
+const boardRow=(h,id)=>h.markup.match(new RegExp('<div class="ew-job-row" data-job-id="'+id+'"[\\s\\S]*?(?=<div class="ew-job-row"|<button type="button" data-author-action="add_job")'))[0];
+const boardCard=h=>h.markup.match(/<section class="ew-job-tool-summary">[\s\S]*?<\/section>/)[0];
+const boardInfo=h=>h.markup.match(/<section class="ew-content-overview"[^>]*>[\s\S]*?<\/section>/)[0];
+
+test('a procedure whose jobs all use tools opens in the editing screen; no view hides its adding buttons',async()=>{
+ const h=toolBoard();
+ assert.match(h.markup,/data-author-tab="content" data-api-overview="false" data-author-detail="false"/);
+ assert.ok(actionButton(h,'add_stage'));assert.ok(actionButton(h,'start_input_add'));
+ assert.equal(actionButton(h,'api_structure_edit'),undefined);
+ assert.doesNotMatch(h.markup,/>절차 편집<|도구 연결 보기|data-api-structure|data-api-overview="true"/);
+ assert.deepEqual(h.buttons.filter(button=>button.className==='ew-author-link'&&['edit_workflow','copy','validate'].includes(button.dataset.authorAction)).map(button=>button.dataset.authorAction),['edit_workflow','copy','validate']);
+ h.click('stage_toggle',{id:'t'});await flush();
+ assert.ok(actionButton(h,'add_job'));
+ // what a job takes and gives back, and the two buttons under the list, moved to the job's page
+ assert.doesNotMatch(h.markup,/data-api-job-binding|ew-api-stage-actions|조회 결과 예시 보기|입력 연결 변경|ew-procedure-unconnected/);
+});
+
+test('the name, category and purpose of a procedure are one line until 절차 정보 수정 opens the fields',async()=>{
+ const value=toolBoardDefinition();value.description='문서 구조를 확인합니다.';const h=toolBoard(value);
+ assert.match(boardInfo(h),/^<section class="ew-content-overview" data-info-open="false"><p class="ew-procedure-brief"><span><span class="ew-visually-hidden">업무 분류 <\/span>운영<\/span><span data-empty="false"><span class="ew-visually-hidden">업무 목적 <\/span>문서 구조를 확인합니다\.<\/span><button type="button" data-author-action="info_toggle" class="ew-author-link" aria-expanded="false">절차 정보 수정<\/button><\/p><form class="ew-procedure-info" id="ew-procedure-info">/);
+ assert.match(boardInfo(h),/<\/form><\/section>$/);assert.doesNotMatch(boardInfo(h),/ew-procedure-brief-close|aria-expanded="true"/);
+ // the way in is on the screen, not in the menu
+ assert.doesNotMatch(h.markup.match(/<details class="ew-procedure-menu">[\s\S]*?<\/details>/)[0],/info_toggle/);
+ h.click('info_toggle');await flush();
+ assert.match(boardInfo(h),/data-info-open="true"/);assert.equal(h.document.activeElement?.name,'overview_name');
+ assert.match(boardInfo(h),/<\/form><button type="button" data-author-action="info_toggle" class="ew-author-link ew-procedure-brief-close" aria-expanded="true" aria-label="절차 정보 접기">접기<\/button><\/section>$/);
+ // what is typed stays in the draft when the fields are folded, and the line says it; the title changes when it is saved
+ h.field('overview_name','문서 구조 확인 가이드');h.field('overview_description','하위 문서까지 확인합니다.');h.field('overview_category','setup','change');
+ h.buttons.find(button=>button.className.includes('ew-procedure-brief-close')).focus();h.click('info_toggle');await flush();
+ assert.match(boardInfo(h),/data-info-open="false"/);assert.match(boardInfo(h),/<\/span>셋업<\/span><span data-empty="false"><span class="ew-visually-hidden">업무 목적 <\/span>하위 문서까지 확인합니다\.<\/span>/);
+ assert.equal(h.document.activeElement?.dataset.authorAction,'info_toggle');
+ assert.match(h.markup,/저장하지 않은 변경 있음/);assert.match(h.markup,/<h2>Confluence 문서 확인 가이드<\/h2>/);
+ h.click('save');await flush();
+ assert.equal(h.workflows.get('w').draft.description,'하위 문서까지 확인합니다.');assert.equal(h.workflows.get('w').draft.category,'setup');
+ assert.equal(h.workflows.get('w').draft.name,'문서 구조 확인 가이드');assert.match(h.markup,/<h2>문서 구조 확인 가이드<\/h2>/);
+ // a procedure without a purpose says so; another procedure opens folded
+ h.click('info_toggle');await flush();assert.match(boardInfo(h),/data-info-open="true"/);
+ h.selection.workflow_id='q';h.state.workflow=h.workflows.get('q');h.render();await flush();
+ assert.match(boardInfo(h),/data-info-open="false"/);assert.match(boardInfo(h),/<span data-empty="true">업무 목적 없음<\/span>/);
+ // an account that may not edit reads the two lines it read before, with nothing to open
+ h.state.capabilities.can_author=false;h.state.capabilities.managed_systems=[];h.state.workflow.can_manage=false;h.render();
+ assert.match(boardInfo(h),/^<section class="ew-content-overview"><p>업무 분류 · 운영<\/p><p class="ew-content-purpose">업무 목적 없음<\/p><\/section>$/);
+});
+
+test('saving a blank name opens the folded fields and says what is missing',async()=>{
+ const h=toolBoard();h.click('info_toggle');await flush();h.field('overview_name','');h.click('info_toggle');await flush();
+ assert.match(boardInfo(h),/data-info-open="false"/);
+ const saves=h.writes.length;h.click('save');await flush();
+ assert.match(boardInfo(h),/data-info-open="true"/);assert.match(h.markup,/절차 이름을 입력해 주세요/);assert.equal(h.writes.length,saves);
+});
+
+test('an edit left in the folded fields is shown when it stops a menu action',async()=>{
+ const h=toolBoard();h.click('info_toggle');await flush();h.field('overview_description','하위 문서까지 확인합니다.');h.click('info_toggle');await flush();
+ assert.match(boardInfo(h),/data-info-open="false"/);
+ // 다른 이름으로 저장 is refused while that edit is pending: the fields open so the message points at them
+ h.click('copy');await flush();
+ assert.match(h.markup,/편집 중인 항목을 적용하거나 취소한 뒤 계속해 주세요/);assert.equal((h.dialogHistory || []).length,0);
+ assert.match(boardInfo(h),/data-info-open="true"/);assert.equal(h.document.activeElement?.name,'overview_name');
+ assert.equal(h.fields.find(field=>field.name==='overview_description').value,'하위 문서까지 확인합니다.');
+});
+
+test('opening the procedure fields leaves a row that is being typed as it is',async()=>{
+ const h=toolBoard();h.click('add_stage');await flush();h.field('name','새 단계 이름');
+ h.click('info_toggle');await flush();
+ assert.match(boardInfo(h),/data-info-open="true"/);assert.doesNotMatch(h.markup,/편집 중인 항목을 먼저/);
+ assert.equal(h.forms['ew-stage-editor'].controls.find(field=>field.name==='name').value,'새 단계 이름');
+});
+
+test('a tool connection that is not whole does not take the procedure screen down',async()=>{
+ const value=toolBoardDefinition();
+ value.nodes.page.api_binding={operation_id:'page',version:1};
+ value.nodes.digest.api_binding={operation_id:'page',version:1,inputs:{id:null},outputs:'title'};
+ value.nodes.children.api_binding={operation_id:'children',version:1,inputs:{id:{result:'page'},limit:7},outputs:[]};
+ const h=toolBoard(value);h.click('stage_toggle',{id:'t'});await flush();
+ for(const id of ['page','digest','children','history','owner','notify'])assert.ok(boardRow(h,id));
+ assert.match(boardRow(h,'children'),/data-tool-state="gone"/);
+ h.click('node',{id:'page'});await flush();
+ // a tool with nothing going in and nothing coming back has no rows for them
+ assert.match(boardCard(h),/<div class="ew-tool-card"><p class="ew-tool-card-name"><span>기준 문서 확인<\/span>/);assert.doesNotMatch(boardCard(h),/ew-tool-card-io/);
+ h.click('node',{id:''});await flush();h.click('node',{id:'digest'});await flush();
+ assert.match(boardCard(h),/<dt>입력<\/dt><dd><span><b>페이지 ID<\/b>[\s\S]*?실행 시 입력/);assert.doesNotMatch(boardCard(h),/받는 결과/);
+});
+
+test('a job connected the older way keeps its one button on its page, without a card',async()=>{
+ const value=toolBoardDefinition();Object.assign(value.nodes.history,{shared_tool_id:'retired'});
+ const h=toolBoard(value);h.click('stage_toggle',{id:'t'});await flush();
+ assert.doesNotMatch(boardRow(h,'history'),/data-tool-state/);assert.match(boardRow(h,'history'),/data-author-action="job_api_setup" data-id="history"/);
+ assert.match(h.markup,/손볼 작업 2개/);
+ h.click('node',{id:'history'});await flush();
+ assert.ok(actionButton(h,'job_api_setup'));assert.doesNotMatch(h.markup,/class="ew-tool-card"/);
+});
+
+test('a tool job in the stage list is its name and one line; what needs a hand is marked on the job and counted on its stage',async()=>{
+ const h=toolBoard();
+ // the count shows while the stage is closed
+ assert.match(h.markup,/<span class="ew-stage-name">문서 구조 확인<small class="ew-author-tag" data-tool-state="count">손볼 작업 3개<\/small><\/span>/);
+ h.click('stage_toggle',{id:'t'});await flush();
+ assert.match(boardRow(h,'page'),/<span class="ew-job-row-label"><span>기준 문서 확인<\/span><small class="ew-job-meta">도구 사용 · 담당자 확인<\/small><\/span>/);
+ assert.match(boardRow(h,'children'),/<small class="ew-job-meta">도구 사용 · 담당자 확인 <span class="ew-job-from" data-from="earlier">앞 작업 ‘기준 문서 확인’ 결과 사용<\/span><\/small>/);
+ // a job fed by a job further down the list is not an error (the run follows what each job waits for): only the word changes
+ assert.match(boardRow(h,'digest'),/<span>문서 요약 확인<\/span><small class="ew-job-meta">도구 사용 · 담당자 확인 <span class="ew-job-from" data-from="later">뒤 작업 ‘하위 문서 목록 조회’ 결과 사용<\/span>/);
+ // no tool yet: the mark, 도구 사용 only (who confirms is not decided yet), and the one thing to do on the row before ⋯
+ assert.match(boardRow(h,'history'),/<span>변경 이력 확인<small class="ew-author-tag" data-tool-state="unconnected">도구 연결 전<\/small><\/span><small class="ew-job-meta">도구 사용<\/small>/);
+ assert.match(boardRow(h,'history'),/<\/button><button type="button" data-author-action="job_api_setup" data-id="history" class="ew-author-link ew-api-row-action" aria-label="변경 이력 확인 도구 연결">도구 연결<\/button><button type="button" data-author-action="job_menu"/);
+ assert.match(boardRow(h,'owner'),/<span>담당자 정보 조회<small class="ew-author-tag" data-tool-state="review">도구 확인 필요<\/small><\/span><small class="ew-job-meta">도구 사용 · 담당자 확인<\/small>/);
+ assert.match(boardRow(h,'notify'),/<span>변경 알림 대상 조회<small class="ew-author-tag" data-tool-state="gone">입력 확인 필요<\/small><\/span><small class="ew-job-meta">도구 사용 · 담당자 확인 <span class="ew-job-from" data-from="gone">결과를 받던 작업이 없어짐<\/span><\/small>/);
+ for(const id of ['page','digest','children','owner','notify'])assert.doesNotMatch(boardRow(h,id),/job_api_setup|도구 변경/);
+ assert.equal((h.markup.match(/<small class="ew-author-tag" data-tool-state="(?:unconnected|review|gone)">/g)||[]).length,3);
+ assert.match(h.markup,/data-tool-state="count">손볼 작업 3개</);      // the count stays on the open stage
+ // a job that takes results from two jobs names the first and counts the rest
+ const two=toolBoardDefinition();two.nodes.children.api_binding.inputs.limit={result:{job_id:'digest',field:'id',confirmed:true}};const t=toolBoard(two);t.click('stage_toggle',{id:'t'});await flush();
+ assert.match(boardRow(t,'children'),/data-from="earlier">앞 작업 ‘기준 문서 확인’ 외 1개 결과 사용</);
+ // a job connected the older way is not marked; its row keeps 도구 연결, which can be its only way to an API tool
+ const older=toolBoardDefinition();older.nodes.history.tool_reference={tool_id:'synthetic-read',function:'read',revision:1,content_hash:'a'.repeat(64),schema_hash:'b'.repeat(64)};const o=toolBoard(older);
+ assert.match(o.markup,/data-tool-state="count">손볼 작업 2개</);o.click('stage_toggle',{id:'t'});await flush();
+ assert.match(boardRow(o,'history'),/<span>변경 이력 확인<\/span><small class="ew-job-meta">도구 사용 · 담당자 확인<\/small><\/span>/);
+ assert.match(boardRow(o,'history'),/data-author-action="job_api_setup" data-id="history" class="ew-author-link ew-api-row-action" aria-label="변경 이력 확인 도구 연결">도구 연결<\/button><button type="button" data-author-action="job_menu"/);
+ // nothing to mark: no count on the stage; a person's job is as it was
+ const clean=harness({legacyToolAuthoring:false});clean.state.operations={api_catalog:tryCatalog()};clean.render();installDefinition(clean,tryDefinition());
+ assert.doesNotMatch(clean.markup,/data-tool-state/);clean.click('stage_toggle',{id:'t'});await flush();
+ assert.match(boardRow(clean,'checks'),/<span>설비 세 곳 점검<\/span><small class="ew-job-meta">사람이 확인 · 항목 2개<\/small>/);
+ // an account that may not edit sees the marks, not the button
+ const read=toolBoard();read.state.capabilities.can_author=false;read.state.capabilities.managed_systems=[];read.state.workflow.can_manage=false;read.render();read.click('stage_toggle',{id:'t'});await flush();
+ assert.match(read.markup,/손볼 작업 3개/);assert.match(boardRow(read,'history').replace(/<p class="ew-author-empty">[\s\S]*$/,''),/data-tool-state="unconnected"/);assert.equal(actionButton(read,'job_api_setup'),undefined);
+});
+
+test('the tool of a job is one card on its page: what goes in and comes back shows, the address and an example are one press away',async()=>{
+ const h=toolBoard();h.click('stage_toggle',{id:'t'});await flush();await h.node('children');
+ assert.match(boardCard(h),/^<section class="ew-job-tool-summary"><label>연결된 도구<\/label><div class="ew-tool-card"><p class="ew-tool-card-name"><span>하위 문서 목록 조회<\/span><small>사내 Confluence<\/small><\/p><button type="button" data-author-action="job_api_setup" data-id="children" class="ew-author-link" aria-haspopup="dialog">도구 변경<\/button><p class="ew-tool-card-purpose">기준 문서 바로 아래의 페이지를 조회합니다\.<\/p><dl class="ew-tool-card-io"><dt>입력<\/dt><dd><span><b>페이지 ID<\/b><span class="ew-visually-hidden">: <\/span><span>앞 작업 ‘기준 문서 확인’의 페이지 ID<\/span><span class="ew-visually-hidden">\. <\/span><\/span><span><b>표시할 문서 수<\/b><span class="ew-visually-hidden">: <\/span><span>5<\/span><span class="ew-visually-hidden">\. <\/span><\/span><\/dd><dt>받는 결과<\/dt><dd>문서 제목, 페이지 ID<\/dd><\/dl>/);
+ // this tool has no example: only the address is under 상세 보기
+ assert.match(boardCard(h),/<details><summary>상세 보기<\/summary><dl><dt>주소<\/dt><dd>GET \/rest\/api\/content\/\{id\}\/child\/page<\/dd><\/dl><\/details><\/div><\/section>$/);
+ h.click('node',{id:''});await flush();await h.node('page');
+ assert.match(boardCard(h),/<b>페이지 ID<\/b><span class="ew-visually-hidden">: <\/span><span>실행 시 입력<\/span>/);
+ assert.match(boardCard(h),/<dt>주소<\/dt><dd>GET \/rest\/api\/content\/\{id\}<\/dd><dt>결과 예시<\/dt><dd><button type="button" data-author-action="job_api_example" data-id="page">예시 보기<\/button><\/dd><\/dl><\/details>/);
+ h.click('job_api_example',{id:'page'});await flush();assert.equal(h.dialogHistory.at(-1)?.title,'조회 결과 예시');assert.match(h.dialogHistory.at(-1).html,/ew-api-result-example/);
+ // the three states that need a hand: the same place and the same button, and what is wrong
+ h.click('node',{id:''});await flush();await h.node('history');
+ assert.match(boardCard(h),/^<section class="ew-job-tool-summary"><label>연결된 도구<\/label><div class="ew-tool-card" data-tool-state="unconnected"><p class="ew-tool-card-name"><small class="ew-author-tag" data-tool-state="unconnected">도구 연결 전<\/small><\/p><button type="button" data-author-action="job_api_setup" data-id="history" class="ew-author-link" aria-haspopup="dialog">도구 연결<\/button><\/div><\/section>$/);
+ h.click('node',{id:''});await flush();await h.node('owner');
+ assert.match(boardCard(h),/<div class="ew-tool-card" data-tool-state="review"><p class="ew-tool-card-name"><small class="ew-author-tag" data-tool-state="review">도구 확인 필요<\/small><\/p><button type="button" data-author-action="job_api_setup" data-id="owner" class="ew-author-link" aria-haspopup="dialog">도구 변경<\/button><p class="ew-tool-card-purpose">연결한 도구의 현재 사용 권한을 확인해 주세요\.<\/p><\/div>/);
+ h.click('node',{id:''});await flush();await h.node('notify');
+ assert.match(boardCard(h),/<div class="ew-tool-card" data-input-state="gone"><p class="ew-tool-card-name"><span>기준 문서 확인<\/span><small>사내 Confluence<\/small><small class="ew-author-tag" data-tool-state="gone">입력 확인 필요<\/small><\/p><button type="button" data-author-action="job_api_setup" data-id="notify" class="ew-author-link" aria-haspopup="dialog">도구 변경<\/button>/);
+ assert.match(boardCard(h),/<b>페이지 ID<\/b><span class="ew-visually-hidden">: <\/span><span data-from="gone">결과를 받던 작업이 없어짐<\/span>/);
+ h.click('node',{id:''});await flush();await h.node('digest');
+ assert.match(boardCard(h),/<span>뒤 작업 ‘하위 문서 목록 조회’의 페이지 ID<\/span>/);assert.doesNotMatch(boardCard(h),/data-tool-state/);
+ // an account that may not edit reads the card without its button
+ h.state.capabilities.can_author=false;h.state.capabilities.managed_systems=[];h.state.workflow.can_manage=false;h.render();
+ assert.match(boardCard(h),/<div class="ew-tool-card"><p class="ew-tool-card-name"><span>기준 문서 확인<\/span><small>사내 Confluence<\/small><\/p><p class="ew-tool-card-purpose">/);
+});

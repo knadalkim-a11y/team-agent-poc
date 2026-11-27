@@ -116,6 +116,25 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertTrue(self.read('[data-author-action=save]', 'disabled'))
         self.assertEqual(self.text('[data-author-status]'), '저장됨')
         self.assertFalse(self.read('[data-author-action=publish]', 'disabled'))
+        # The procedure opens with its name, category and purpose folded into one line.
+        self.assertEqual(self.read('.ew-content-overview', 'dataset.infoOpen'), 'false')
+        self.assertFalse(self.read('#ew-procedure-info', 'checkVisibility()'))
+        self.assertIn('업무 목적 없음', self.text('.ew-procedure-brief'))
+        self.assertFalse(self.read('.ew-procedure-brief-close', 'isConnected'))
+        # Saving a blank name while the fields are folded opens them and says what is missing; nothing is written.
+        self.open_procedure_info()
+        self.assertEqual(self.read('.ew-procedure-brief-close', 'ariaExpanded'), 'true')
+        self.click('#ew-procedure-info [name=overview_name]'); self.key('a', 65, 2); self.key('Backspace', 8); self.key('Tab', 9)
+        self.assertEqual(self.read('#ew-procedure-info [name=overview_name]', 'value'), '')
+        self.click('.ew-procedure-brief-close')
+        self.wait("document.querySelector('.ew-content-overview')?.dataset.infoOpen === 'false'")
+        writes = len(self.server.workspace_commands)
+        self.click('[data-author-action=save]')
+        self.wait("document.querySelector('.ew-content-overview')?.dataset.infoOpen === 'true'")
+        self.assertTrue(self.browser.evaluate("document.querySelector('#ew-procedure-info [name=overview_name]').matches(':invalid')"))
+        self.assertEqual([body['action'] for body in self.server.workspace_commands[writes:] if body['action'] != 'save_ui'], [])
+        self.assertEqual(self.state(workflow_id=key)['workflow']['draft']['name'], '미완성 게시 검증')
+        self.fill('#ew-procedure-info [name=overview_name]', '미완성 게시 검증')
         self.fill('#ew-procedure-info [name=overview_description]', '작성 중인 절차도 목록에 표시')
         self.assertEqual(self.text('[data-author-status]'), '저장하지 않은 변경 있음')
         self.click('[data-author-action=save]')
@@ -138,6 +157,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.screenshot('procedure-manual-publication-narrow')
         self.assertTrue(self.read('.ew-author-definition-head .ew-author-tag', 'checkVisibility()'))
         self.authoring_viewport(1920, 1080, overlay=False)
+        self.open_procedure_info()
         self.fill('#ew-procedure-info [name=overview_description]', '게시하지 않고 저장한 내용')
         self.click('[data-author-action=save]')
         self.wait("document.querySelector('[data-author-status]')?.dataset.dirty === 'false'")
@@ -146,6 +166,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertEqual(draft_only['published']['description'], '작성 중인 절차도 목록에 표시')
         self.assertIn('게시 안 한 변경 있음', self.text('.ew-author-definition-head .ew-author-muted'))
         # 게시 with unsaved edits saves and publishes them in one command.
+        self.open_procedure_info()
         self.fill('#ew-procedure-info [name=overview_description]', '게시하며 저장한 최신 내용')
         writes = len(self.server.workspace_commands)
         self.click('[data-author-action=publish]')
@@ -664,12 +685,17 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click('[data-author-action=edit_workflow]')
         self.choose('#ew-summary-editor [name=execution_scope]', 'system')
         self.click('[data-author-action=summary_apply]')
+        self.open_procedure_info()
         self.choose('#ew-overview-category', 'setup')
         self.fill('#ew-procedure-info [name=overview_description]', '개인 PC에서 개발 환경 준비')
         self.click('[data-author-action=tab][data-tab=history]')
         self.click('[data-author-action=tab][data-tab=content]')
         self.assertEqual(self.read('#ew-overview-category', 'value'), 'setup')
         self.assertEqual(self.read('#ew-procedure-info [name=overview_description]', 'value'), '개인 PC에서 개발 환경 준비')
+        # Folded, the line says what was typed: it is in the draft, not yet saved.
+        self.click('.ew-procedure-brief-close')
+        self.wait("document.querySelector('.ew-content-overview')?.dataset.infoOpen === 'false'")
+        self.assertEqual(self.text('.ew-procedure-brief').replace('\n', ' '), '업무 분류 셋업 업무 목적 개인 PC에서 개발 환경 준비 절차 정보 수정')
         self.assertEqual(self.state(workflow_id=identifier)['workflow']['revision'], 1)
         # C66 removes the needed-summary surface; editing the procedure must
         # keep its former review decisions instead of recreating that screen.
@@ -1386,14 +1412,14 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
               const style = selector => {const value=getComputedStyle(document.querySelector(selector));return {font:value.fontFamily,size:value.fontSize,weight:value.fontWeight,line:value.lineHeight,background:value.backgroundColor,paddingTop:value.paddingTop,paddingBottom:value.paddingBottom,paddingLeft:value.paddingLeft,paddingRight:value.paddingRight,border:value.borderTopWidth};};
               return {panel:bounds('[data-ees-work-surface]'),frame:bounds('[data-ees-source-shell]'),sidebar:bounds('#sidebar'),
                 chatState:document.querySelector('[data-ees-source-shell]').dataset.eesChatState,chat:bounds('[data-ees-chat-surface]'),header:bounds('[data-ees-work-toolbar]'),
-                card:bounds('.ew-work-content'),purpose:bounds('#ew-procedure-info'),steps:bounds('.ew-content-heading'),list:bounds('.ew-stage-list'),footer:bounds('.ew-author>footer'),
+                card:bounds('.ew-work-content'),purpose:bounds('.ew-procedure-brief'),steps:bounds('.ew-content-heading'),list:bounds('.ew-stage-list'),footer:bounds('.ew-author>footer'),
                 titleRow:bounds('.ew-author-definition-head>.ew-author-heading'),title:bounds('.ew-author-definition-head h2'),badgeBounds:bounds('.ew-author-definition-head .ew-author-tag'),
                 menu:bounds('.ew-procedure-menu'),menuOpacity:getComputedStyle(document.querySelector('.ew-procedure-menu')).opacity,
                 footerItems:[...document.querySelector('.ew-author>footer').children].map(rect),
                 retiredSummary:!!document.querySelector('.ew-content-needs,[data-author-action=summary_open]'),
                 redundantOverview:!!document.querySelector('.ew-content-overview h3,.ew-content-meta,.ew-work-order-note'),
                 availableWidth:document.querySelector('[data-ees-work-surface]').parentElement.getBoundingClientRect().width,
-                badge:style('.ew-author-definition-head .ew-author-tag'),detail:style('#ew-procedure-info textarea'),
+                badge:style('.ew-author-definition-head .ew-author-tag'),detail:style('.ew-procedure-brief>span:nth-child(2)'),
                 tabs:style('.ew-author-tabs>button'),heading:style('.ew-author h2'),
                 footerStyle:style('.ew-author>footer'),footerButton:style('.ew-author>footer>button'),primaryButton:document.querySelector('.ew-author>footer>.ew-primary')&&style('.ew-author>footer>.ew-primary'),
                 extraHeader:document.querySelectorAll('#ees-work-panel>.ew-panel-header').length,
@@ -1428,7 +1454,8 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
             self.assertFalse(metrics['retiredSummary'])
             self.assertFalse(metrics['redundantOverview'])
             self.assertEqual(self.text('.ew-content-heading>small'), '0개 단계')
-            self.assertTrue(self.browser.evaluate("!!document.querySelector('#ew-procedure-info [name=overview_description]')"))
+            # The purpose is read on the folded line; its field is one press away (design mock 23, revision 3).
+            self.assertTrue(self.browser.evaluate("document.querySelector('.ew-procedure-brief [data-author-action=info_toggle]').checkVisibility() && !document.querySelector('#ew-procedure-info [name=overview_description]').checkVisibility()"))
             self.assertLess(metrics['purpose']['y'], metrics['steps']['y'])
             # An empty procedure has no stage rows: the empty list is not drawn and the row for the first stage follows the heading.
             self.assertEqual(metrics['list']['height'], 0)
@@ -3458,6 +3485,7 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.assertFalse(beside['toList'] or beside['overflow'], beside)
         self.screenshot('ws1-ws2-wide')
         # Unsaved changes stay with their procedure while another one is opened from the list.
+        self.open_procedure_info()
         self.fill(description, '목록 옆에서 고친 설명')
         self.assertEqual(self.text('[data-author-status]'), '저장하지 않은 변경 있음')
         self.click(row % second)
@@ -3466,6 +3494,9 @@ class FigmaAuthoringNativeTests(IntegratedNativeCase):
         self.click(row % first)
         self.wait(title + " === '넓은 화면 절차 가' && document.querySelector(" + json.dumps(description) + ")?.value === '목록 옆에서 고친 설명'")
         self.assertEqual(self.text('[data-author-status]'), '저장하지 않은 변경 있음')
+        # Coming back, the fields are folded again and the line says what was typed.
+        self.assertEqual(self.read('.ew-content-overview', 'dataset.infoOpen'), 'false')
+        self.assertIn('목록 옆에서 고친 설명', self.text('.ew-procedure-brief'))
         # What was typed survives the list leaving as the chat opens.
         self.click('[data-ees-chat-toggle]')
         self.wait(chat + " === 'docked' && " + width + " === 1104 && " + split + " === 'false'")
