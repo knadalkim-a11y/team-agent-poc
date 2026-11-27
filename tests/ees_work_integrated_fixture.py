@@ -584,6 +584,13 @@ class IntegratedNativeCase(unittest.TestCase):
                 event.update(text='\r', unmodifiedText='\r')
             self.browser.call('Input.dispatchKeyEvent', event)
 
+    def open_procedure_info(self):
+        # A procedure opens with its name, category and purpose folded into one line (design mock 23, revision 3):
+        # 절차 정보 수정 on that line opens the fields.
+        if self.read('.ew-content-overview', 'dataset.infoOpen') == 'false':
+            self.click('.ew-procedure-brief [data-author-action=info_toggle]')
+            self.wait("document.querySelector('.ew-content-overview')?.dataset.infoOpen === 'true'")
+
     def fill(self, selector, value):
         self.click(selector); self.key('a', 65, 2)
         self.browser.call('Input.insertText', {'text': value}); self.key('Tab', 9)

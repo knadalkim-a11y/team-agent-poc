@@ -53,7 +53,7 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
             mapping:rect('[data-api-mapping]'), foot:rect('.ew-api-foot'),
             fields:['url','name','purpose'].map(name=>rect('[name=api-'+name+']')),
             stage:rect('[data-stage-id=stage]'), jobs:['job-0','job-1'].map(id=>rect('[data-job-id='+id+']')),
-            bindings:[...document.querySelectorAll('[data-api-job-binding]')].map(e=>e.innerText)};
+            rows:[...document.querySelectorAll('.ew-job-row .ew-job-row-label')].map(e=>e.innerText)};
         })()""")
         report['scene'] = name
         directory = self.screenshot('api-v11-' + name)
@@ -96,11 +96,14 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
             self.assertAlmostEqual(purpose['width'], 960, delta=1)
             self.assertGreater(report['mapping']['y'], purpose['y'] + purpose['height'])
         if name.startswith('task-'):
+            # 2026-11-27 (design mock 23, revision 3): a procedure whose jobs all use tools opens in the editing
+            # screen like any other; the summary view these numbers came from (x 328, width 960, y 237) is gone.
+            # The stage keeps the column's left edge, under the folded procedure information.
             self.assertAlmostEqual(report['stage']['x'], 328, delta=2)
-            self.assertAlmostEqual(report['stage']['width'], 960, delta=2)
-            # 2026-11-18: the publication state sits in the title row on every editor screen,
-            # which makes that row 3px taller than the status tag it replaces here.
-            self.assertAlmostEqual(report['stage']['y'], 237, delta=2)
+            self.assertAlmostEqual(report['stage']['width'], 948, delta=2)
+            self.assertAlmostEqual(report['stage']['y'], 348, delta=2)
+            for job in report['jobs']:
+                self.assertLessEqual(job['height'], 64)
         if name == 'tools-edit':
             # Save stays below the settings, at the right edge of the form and the bottom edge of the pane.
             self.assertGreater(report['save']['x'], report['form']['x'] + 800)
@@ -392,10 +395,22 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
                 self.choose('[data-api-result="code"]', '["job-0","code"]')
             self.click('#ees-work-dialog [data-dialog-confirm]')
             self.wait("!document.querySelector('#ees-work-dialog[open]')")
-        self.capture_state('task-mapped', '[data-api-job-binding]')
-        self.click('[data-author-action=job_api_example]')
+        # What a job takes and gives back is on its page; its row says which job it takes a result from.
+        self.capture_state('task-mapped', '[data-job-id=job-1] .ew-job-from')
+        self.assertFalse(self.read('[data-api-job-binding]', 'isConnected'))
+        self.assertFalse(self.read('.ew-job-row [data-author-action=job_api_setup]', 'isConnected'))
+        self.assertEqual(self.text('[data-job-id=job-1] .ew-job-from'), '앞 작업 ‘설비 알람 조회’ 결과 사용')
+        self.click('[data-author-action=node][data-id=job-0]')
+        self.wait("document.querySelector('.ew-tool-card .ew-tool-card-io')?.checkVisibility()")
+        self.assertIn('EQ-100', self.text('.ew-tool-card-io'))
+        self.assertFalse(self.read('.ew-tool-card [data-author-action=job_api_example]', 'checkVisibility()'))
+        self.click('.ew-tool-card>details>summary')
+        self.click('.ew-tool-card [data-author-action=job_api_example]')
         self.wait("document.querySelector('#ees-work-dialog[open] .ew-api-result-example')?.textContent.includes('F101')")
         self.key('Escape', 27)
+        self.wait("!document.querySelector('#ees-work-dialog[open]')")
+        self.click('.ew-job-detail-header [data-author-action=node]')
+        self.wait("document.querySelector('[data-job-id=job-1] .ew-job-from')?.checkVisibility()")
         self.click('[data-author-action=save]')
         self.wait("document.querySelector('[data-author-status]')?.dataset.dirty === 'false'")
         saved = self.state(workflow_id=key)['workflow']['draft']['nodes']
@@ -438,7 +453,7 @@ class RegisteredApiNativeTests(IntegratedNativeCase):
         self.click(link)
         self.click('[data-api-candidate="' + api + '"]')
         self.click('#ees-work-dialog [data-dialog-confirm]')
-        self.wait("document.querySelector('[data-api-job-binding]')")
+        self.wait("document.querySelector('[data-job-id=job-0]') && !document.querySelector('[data-job-id=job-0] [data-author-action=job_api_setup]')")
         self.click('[data-author-action=save]')
         self.wait("document.querySelector('[data-author-status]')?.dataset.dirty === 'false'")
         current = self.state(workflow_id=key)['workflow']

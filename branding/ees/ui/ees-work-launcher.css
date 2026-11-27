@@ -2524,8 +2524,6 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 /* Workflow API selection uses the work panel's existing typography and theme. */
 #ees-work-designer .ew-job-row:has(.ew-api-row-action) { flex-wrap:wrap; }
 #ees-work-designer .ew-api-row-action { display:inline-flex; align-items:center; gap:4px; padding:6px 12px; white-space:nowrap; }
-#ees-work-designer .ew-api-job-binding { display:grid; flex-basis:100%; gap:3px; padding:0 12px 10px; font-size:13px; color:var(--ees-text-secondary); }
-#ees-work-designer .ew-api-job-binding small { font-size:12px; color:var(--ees-text-tertiary); }
 #ees-work-dialog .ew-api-picker [data-api-choices] { display:grid; gap:4px; margin:8px 0; }
 #ees-work-dialog .ew-api-picker [data-api-candidate] { display:grid; gap:4px; width:100%; text-align:left; padding:8px; border-radius:6px; }
 #ees-work-dialog .ew-api-picker [data-api-candidate][aria-pressed=true] { background:var(--ees-surface-selected); }
@@ -2534,33 +2532,10 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 #ees-work-dialog .ew-api-map-row label { display:grid; gap:5px; margin:5px 0; }
 #ees-work-dialog .ew-api-picker pre,.ew-api-table { overflow:auto; }
 
-/* API-only procedures expose task connections from the stage list. The
-   procedure menu's editing view retains metadata, order and input controls. */
-[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-api-overview=true] > .ew-author-scroll {
-  box-sizing:border-box; width:100%; max-width:1104px; margin-inline:auto;
-  padding:18px max(16px,calc((100% - 960px)/2)) 28px; scrollbar-gutter:auto;
-}
-#ees-work-designer[data-api-overview=true] :is(.ew-content-overview,.ew-author-definition-head > .ew-author-muted,.ew-content-start-inputs,.ew-stage-description,[data-author-action=add_stage],[data-author-action=add_job],[data-author-action=factory_settings],.ew-job-meta,.ew-author-job>.ew-icon,.ew-job-row>.ew-job-menu-button,.ew-factory-differences) { display:none!important; }
-#ees-work-designer[data-api-overview=true] .ew-content-stage { border:1px solid var(--ees-line-divider); border-radius:8px; background:var(--ees-surface-sidebar); }
-#ees-work-designer[data-api-overview=true] .ew-stage-list { display:grid; gap:8px; border:0; }
-#ees-work-designer[data-api-overview=true] .ew-stage-head > .ew-stage-toggle { padding-inline:14px; min-height:52px; }
-#ees-work-designer[data-api-overview=true] .ew-stage-body { padding:0; gap:0; border-top:1px solid var(--ees-line-divider); }
-#ees-work-designer[data-api-overview=true] .ew-job-row { min-height:56px; padding-right:8px; border-bottom:0; }
-#ees-work-designer[data-api-overview=true] .ew-job-row+.ew-job-row { border-top:1px solid var(--ees-line-divider); }
-#ees-work-designer[data-api-overview=true] .ew-job-row>.ew-author-job { padding:12px 4px 12px 48px; }
-#ees-work-designer[data-api-overview=true] .ew-job-row:has([data-api-job-binding])>.ew-author-job { padding-bottom:2px; }
-#ees-work-designer[data-api-overview=true] .ew-api-job-binding { padding-left:48px; padding-bottom:14px; font-size:12px; gap:3px; }
-#ees-work-designer[data-api-overview=true] .ew-api-row-action { display:inline-flex; color:var(--ees-brand-text); background:transparent; }
-#ees-work-designer[data-api-overview=true] .ew-author-tabs { margin:12px 0; }
-#ees-work-designer[data-api-overview=true] .ew-author-heading { min-height:32px; }
 #ees-work-designer [data-api-screen=create] .ew-api-tabs {margin-bottom:7px;}
 #ees-work-designer [data-api-screen=create] :is(.ew-api-request,.ew-api-pair) {margin-bottom:15px;}
 #ees-work-designer [data-api-screen=edit] .ew-api-head {margin-bottom:17px;}
 #ees-work-designer [data-api-screen=edit] :is(.ew-api-request,.ew-api-pair) {margin-bottom:18px;}
-[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-api-overview=true] > .ew-author-scroll { padding-top:20px; }
-#ees-work-designer[data-api-overview=true] .ew-job-row { min-height:58px; }
-#ees-work-designer[data-api-overview=true] .ew-api-job-binding { padding-bottom:24px; }
-#ees-work-designer .ew-api-stage-actions { display:grid; justify-items:start; gap:10px; }
 #ees-work-dialog .ew-api-result-example { max-height:60vh; overflow:auto; white-space:pre-wrap; }
 #ees-work-designer [data-api-catalog] dialog[data-api-modal] {position:fixed;inset:0;width:min(620px,calc(100vw - 32px));max-height:85vh;overflow:auto;margin:auto;padding:22px 26px;background:var(--ees-surface-panel);color:var(--ees-text-strong);border:1px solid var(--ees-line-divider);border-radius:8px;}
 #ees-work-designer [data-api-screen=impact] dialog[data-api-modal] {width:min(716px,calc(100vw - 32px));}
@@ -2905,15 +2880,8 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 [data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-stage-head>.ew-stage-menu-button{border-radius:var(--ees-radius-control)}
 [data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-job-row .ew-job-row-label>span{font:var(--ees-type-body);font-weight:600}
 [data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-job-row .ew-job-meta{font:var(--ees-type-label);color:var(--ees-text-tertiary)}
-/* what the tool takes and gives back is a note under the row, and '도구 변경' belongs to that note */
-[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-job-row>.ew-api-job-binding{grid-column:1/-1;grid-row:2;margin:0 0 10px;padding:8px 112px 8px 12px;border-radius:var(--ees-radius-control);background:var(--ees-surface-note)}
-[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-job-row>.ew-api-job-binding>div{font:var(--ees-type-label);font-weight:500;color:var(--ees-text-primary)}
-[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-job-row>.ew-api-job-binding>small{font:var(--ees-type-meta);color:var(--ees-text-tertiary)}
-[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-job-row>.ew-api-row-action{grid-column:1/-1;grid-row:2;justify-self:end;align-self:center;z-index:1;margin:0 10px 10px 0}
-[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-job-row>.ew-api-row-action>img{display:none}
-/* the job one has just come back from: where I was takes the tint (it was a grey band), and its note stays readable on it */
+/* the job one has just come back from: where I was takes the tint (it was a grey band) */
 [data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-job-row[data-returned=true]{border-radius:var(--ees-radius-control);background:var(--ees-accent-tint);box-shadow:-8px 0 0 var(--ees-accent-tint),8px 0 0 var(--ees-accent-tint)}
-[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-job-row[data-returned=true]>.ew-api-job-binding{background:var(--ees-surface-default)}
 }
 /* the bottom bar of a procedure: what is saved, then the two actions. It ends where the content ends: the scrolling
    part keeps room for its scroll bar, so the bar keeps the same room. */
@@ -2940,7 +2908,7 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 /* the plus of an 'add' link is tinted to the accent (the image stays an image at its own size) */
 [data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] :is(.ew-stage-add,[data-author-action=add_job])>img{filter:brightness(0) saturate(100%) invert(31%) sepia(68%) saturate(638%) hue-rotate(177deg) brightness(95%) contrast(94%)}
 
-/* -- small buttons inside a row: 실행 on a job, 도구 변경 on a tool note --------------------------------------------- */
+/* -- small buttons inside a row: 실행 on a job, 도구 연결 on a tool job --------------------------------------------- */
 [data-ees-work-surface] #ees-work-panel.ew-vd .ew-center-task-row .ew-vd-run,
 [data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-job-row>.ew-api-row-action{height:32px;min-height:32px;padding:0 12px;border:1px solid var(--ees-line-control);border-radius:var(--ees-radius-control);background:var(--ees-surface-default);font:var(--ees-type-label);font-weight:600;color:var(--ees-text-primary);text-decoration:none}
 [data-ees-work-surface] #ees-work-panel.ew-vd .ew-center-task-row .ew-vd-run:not(:disabled):hover,
@@ -3025,3 +2993,78 @@ body.ees-panel-resizing{cursor:col-resize;user-select:none;}
 /* where I am: the tint and the accent word; hovering does not take the mark away */
 #ees-work-entry#ees-work-entry :is(.ew-workflows button,[data-action=procedures])[aria-current=page],
 #ees-work-entry#ees-work-entry :is(.ew-workflows button,[data-action=procedures])[aria-current=page]:hover{background:var(--ees-accent-tint);color:var(--ees-accent);font-weight:600}
+
+/* ===== Tool jobs in a procedure (design mock 23, revision 3) ==================================================
+   A procedure opens in the editing screen whatever its jobs are (the summary view of tool-only procedures and its
+   rules are gone; data-api-overview stays "false" for the rules above written against it). These rules are the
+   mock's new-screen block as it is. They come last: several refine rules above that still apply to the same
+   elements (the row button, the tool section of a job). */
+/* The name, category and purpose fields of a procedure are folded
+   into one line under the tabs; '절차 정보 수정' on that line (a link one can see, not a menu item) opens the same
+   fields and '접기' folds them again. */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-content-overview{min-width:0}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-procedure-brief{display:flex;align-items:center;gap:0;box-sizing:border-box;min-width:0;max-width:536px;min-height:32px;margin:0;font:var(--ees-type-label);color:var(--ees-text-secondary)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-procedure-brief>span{flex:0 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-procedure-brief>span:first-child{flex:none;font-weight:600;color:var(--ees-text-primary)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-procedure-brief>span+span{margin-left:10px;padding-left:10px;border-left:1px solid var(--ees-line-divider)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-procedure-brief>span[data-empty=true]{color:var(--ees-text-tertiary)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-content-overview>.ew-author-link[data-author-action=info_toggle],
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-procedure-brief>.ew-author-link{flex:none;display:inline-flex;align-items:center;min-height:28px;margin:0 0 0 6px;padding:0 8px;border:0;border-radius:6px;background:transparent;font:var(--ees-type-label);font-weight:500;color:var(--ees-accent);text-decoration:none;white-space:nowrap;cursor:pointer}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-content-overview>.ew-author-link.ew-procedure-brief-close[data-author-action=info_toggle]{margin:8px 0 0 -8px}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-content-overview .ew-author-link[data-author-action=info_toggle]:hover{background:var(--ees-accent-tint)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-content-overview .ew-author-link[data-author-action=info_toggle]:focus-visible{outline:2px solid var(--ees-focus-line);outline-offset:2px}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-content-overview[data-info-open=false]>.ew-procedure-info,
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-content-overview[data-info-open=false]>.ew-procedure-brief-close,
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-content-overview[data-info-open=true]>.ew-procedure-brief{display:none}
+
+/* A tool job in the stage list is its name and the line the product already writes ('도구 사용 · 담당자 확인').
+   What it takes, what it gives back and its address are in the job (one more click). Three things stay on the row:
+   a job that needs a hand says so with a mark, the one thing to do about it is a button, and a job that takes
+   another job's result names that job, set apart from the line before it. */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-job-row-label>span:has(>.ew-author-tag[data-tool-state]){display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-job-row-label>span>.ew-author-tag[data-tool-state]{flex:none;margin:0;color:var(--ees-status-attention);background:var(--ees-status-attention-bg)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-job-meta>.ew-job-from{margin-left:6px;padding-left:10px;border-left:1px solid var(--ees-line-control);color:var(--ees-text-label)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-job-meta>.ew-job-from[data-from=gone]{color:var(--ees-status-attention)}
+/* a stage that holds jobs needing a hand says how many on its own row, so it shows while the stage is closed */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-stage-name:has(>.ew-author-tag[data-tool-state]){display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-stage-name>.ew-author-tag[data-tool-state]{flex:none;margin:0;color:var(--ees-status-attention);background:var(--ees-status-attention-bg)}
+/* '도구 연결' is the one thing to do on a job without a tool: it sits on that job's own row, before the ⋯.
+   The row is a grid from 301px up; narrower than that the button stays in the row's own flow. */
+@container ees-author-content (min-width:301px){
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-job-row>.ew-api-row-action{grid-column:1;grid-row:1;justify-self:end;align-self:center;z-index:1;margin:0 8px 0 0}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-job-row:has(>.ew-api-row-action) .ew-job-row-label{padding-right:104px}
+/* a row that also carries a factory-condition or proposal mark keeps the marks clear of the button */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-job-row:has(>.ew-api-row-action)>.ew-author-job:has(>.ew-author-tag[data-factory-condition],>.ew-proposal-mark) .ew-job-row-label{padding-right:0}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=false][data-api-overview=false] .ew-job-row:has(>.ew-api-row-action)>.ew-author-job:has(>.ew-author-tag[data-factory-condition],>.ew-proposal-mark)>img:last-child{margin-left:136px}
+}
+
+/* The job page: the tool connected to this job is one card, as wide as what it holds. Its name, the service, what
+   it does, what goes in (and where each value comes from) and what comes back are shown; the address and a result
+   example open under '상세 보기'. */
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-job-tool-summary>.ew-tool-card{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 16px;align-items:start;box-sizing:border-box;width:100%;max-width:640px;padding:12px;border:1px solid var(--ees-line-divider);border-radius:var(--ees-radius-control);background:var(--ees-surface-default)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card-name{grid-column:1;display:flex;flex-wrap:wrap;align-items:baseline;gap:0 8px;min-width:0;min-height:22px;margin:0;font:var(--ees-type-body);font-weight:600;color:var(--ees-text-primary)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card-name>small:not(.ew-author-tag){font:var(--ees-type-label);color:var(--ees-text-tertiary)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card-name>.ew-author-tag[data-tool-state]{align-self:center;color:var(--ees-status-attention);background:var(--ees-status-attention-bg)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card:not([data-tool-state])>.ew-tool-card-name{grid-row:1}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card[data-tool-state]>.ew-tool-card-name{min-height:32px;align-items:center}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card-purpose{grid-column:1;margin:0;font:var(--ees-type-label);color:var(--ees-text-secondary)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card>[data-author-action=job_api_setup]{grid-column:2;grid-row:1/span 2;justify-self:end;display:inline-flex;align-items:center;height:32px;min-height:32px;padding:0 12px;border:1px solid var(--ees-line-control);border-radius:var(--ees-radius-control);background:var(--ees-surface-default);font:var(--ees-type-label);font-weight:600;color:var(--ees-text-primary);text-decoration:none;white-space:nowrap}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card>[data-author-action=job_api_setup]:hover{border-color:var(--ees-line-control-hover);background:var(--ees-surface-hover)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card>details{grid-column:1/-1;margin:6px 0 0;padding:0;border:0}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card>details>summary{display:inline-flex;align-items:center;gap:6px;min-height:28px;margin:0 0 0 -6px;padding:0 8px 0 6px;border-radius:6px;list-style:none;cursor:pointer;font:var(--ees-type-label);font-weight:500;color:var(--ees-accent)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card>details>summary::-webkit-details-marker{display:none}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card>details>summary::before{content:"";flex:none;width:6px;height:6px;margin:0 2px 2px 2px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);transition:transform .12s ease}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card>details[open]>summary::before{transform:rotate(45deg)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card>details>summary:hover{background:var(--ees-accent-tint)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card>details>summary:focus-visible{outline:2px solid var(--ees-focus-line);outline-offset:2px}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card dl{display:grid;grid-template-columns:64px minmax(0,1fr);gap:6px 12px;align-items:baseline;margin:0;font:var(--ees-type-label)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card>.ew-tool-card-io{grid-column:1/-1;margin:10px 0 0;padding:10px 0 0;border-top:1px solid var(--ees-line-divider)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card>details>dl{margin:4px 0 2px}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card-io>dd>span{display:grid;grid-template-columns:minmax(0,132px) minmax(0,1fr);gap:0 12px}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card-io>dd>span+span{margin-top:4px}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card-io>dd>span>b{font-weight:500;color:var(--ees-text-secondary)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card-io>dd>span>[data-from=gone]{color:var(--ees-status-attention)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card dt{margin:0;font:inherit;color:var(--ees-text-tertiary)}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card dd{margin:0;min-width:0;font:inherit;color:var(--ees-text-primary);overflow-wrap:anywhere}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card dd>[data-author-action=job_api_example]{display:inline-block;margin:-4px 0 -4px -8px;padding:4px 8px;border:0;border-radius:6px;background:transparent;font:inherit;font-weight:500;color:var(--ees-accent);cursor:pointer}
+[data-ees-work-surface] #ees-work-panel #ees-work-designer[data-author-tab=content][data-author-detail=true] .ew-tool-card dd>[data-author-action=job_api_example]:hover{background:var(--ees-accent-tint)}

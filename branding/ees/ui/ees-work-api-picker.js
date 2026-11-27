@@ -27,27 +27,37 @@ function createWorkApiPicker(){
     return candidates;
   }
   function selectable(operation) { return operation.can_use !== false && operation.state === 'active'; }
-  function summary(node, catalog, jobs, compact=false) {
+  // One reading of a tool job's connection, shared by the job's row in the stage list, the count on its stage and the
+  // card on the job page, so the three never disagree. `jobs` is every job in the order the procedure shows them.
+  //   state    'review' when the tool is not among those this account may see, 'gone' when a job an input took its
+  //            value from is no longer in the procedure, otherwise 'ok'
+  //   sources  the jobs it takes results from, in input order; `later` when that job stands after this one in the list
+  function describe(node, catalog, jobs) {
     const b = node.api_binding;
-    if (!b) return '';
+    if (!b || !catalog) return null;
     const op = catalog.apis.find(api => api.id === b.operation_id);
-    if (!op) return '<div data-api-job-binding><small>연결한 API의 현재 사용 권한을 확인해 주세요.</small></div>';
-    const entries=Object.entries(b.inputs);
-    const compactRows=compact&&entries.some(([,ref])=>ref.result)?entries.filter(([,ref])=>ref.result):entries;
-    const rows = compactRows.map(([name, ref]) => {
-      const field = op.inputs.find(f => f.name === name);
-      const label = field?.label || name;
+    if (!op) return {state:'review', sources:[], inputs:[], outputs:[]};
+    const at = jobs.findIndex(job => job.id === node.id), sources = [];
+    // a binding that is not whole (an applied proposal can carry one) is read as far as it goes; the server names what is wrong on save
+    const inputs = Object.entries(b.inputs && typeof b.inputs === 'object' ? b.inputs : {}).map(([name, value]) => {
+      const ref = value && typeof value === 'object' ? value : {};
+      const label = op.inputs.find(field => field.name === name)?.label || name;
       if (ref.result) {
-        const upstream=jobs.find(j=>j.id===ref.result.job_id);
-        const labelForSource=catalog.apis.find(api=>api.id===upstream?.api_binding?.operation_id)?.fields.find(f=>f.path===ref.result.field)?.label||ref.result.field;
-        return label+' ← '+(upstream?.name || '앞 작업')+(compact?'에서 선택한 결과':' · '+labelForSource);
+        const index = jobs.findIndex(job => job.id === ref.result?.job_id), upstream = jobs[index];
+        if (!upstream) return {label, gone:true, text:'결과를 받던 작업이 없어짐'};
+        const later = at >= 0 && index > at;
+        if (!sources.some(source => source.id === upstream.id)) sources.push({id:upstream.id, name:upstream.name, later});
+        const field = catalog.apis.find(api => api.id === upstream.api_binding?.operation_id)?.fields.find(f => f.path === ref.result.field)?.label || ref.result.field;
+        return {label, text:(later ? '뒤' : '앞')+' 작업 ‘'+upstream.name+'’의 '+field};
       }
-      if ('constant' in ref) return label+' '+(typeof ref.constant==='string'?ref.constant:JSON.stringify(ref.constant));
-      if ('context' in ref) return label+' · 현재 업무의 '+(ref.context==='system_id'?'시스템':'공장');
-      return label+' · 실행 시 입력';
+      if ('constant' in ref) return {label, text:typeof ref.constant === 'string' ? ref.constant : JSON.stringify(ref.constant)};
+      if ('context' in ref) return {label, text:'현재 업무의 '+(ref.context === 'system_id' ? '시스템' : '공장')};
+      return {label, text:'실행 시 입력'};
     });
-    const outputs = b.outputs.map(path=>op.fields.find(f=>f.path===path)?.label || path);
-    return `<div data-api-job-binding class="ew-api-job-binding">${rows.map(r=>'<div>'+esc(r)+'</div>').join('')}${outputs.length?'<small>받는 결과 · '+esc(outputs.join(', '))+'</small>':''}<small>${esc(serviceName(catalog,op))}　${esc(op.method)}　${esc(address(op.url))}</small></div>`;
+    return {state:inputs.some(input => input.gone) ? 'gone' : 'ok', sources, inputs,
+      outputs:(Array.isArray(b.outputs) ? b.outputs : []).map(path => op.fields.find(f => f.path === path)?.label || path),
+      name:op.name, purpose:op.purpose || '', service:serviceName(catalog, op), address:op.method+' '+address(op.url),
+      example:op.can_use !== false && op.example != null};
   }
   function defaultDraft(op, node) {
     const b = node.api_binding;
@@ -184,6 +194,6 @@ function createWorkApiPicker(){
     try{const accepted=await pending;return registering?{register:{drafts,query,id:selected}}:accepted&&next?{node:next}:null;}
     finally{handlers.forEach(type=>dialog.removeEventListener(type,events,type==='click'));}
   }
-  return {summary,open,buildNode};
+  return {describe,open,buildNode};
 }
 const workApiPicker=createWorkApiPicker();
