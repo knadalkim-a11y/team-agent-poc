@@ -935,6 +935,7 @@ PR의 최신 EES delivery 실행에서 `ees-work-browser-evidence-native-compose
   - 제품 통합 점검 둘(`ees_work_integrated_app.py`, `ees_work_native_chat.py`) 통과.
   - 시안 대조: 위 결과(빌드를 바꿀 때마다 다시 수집했고 최종 빌드에서도 같다. [요약 값](artifacts/tool-job-list-20261126/product-comparison.json), [화면](artifacts/tool-job-list-20261126/product/)).
   - PR의 빠른 검사 묶음(`--quick`) 통과, 문서 링크 점검 오류 없음.
+  - 브랜치 CI: 커밋 `6867118`에서 `browser` 범위의 [실행 642](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/45945035805)가 첫 시도에 성공했다(프런트엔드 빌드, 제품 통합 점검, 브라우저 묶음 넷). [PR #160](https://github.com/knadalkim-a11y/team-agent-poc/pull/160)의 빠른 검사([실행 643](https://github.com/knadalkim-a11y/team-agent-poc/actions/runs/45945098900))도 성공했고 자동 리뷰는 지적 없이 끝났다. Windows 묶음과 전체 검사는 이 범위에 없다.
 - **미실행·미확인:** 사내 서버, Windows·전체 검사(`full`), 실제 팀원의 사용, Figma. T4-2(도구 확인 필요)의 실제 화면. 고친 뒤의 코드를 다시 독립 검토하지 않았다. 공장 조건 표시와 제안 표시가 붙은 줄은 표시를 끼워 넣어 간격만 쟀고 그 상태를 실제로 만들어 보지는 않았다. 어두운 화면, 확대 배율, 화면 낭독기.
 - **놓친 까닭과 반영:**
   - 줄의 단추를 다른 표시와 함께 놓아 보지 않았고, 가장 좁은 패널에서 보지 않았다. 시안은 그 두 경우를 그리지 않았다. 2026-11-26에 적어 둔 것(시안은 멈춘 화면만 보여 주므로 제품의 다른 상태는 따로 확인한다)과 같은 유형이다. 이번에는 브라우저 시험으로 넣어 두었다(표시와 단추의 간격, 360px 창의 줄).
